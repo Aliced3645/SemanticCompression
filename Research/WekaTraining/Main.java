@@ -3,6 +3,8 @@ package WekaTraining;
 import java.io.IOException;
 import java.util.PriorityQueue;
 
+import weka.core.Instance;
+
 /**
  * Package: semanticcompression
  * Class: Main
@@ -29,6 +31,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         if (args.length < 1 || !(args[0].equals("compress") || args[0].equals("decompress"))) {
             printUsageAndExit();
+            Instance i;
         }
         if (args[0].equals("compress")) {
             if (args.length != 5 && args.length != 6)
