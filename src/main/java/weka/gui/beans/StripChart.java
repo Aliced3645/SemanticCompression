@@ -1,31 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    StripChart.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.visualize.PrintableComponent;
-import weka.gui.visualize.VisualizeUtils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,17 +37,21 @@ import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.visualize.PrintableComponent;
+import weka.gui.visualize.VisualizeUtils;
 
 /**
  * Bean that can display a horizontally scrolling strip chart. Can
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 7261 $
+ * @version $Revision: 8034 $
  */
 public class StripChart
   extends JPanel
@@ -268,7 +266,7 @@ public class StripChart
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return Messages.getInstance().getString("StripChart_GlobalInfo_Text");
+    return "Visualize incremental classifier performance as a scrolling plot.";
   }
 
   /**
@@ -277,7 +275,7 @@ public class StripChart
    * @return a <code>String</code> value
    */
   public String xLabelFreqTipText() {
-    return Messages.getInstance().getString("StripChart_XLabelFreqTipText_Text");
+    return "Show x axis labels this often";
   }
 
   /**
@@ -306,7 +304,7 @@ public class StripChart
    * @return a <code>String</code> value
    */
   public String refreshFreqTipText() {
-    return Messages.getInstance().getString("StripChart_RefreshFreqTipText_Text");
+    return "Plot every x'th data point";
   }
 
   /**
@@ -436,7 +434,7 @@ public class StripChart
    */
   public void showChart() {
     if (m_outputFrame == null) {
-      m_outputFrame = new JFrame(Messages.getInstance().getString("StripChart_ShowChart_OutputFrame_JFrame_Text"));
+      m_outputFrame = new JFrame("Strip Chart");
       m_outputFrame.getContentPane().setLayout(new BorderLayout());
       JPanel panel = new JPanel(new BorderLayout());
       new PrintableComponent(panel);
@@ -453,14 +451,14 @@ public class StripChart
 			      createTitledBorder(BorderFactory.
 				    createEtchedBorder(Color.gray,
 						       Color.darkGray),
-						       Messages.getInstance().getString("StripChart_ShowChart_LegendPanel_SetBorder_BorderFactoryCreateEtchedBorder_Text") ,
+				    "Legend" ,
 				    TitledBorder.CENTER,
 				    TitledBorder.DEFAULT_POSITION, lf,
 				    m_LegendPanelBorderColor));
       m_outputFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
 	    if (m_updateHandler != null) {
-	      System.err.println(Messages.getInstance().getString("StripChart_ShowChart_WindowClosing_Error_Text"));
+	      System.err.println("Interrupting");
 	      m_updateHandler.interrupt();
 	      m_updateHandler = null;
 	    }
@@ -476,6 +474,7 @@ public class StripChart
       m_outputFrame.setResizable(false);
       m_outputFrame.setVisible(true);
       m_outputFrame.setAlwaysOnTop(true);
+      //m_outputFrame.setLocationByPlatform(true);
       int iwidth = m_plotPanel.getWidth();
       int iheight = m_plotPanel.getHeight();
       m_osi = m_plotPanel.createImage(iwidth, iheight);
@@ -485,7 +484,7 @@ public class StripChart
       m_previousY[0] = -1;
       setRefreshWidth();
       if (m_updateHandler == null) {
-	System.err.println(Messages.getInstance().getString("StripChart_ShowChart_Error_Text"));
+	System.err.println("Starting handler");
 	startHandler();
       }
     } else {
@@ -767,7 +766,8 @@ public class StripChart
    * @return true if the bean is busy.
    */
   public boolean isBusy() {
-    return (m_updateHandler != null);
+    //return (m_updateHandler != null);
+    return false;
   }
 
   /**
@@ -856,7 +856,7 @@ public class StripChart
     } else {
       throw new
 	IllegalArgumentException(request
-				 + Messages.getInstance().getString("StripChart_PerformRequest_IllegalArgumentException_Text"));
+				 + " not supported (StripChart)");
     }
   }
 
@@ -869,7 +869,7 @@ public class StripChart
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame(Messages.getInstance().getString("StripChart_Main_Jf_JFrame_Text"));
+	new javax.swing.JFrame("Weka Knowledge Flow : StipChart");
       jf.getContentPane().setLayout(new BorderLayout());
       final StripChart jd = new StripChart();
       jf.getContentPane().add(jd, BorderLayout.CENTER);
@@ -888,7 +888,7 @@ public class StripChart
 	pos[0] = r.nextDouble();
 	jd.acceptDataPoint(pos);
       }
-      System.err.println(Messages.getInstance().getString("StripChart_Main_Error_Text"));
+      System.err.println("Done sending data");
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());

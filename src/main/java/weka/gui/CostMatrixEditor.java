@@ -1,28 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    CostMatrixEditor.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
-
-import weka.classifiers.CostMatrix;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -57,13 +54,15 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 
+import weka.classifiers.CostMatrix;
+
 /**
  * Class for editing CostMatrix objects. Brings up a custom editing panel
  * with which the user can edit the matrix interactively, as well as save
  * load cost matrices from files.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class CostMatrixEditor 
   implements PropertyEditor {
@@ -226,15 +225,15 @@ public class CostMatrixEditor
       // set up the file chooser
       m_fileChooser.setFileFilter(
 	     new ExtensionFileFilter(CostMatrix.FILE_EXTENSION, 
-				     Messages.getInstance().getString("CostMatrixEditor_CustomEditor_FileChooser_SetFileFilter_Text"))
+				     "Cost files")
 	       );
       m_fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
       // create the buttons + field
-      m_defaultButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_DefaultButton_JButton_Text"));
-      m_openButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_OpenButton_JButton_Text"));
-      m_saveButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_SaveButton_JButton_Text"));
-      m_resizeButton = new JButton(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_ResizeButton_JButton_Text"));
+      m_defaultButton = new JButton("Defaults");
+      m_openButton = new JButton("Open...");
+      m_saveButton = new JButton("Save...");
+      m_resizeButton = new JButton("Resize");
       m_classesField = new JTextField("" + m_matrix.size());
 
       m_defaultButton.addActionListener(this);
@@ -246,7 +245,7 @@ public class CostMatrixEditor
       // lay out the GUI
       JPanel classesPanel = new JPanel();
       classesPanel.setLayout(new GridLayout(1, 2, 0, 0));
-      classesPanel.add(new JLabel(Messages.getInstance().getString("CostMatrixEditor_CustomEditor_ClassesPanel_JLabel_Text"), SwingConstants.RIGHT));
+      classesPanel.add(new JLabel("Classes:", SwingConstants.RIGHT));
       classesPanel.add(m_classesField);
 
       JPanel rightPanel = new JPanel();
@@ -351,10 +350,10 @@ public class CostMatrixEditor
 	  matrixChanged();
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this, 
-			  Messages.getInstance().getString("CostMatrixEditor_OpenMatrix_JOptionPaneShowMessageDialog_Text_First")
+					"Error reading file '"
 					+ selectedFile.getName()
-					+ Messages.getInstance().getString("CostMatrixEditor_OpenMatrix_JOptionPaneShowMessageDialog_Text_Second") + ex.getMessage(),
-					Messages.getInstance().getString("CostMatrixEditor_OpenMatrix_JOptionPaneShowMessageDialog_Text_Third"),
+					+ "':\n" + ex.getMessage(),
+					"Load failed",
 					JOptionPane.ERROR_MESSAGE);
 	  System.out.println(ex.getMessage());
 	}
@@ -386,10 +385,10 @@ public class CostMatrixEditor
 	  writer.close();
 	} catch (Exception ex) {
 	  JOptionPane.showMessageDialog(this, 
-			  Messages.getInstance().getString("CostMatrixEditor_SaveMatrix_JOptionPaneShowMessageDialog_Text_First")
+					"Error writing file '"
 					+ selectedFile.getName()
-					+ Messages.getInstance().getString("CostMatrixEditor_SaveMatrix_JOptionPaneShowMessageDialog_Text_Second") + ex.getMessage(),
-					Messages.getInstance().getString("CostMatrixEditor_SaveMatrix_JOptionPaneShowMessageDialog_Text_Third"),
+					+ "':\n" + ex.getMessage(),
+					"Save failed",
 					JOptionPane.ERROR_MESSAGE);
 	  System.out.println(ex.getMessage());
 	}
@@ -483,7 +482,9 @@ public class CostMatrixEditor
    * @throws IllegalArgumentException always throws an IllegalArgumentException
    */   
   public void setAsText(String text) {
-    throw new IllegalArgumentException(Messages.getInstance().getString("CostMatrixEditor_SetAsText_IllegalArgumentException_Text"));
+    throw new IllegalArgumentException("CostMatrixEditor: "
+				       + "CostMatrix properties cannot be "
+				       + "expressed as text");
   }
 
   /**

@@ -1,37 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    AlgorithmListPanel.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.xml.XMLClassifier;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.experiment.Experiment;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.JListHelper;
-import weka.gui.PropertyDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -68,12 +56,23 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.xml.XMLClassifier;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.experiment.Experiment;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.JListHelper;
+import weka.gui.PropertyDialog;
+
 /** 
  * This panel controls setting a list of algorithms for an experiment to
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class AlgorithmListPanel
   extends JPanel
@@ -135,25 +134,25 @@ public class AlgorithmListPanel
   protected JList m_List;
 
   /** Click to add an algorithm */
-  protected JButton m_AddBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_AddBut_JButton_Text"));
+  protected JButton m_AddBut = new JButton("Add new...");
   
   /** Click to edit the selected algorithm */
-  protected JButton m_EditBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_EditBut_JButton_Text"));
+  protected JButton m_EditBut = new JButton("Edit selected...");
 
   /** Click to remove the selected dataset from the list */
-  protected JButton m_DeleteBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_DeleteBut_JButton_Text"));
+  protected JButton m_DeleteBut = new JButton("Delete selected");
   
   /** Click to edit the load the options for athe selected algorithm */
-  protected JButton m_LoadOptionsBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_LoadOptionsBut_JButton_Text"));
+  protected JButton m_LoadOptionsBut = new JButton("Load options...");
   
   /** Click to edit the save the options from selected algorithm */
-  protected JButton m_SaveOptionsBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_SaveOptionsBut_JButton_Text"));
+  protected JButton m_SaveOptionsBut = new JButton("Save options...");
   
   /** Click to move the selected algorithm(s) one up */
-  protected JButton m_UpBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_UpBut_JButton_Text"));
+  protected JButton m_UpBut = new JButton("Up");
   
   /** Click to move the selected algorithm(s) one down */
-  protected JButton m_DownBut = new JButton(Messages.getInstance().getString("AlgorithmListPanel_DownBut_JButton_Text"));
+  protected JButton m_DownBut = new JButton("Down");
   
   /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser =
@@ -162,7 +161,7 @@ public class AlgorithmListPanel
   /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(".xml", 
-    		Messages.getInstance().getString("AlgorithmListPanel_XMLFilter_Text_End"));
+                            "Classifier options (*.xml)");
 
   /** Whether an algorithm is added or only edited  */
   protected boolean m_Editing = false;
@@ -217,12 +216,12 @@ public class AlgorithmListPanel
 	    JPopupMenu menu = new JPopupMenu();
 	    JMenuItem item;
 
-	    item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_First"));
+	    item = new JMenuItem("Add configuration...");
 	    item.addActionListener(new ActionListener() {
 	      public void actionPerformed(ActionEvent e) {
 		String str = JOptionPane.showInputDialog(
 		    self, 
-		    Messages.getInstance().getString("AlgorithmListPanel_JOptionPaneShowInputDialog_Text"));
+		    "Configuration (<classname> [<options>])");
 		if (str != null) {
 		  try {
 		    String[] options = Utils.splitOptions(str);
@@ -236,8 +235,8 @@ public class AlgorithmListPanel
 		    ex.printStackTrace();
 		    JOptionPane.showMessageDialog(
 			self, 
-			Messages.getInstance().getString("AlgorithmListPanel_Error_JOptionPaneShowMessageDialog_Text_Front") + ex, 
-			Messages.getInstance().getString("AlgorithmListPanel_Error_JOptionPaneShowMessageDialog_Text_End"),
+			"Error parsing commandline:\n" + ex, 
+			"Error...",
 			JOptionPane.ERROR_MESSAGE);
 		  }
 		}
@@ -248,7 +247,7 @@ public class AlgorithmListPanel
 	    if (m_List.getSelectedValue() != null) {
 	      menu.addSeparator();
 
-	      item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_Second"));
+	      item = new JMenuItem("Show properties...");
 	      item.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		  self.actionPerformed(new ActionEvent(m_EditBut, 0, ""));
@@ -256,7 +255,7 @@ public class AlgorithmListPanel
 	      });
 	      menu.add(item);
 
-	      item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_Third"));
+	      item = new JMenuItem("Copy configuration to clipboard");
 	      item.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		  String str = m_List.getSelectedValue().getClass().getName();
@@ -269,12 +268,12 @@ public class AlgorithmListPanel
 	      });
 	      menu.add(item);
 
-	      item = new JMenuItem(Messages.getInstance().getString("AlgorithmListPanel_Item_JMenuItem_Text_Fourth"));
+	      item = new JMenuItem("Enter configuration...");
 	      item.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		  String str = JOptionPane.showInputDialog(
 		      self, 
-		      Messages.getInstance().getString("AlgorithmListPanel_ActionPerformed_JOptionPaneShowInputDialog_Text"));
+		      "Configuration (<classname> [<options>])");
 		  if (str != null) {
 		    try {
 		      String[] options = Utils.splitOptions(str);
@@ -288,8 +287,8 @@ public class AlgorithmListPanel
 		      ex.printStackTrace();
 		      JOptionPane.showMessageDialog(
 			  self, 
-			  Messages.getInstance().getString("AlgorithmListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_First") + ex, 
-			  Messages.getInstance().getString("AlgorithmListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_Second"),
+			  "Error parsing commandline:\n" + ex, 
+			  "Error...",
 			  JOptionPane.ERROR_MESSAGE);
 		    }
 		  }
@@ -345,7 +344,7 @@ public class AlgorithmListPanel
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("AlgorithmListPanel_SetBorder_Text")));
+    setBorder(BorderFactory.createTitledBorder("Algorithms"));
     JPanel topLab = new JPanel();
     GridBagLayout gb = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
@@ -590,7 +589,7 @@ public class AlgorithmListPanel
       SerializedObject so = new SerializedObject(source);
       result = so.getObject();
     } catch (Exception ex) {
-      System.err.println(Messages.getInstance().getString("AlgorithmListPanel_CopyObject_Error_Text"));
+      System.err.println("AlgorithmListPanel: Problem copying object");
       System.err.println(ex);
     }
     return result;
@@ -604,7 +603,7 @@ public class AlgorithmListPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame(Messages.getInstance().getString("AlgorithmListPanel_Main_JFrame_Text"));
+      final JFrame jf = new JFrame("Algorithm List Editor");
       jf.getContentPane().setLayout(new BorderLayout());
       AlgorithmListPanel dp = new AlgorithmListPanel();
       jf.getContentPane().add(dp,
@@ -617,9 +616,9 @@ public class AlgorithmListPanel
       });
       jf.pack();
       jf.setVisible(true);
-      System.err.println(Messages.getInstance().getString("AlgorithmListPanel_Main_Error_Text_First"));
+      System.err.println("Short nap");
       Thread.currentThread().sleep(3000);
-      System.err.println(Messages.getInstance().getString("AlgorithmListPanel_Main_Error_Text_Second"));
+      System.err.println("Done");
       dp.setExperiment(new Experiment());
     } catch (Exception ex) {
       ex.printStackTrace();

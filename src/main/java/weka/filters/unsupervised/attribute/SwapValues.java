@@ -1,30 +1,33 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    SwapValues.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -34,13 +37,9 @@ import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 
 /** 
@@ -64,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 8585 $
+ * @version $Revision: 8584 $
  */
 public class SwapValues 
   extends Filter 
@@ -381,21 +380,21 @@ public class SwapValues
 	newAtts.addElement(att.copy()); 
       } else {
 	  
-	// Compute list of attribute values
-	  
-	newVals = new FastVector(att.numValues());
-	for (int i = 0; i < att.numValues(); i++) {
-	  if (i == m_FirstIndex.getIndex()) {
-	    newVals.addElement(att.value(m_SecondIndex.getIndex()));
-	  } else if (i == m_SecondIndex.getIndex()) {
-	    newVals.addElement(att.value(m_FirstIndex.getIndex()));
-	  } else {
-	    newVals.addElement(att.value(i)); 
-	  }
-	}
-	Attribute newAtt = new Attribute(att.name(), newVals);
-	newAtt.setWeight(att.weight());
-	newAtts.addElement(newAtt);
+        // Compute list of attribute values
+
+        newVals = new FastVector(att.numValues());
+        for (int i = 0; i < att.numValues(); i++) {
+          if (i == m_FirstIndex.getIndex()) {
+            newVals.addElement(att.value(m_SecondIndex.getIndex()));
+          } else if (i == m_SecondIndex.getIndex()) {
+            newVals.addElement(att.value(m_FirstIndex.getIndex()));
+          } else {
+            newVals.addElement(att.value(i)); 
+          }
+        }
+        Attribute newAtt = new Attribute(att.name(), newVals);
+        newAtt.setWeight(att.weight());
+        newAtts.addElement(newAtt);
       }
     }
       
@@ -412,7 +411,7 @@ public class SwapValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8585 $");
+    return RevisionUtils.extract("$Revision: 8584 $");
   }
   
   /**

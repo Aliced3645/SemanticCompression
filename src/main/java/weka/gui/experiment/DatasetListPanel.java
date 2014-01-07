@@ -1,36 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    DatasetListPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
-
-import weka.core.ClassDiscovery.StringCompare;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.Saver;
-import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.Utils;
-import weka.experiment.Experiment;
-import weka.gui.ConverterFileChooser;
-import weka.gui.JListHelper;
-import weka.gui.ViewerDialog;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -59,12 +48,22 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import weka.core.ClassDiscovery.StringCompare;
+import weka.core.Utils;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.converters.Saver;
+import weka.experiment.Experiment;
+import weka.gui.ConverterFileChooser;
+import weka.gui.JListHelper;
+import weka.gui.ViewerDialog;
+
 /** 
  * This panel controls setting a list of datasets for an experiment to
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class DatasetListPanel
   extends JPanel
@@ -80,22 +79,22 @@ public class DatasetListPanel
   protected JList m_List;
 
   /** Click to add a dataset. */
-  protected JButton m_AddBut = new JButton(Messages.getInstance().getString("DatasetListPanel_AddBut_JButton_Text"));
+  protected JButton m_AddBut = new JButton("Add new...");
   
   /** Click to edit the selected algorithm. */
-  protected JButton m_EditBut = new JButton(Messages.getInstance().getString("DatasetListPanel_EditBut_JButton_Text"));
+  protected JButton m_EditBut = new JButton("Edit selected...");
 
   /** Click to remove the selected dataset from the list. */
-  protected JButton m_DeleteBut = new JButton(Messages.getInstance().getString("DatasetListPanel_DeleteBut_JButton_Text"));
+  protected JButton m_DeleteBut = new JButton("Delete selected");
   
   /** Click to move the selected dataset(s) one up. */
-  protected JButton m_UpBut = new JButton(Messages.getInstance().getString("DatasetListPanel_UpBut_JButton_Text"));
+  protected JButton m_UpBut = new JButton("Up");
   
   /** Click to move the selected dataset(s) one down. */
-  protected JButton m_DownBut = new JButton(Messages.getInstance().getString("DatasetListPanel_DownBut_JButton_Text"));
+  protected JButton m_DownBut = new JButton("Down");
 
   /** Make file paths relative to the user (start) directory. */
-  protected JCheckBox m_relativeCheck = new JCheckBox(Messages.getInstance().getString("DatasetListPanel_RelativeCheck_JCheckBox_Text"));
+  protected JCheckBox m_relativeCheck = new JCheckBox("Use relative paths");
 
   /** The user (start) directory. */
   //  protected File m_UserDir = new File(System.getProperty("user.dir"));
@@ -158,9 +157,10 @@ public class DatasetListPanel
     m_DownBut.setEnabled(false);
     m_DownBut.addActionListener(this);
     m_relativeCheck.setSelected(ExperimenterDefaults.getUseRelativePaths());
-    m_relativeCheck.setToolTipText(Messages.getInstance().getString("DatasetListPanel_RelativeCheck_SetToolTipText_Text"));
+    m_relativeCheck.setToolTipText("Store file paths relative to "
+				   +"the start directory");
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("DatasetListPanel_RelativeCheck_SetBorder_Text")));
+    setBorder(BorderFactory.createTitledBorder("Datasets"));
     JPanel topLab = new JPanel();
     GridBagLayout gb = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
@@ -258,7 +258,7 @@ public class DatasetListPanel
 	}
       }
     } catch (Exception e) {
-      System.err.println(Messages.getInstance().getString("DatasetListPanel_GetFilesRecursively_Error_Text"));
+      System.err.println("IOError occured when reading list of files");
     }
   }
   
@@ -375,7 +375,7 @@ public class DatasetListPanel
 	  if ((result == ViewerDialog.APPROVE_OPTION) && (dialog.isChanged())) {
 	    result = JOptionPane.showConfirmDialog(
 			this,
-			Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Result_JOptionPaneShowConfirmDialog_Text"));
+			"File was modified - save changes?");
 	    if (result == JOptionPane.YES_OPTION) {
 	      Saver saver = ConverterUtils.getSaverForFile(filename);
 	      saver.setFile(new File(filename));
@@ -387,8 +387,8 @@ public class DatasetListPanel
 	catch (Exception ex) {
 	  JOptionPane.showMessageDialog(
 	      this,
-	      Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_First") + filename + Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_Second") + ex.toString(),
-	      Messages.getInstance().getString("DatasetListPanel_ActionPerformed_Error_JOptionPaneShowMessageDialog_Text_Third"),
+	      "Error loading file '" + filename + "':\n" + ex.toString(),
+	      "Error loading file",
 	      JOptionPane.INFORMATION_MESSAGE);
 	}
       }
@@ -408,7 +408,7 @@ public class DatasetListPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame(Messages.getInstance().getString("DatasetListPanel_Main_JFrame_Text"));
+      final JFrame jf = new JFrame("Dataset List Editor");
       jf.getContentPane().setLayout(new BorderLayout());
       DatasetListPanel dp = new DatasetListPanel();
       jf.getContentPane().add(dp,
@@ -421,9 +421,9 @@ public class DatasetListPanel
       });
       jf.pack();
       jf.setVisible(true);
-      System.err.println(Messages.getInstance().getString("DatasetListPanel_Main_Error_Text_First"));
+      System.err.println("Short nap");
       Thread.currentThread().sleep(3000);
-      System.err.println(Messages.getInstance().getString("DatasetListPanel_Main_Error_Text_Second"));
+      System.err.println("Done");
       dp.setExperiment(new Experiment());
     } catch (Exception ex) {
       ex.printStackTrace();

@@ -1,29 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    InstanceLoader.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.streams;
-
-import weka.core.Instance;
-import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -38,11 +34,14 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import weka.core.Instance;
+import weka.core.Instances;
+
 /** 
  * A bean that produces a stream of instances from a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class InstanceLoader
   extends JPanel 
@@ -70,17 +69,19 @@ public class InstanceLoader
     public void run() {
       
       try {
-	m_StartBut.setText(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_StartBut_SetText_Text"));
+	m_StartBut.setText("Stop");
 	m_StartBut.setBackground(Color.red);
 	if (m_Debug) {
-	  System.err.println(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_Error_Text_First"));
+	  System.err.println("InstanceLoader::LoadThread::run()");
 	}
 	// Load the instances one at a time and pass them on to the listener
 	Reader input = new BufferedReader(
 		       new FileReader(m_FileNameTex.getText()));
 	m_OutputInstances = new Instances(input, 1);
 	if (m_Debug) {
-	  System.err.println(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_Error_Text_Second") + m_FileNameTex.getText());
+	  System.err.println("InstanceLoader::LoadThread::run()"
+			     + " - Instances opened from: "
+			     + m_FileNameTex.getText());
 	}
 	InstanceEvent ie = new InstanceEvent(m_IP,
 					     InstanceEvent.FORMAT_AVAILABLE);
@@ -90,7 +91,8 @@ public class InstanceLoader
 	    return;
 	  }
 	  if (m_Debug) {
-	    System.err.println(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_Error_Text_Third"));
+	    System.err.println("InstanceLoader::LoadThread::run()"
+			       + " - read instance");
 	  }
 	  // put the instance into a queue?
 	  m_OutputInstance = m_OutputInstances.instance(0);
@@ -104,7 +106,7 @@ public class InstanceLoader
 	System.err.println(ex.getMessage());
       } finally {
 	m_LoaderThread = null;
-	m_StartBut.setText(Messages.getInstance().getString("InstanceLoader_LoadThread_Run_StatusBut_SetText_Text"));
+	m_StartBut.setText("Start");
 	m_StartBut.setBackground(Color.green);
       }
     }
@@ -112,12 +114,12 @@ public class InstanceLoader
 
   public InstanceLoader() {
     setLayout(new BorderLayout());
-    m_StartBut = new JButton(Messages.getInstance().getString("InstanceLoader_StartBut_JButton_Text"));
+    m_StartBut = new JButton("Start");
     m_StartBut.setBackground(Color.green);
-    add(Messages.getInstance().getString("InstanceLoader_StartBut_JButton_Add_Text_First"), m_StartBut);
+    add("West",m_StartBut);
     m_StartBut.addActionListener(this);
     m_FileNameTex = new JTextField("/home/trigg/datasets/UCI/iris.arff");
-    add(Messages.getInstance().getString("InstanceLoader_StartBut_JButton_Add_Text_Second"), m_FileNameTex);
+    add("Center",m_FileNameTex);
     m_Listeners = new Vector();
     //    setSize(60,40);
   }
@@ -154,7 +156,7 @@ public class InstanceLoader
   protected void notifyInstanceProduced(InstanceEvent e) {
     
     if (m_Debug) {
-      System.err.println(Messages.getInstance().getString("InstanceLoader_NotifyInstanceProduced_Error_Text"));
+      System.err.println("InstanceLoader::notifyInstanceProduced()");
     }
     Vector l;
     synchronized (this) {
@@ -173,7 +175,7 @@ public class InstanceLoader
   public Instances outputFormat() throws Exception {
     
     if (m_OutputInstances == null) {
-      throw new Exception(Messages.getInstance().getString("InstanceLoader_OutputFormat_Exception_Text"));
+      throw new Exception("No output format defined.");
     }
     return new Instances(m_OutputInstances,0);
   }

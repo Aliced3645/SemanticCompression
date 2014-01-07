@@ -1,26 +1,32 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    CVParameterSelection.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.meta;
+
+import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
@@ -35,17 +41,10 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-
-import java.io.Serializable;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -113,7 +112,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 8180 $ 
+ * @version $Revision: 8181 $ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer
@@ -152,7 +151,7 @@ public class CVParameterSelection
 
     /**  True if the parameter should be rounded to an integer */
     private boolean m_RoundParam;
-    
+
     /**
      * Constructs a CVParameter.
      * 
@@ -243,7 +242,7 @@ public class CVParameterSelection
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 8180 $");
+      return RevisionUtils.extract("$Revision: 8181 $");
     }
   }
 
@@ -298,9 +297,8 @@ public class CVParameterSelection
       }
       boolean isInt = ((paramValue - (int)paramValue) == 0);
       
-      
       if (cvParam.m_AddAtEnd) {
-	options[--end] = "" + ((cvParam.m_RoundParam || isInt) ? 
+        options[--end] = "" + ((cvParam.m_RoundParam || isInt) ? 
             Utils.doubleToString(paramValue,4) : cvParam.m_ParamValue);
 	//Utils.doubleToString(paramValue,4);
 	options[--end] = "-" + cvParam.m_ParamChar;
@@ -535,9 +533,9 @@ public class CVParameterSelection
 
     if (m_InitOptions != null) {
       try {
-	m_Classifier.setOptions((String[])m_InitOptions.clone());
+	((OptionHandler)m_Classifier).setOptions((String[])m_InitOptions.clone());
 	superOptions = super.getOptions();
-	m_Classifier.setOptions((String[])m_BestClassifierOptions.clone());
+	((OptionHandler)m_Classifier).setOptions((String[])m_BestClassifierOptions.clone());
       } catch (Exception e) {
 	throw new RuntimeException("CVParameterSelection: could not set options " +
 				   "in getOptions().");
@@ -851,7 +849,7 @@ public class CVParameterSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8180 $");
+    return RevisionUtils.extract("$Revision: 8181 $");
   }
   
   /**

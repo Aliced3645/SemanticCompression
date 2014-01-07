@@ -1,29 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    InstanceViewer.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.streams;
-
-import weka.core.Instance;
-import weka.core.Instances;
 
 import java.awt.BorderLayout;
 
@@ -31,13 +27,16 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import weka.core.Instance;
+import weka.core.Instances;
+
 /**
  * This is a very simple instance viewer - just displays the dataset as
  * text output as it would be written to a file. A more complex viewer
  * might be more spreadsheet-like
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class InstanceViewer
   extends JPanel
@@ -66,7 +65,7 @@ public class InstanceViewer
   public void inputFormat(Instances instanceInfo) {
     
     if (m_Debug) {
-      System.err.println(Messages.getInstance().getString("InstanceViewer_InputFormat_Error_Text")
+      System.err.println("InstanceViewer::inputFormat()\n"
 			 + instanceInfo.toString());
     }
     if (m_Clear) {
@@ -79,7 +78,7 @@ public class InstanceViewer
   public void input(Instance instance) throws Exception {
     
     if (m_Debug) {
-      System.err.println(Messages.getInstance().getString("InstanceViewer_Input_Error_Text_First") + instance +Messages.getInstance().getString("InstanceViewer_Input_Error_Text_Second"));
+      System.err.println("InstanceViewer::input(" + instance +")");
     }
     m_UpdateString += instance.toString() + "\n";
     updateOutput();
@@ -89,7 +88,7 @@ public class InstanceViewer
     
     updateOutput();
     if (m_Debug) {
-      System.err.println(Messages.getInstance().getString("InstanceViewer_BatchFinished_Error_Text"));
+      System.err.println("InstanceViewer::batchFinished()");
     }
   }
 
@@ -140,14 +139,16 @@ public class InstanceViewer
 	  batchFinished();
 	  break;
 	default:
-	  System.err.println(Messages.getInstance().getString("InstanceViewer_InstanceProduced_InstanceEventDEFAULT_Error_Text"));
+	  System.err.println("InstanceViewer::instanceProduced()"
+			     + " - unknown event type");
 	  break;
 	}
       } catch (Exception ex) {
 	System.err.println(ex.getMessage());
       }
     } else {
-      System.err.println(Messages.getInstance().getString("InstanceViewer_InstanceProduced_Error_Text"));
+      System.err.println("InstanceViewer::instanceProduced()"
+			 + " - Unknown source object type");
     }
   }
 }

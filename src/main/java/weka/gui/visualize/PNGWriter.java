@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * PNGWriter.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.visualize;
@@ -35,23 +34,23 @@ import javax.swing.JComponent;
  * Scaling is by default disabled, since we always take a screenshot.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class PNGWriter
   extends JComponentWriter {
 
-  /** the background color */
+  /** the background color. */
   protected Color m_Background;
   
   /**
-   * initializes the object 
+   * initializes the object.
    */
   public PNGWriter() {
     super();
   }
 
   /**
-   * initializes the object with the given Component
+   * initializes the object with the given Component.
    * 
    * @param c		the component to print in the output format
    */
@@ -60,7 +59,7 @@ public class PNGWriter
   }
 
   /**
-   * initializes the object with the given Component and filename
+   * initializes the object with the given Component and filename.
    * 
    * @param c		the component to print in the output format
    * @param f		the file to store the output in
@@ -70,7 +69,7 @@ public class PNGWriter
   }
   
   /**
-   * further initialization 
+   * further initialization.
    */
   public void initialize() {
     super.initialize();
@@ -85,7 +84,7 @@ public class PNGWriter
    * @return 		the name of the writer
    */
   public String getDescription() {
-    return Messages.getInstance().getString("PNGWriter_GetDescription_Text");
+    return "PNG-Image";
   }
   
   /**
@@ -99,7 +98,7 @@ public class PNGWriter
   }
   
   /**
-   * returns the current background color
+   * returns the current background color.
    * 
    * @return		the current background color
    */
@@ -108,7 +107,7 @@ public class PNGWriter
   }
   
   /**
-   * sets the background color to use in creating the JPEG
+   * sets the background color to use in creating the PNG.
    * 
    * @param c 		the color to use for background
    */
@@ -117,7 +116,7 @@ public class PNGWriter
   }
   
   /**
-   * generates the actual output
+   * generates the actual output.
    * 
    * @throws Exception	if something goes wrong
    */
@@ -137,23 +136,23 @@ public class PNGWriter
   }
   
   /**
-   * for testing only 
+   * for testing only.
    * 
    * @param args 	the commandline arguments
    * @throws Exception 	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    System.out.println(Messages.getInstance().getString("PNGWriter_Main_Text_First"));
+    System.out.println("building TreeVisualizer...");
     weka.gui.treevisualizer.TreeBuild builder = new weka.gui.treevisualizer.TreeBuild();
     weka.gui.treevisualizer.NodePlace arrange = new weka.gui.treevisualizer.PlaceNode2();
-    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader(Messages.getInstance().getString("PNGWriter_Main_Text_Second")));
+    weka.gui.treevisualizer.Node top = builder.create(new java.io.StringReader("digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
     String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.png";
-    System.out.println(Messages.getInstance().getString("PNGWriter_Main_Text_Third") + filename + Messages.getInstance().getString("PNGWriter_Main_Text_Fourth"));
+    System.out.println("outputting to '" + filename + "'...");
     toOutput(new PNGWriter(), tv, new File(filename));
 
-    System.out.println(Messages.getInstance().getString("PNGWriter_Main_Text_Fifth"));
+    System.out.println("done!");
   }
 }

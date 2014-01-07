@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * Trie.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -37,7 +36,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * on WikiPedia.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 8034 $
  */
 public class Trie
   implements Serializable, Cloneable, Collection<String>, RevisionHandler {
@@ -49,7 +48,7 @@ public class Trie
    * Represents a node in the trie.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 8034 $
    */
   public static class TrieNode
     extends DefaultMutableTreeNode
@@ -419,7 +418,7 @@ public class Trie
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
   
@@ -427,7 +426,7 @@ public class Trie
    * Represents an iterator over a trie
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 8034 $
    */
   public static class TrieIterator 
     implements Iterator<String>, RevisionHandler {
@@ -493,7 +492,7 @@ public class Trie
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
   
@@ -534,11 +533,11 @@ public class Trie
    */
   public boolean addAll(Collection<? extends String> c) {
     boolean		result;
-    Iterator<String>	iter;
+    Iterator<? extends String>	iter;
     
     result = false;
     
-    iter = (Iterator<String>) c.iterator();
+    iter = c.iterator();
     while (iter.hasNext())
       result = add(iter.next()) || result;
     
@@ -785,25 +784,25 @@ public class Trie
    * @return		an array containing the elements of this collection
    */
   public <T> T[] toArray(T[] a) {
-    Object[]	result;
-    Iterator	iter;
-    Vector	list;
+    T[]	result;
+    Iterator<T>	iter;
+    Vector<T>	list;
     int		i;
     
-    list = new Vector();
-    iter = iterator();
+    list = new Vector<T>();
+    iter = Utils.<Iterator<T>>cast(iterator());
     while (iter.hasNext())
       list.add(iter.next());
     
     if (Array.getLength(a) != list.size())
-      result = (Object[]) Array.newInstance(a.getClass().getComponentType(), list.size());
+      result = Utils.<T[]>cast(Array.newInstance(a.getClass().getComponentType(), list.size()));
     else
       result = a;
     
     for (i = 0; i < list.size(); i++)
       result[i] = list.get(i);
     
-    return (T[]) result;
+    return result;
   }
 
   /**
@@ -856,7 +855,7 @@ public class Trie
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
   
   /**

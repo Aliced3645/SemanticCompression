@@ -1,37 +1,36 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    BIFParser.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.gui.graphvisualizer;
 
-import java.io.InputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.StringTokenizer;
 
-import weka.core.FastVector;
-
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import weka.core.FastVector;
 
 
 /**
@@ -40,7 +39,7 @@ import org.w3c.dom.Element;
  * that are passed to it through the constructor.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 7059 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 8034 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class BIFParser implements GraphConstants {
   
@@ -106,12 +105,12 @@ public class BIFParser implements GraphConstants {
     else if(inString!=null)
       dc = db.parse(new org.xml.sax.InputSource(new StringReader(inString)));
     else
-    { throw new Exception(Messages.getInstance().getString("BIFParser_Parse_Exception_Text")); }
+    { throw new Exception("No input given"); }
     
     NodeList nl = dc.getElementsByTagName( "NETWORK" );
     
     if(nl.getLength()==0) {
-      throw new BIFFormatException( Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_First"));
+      throw new BIFFormatException( "NETWORK tag not found" );
     }
     
     //take only the first network node
@@ -126,7 +125,8 @@ public class BIFParser implements GraphConstants {
       
       templist = ((Element)nl.item(i)).getElementsByTagName("NAME");
       if(templist.getLength()>1)
-        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Second") + (i+1));
+        throw new BIFFormatException("More than one name tags found for "+
+        "variable no. "+(i+1));
       
       String nodename =
       ((org.w3c.dom.Node)templist.item(0)).getFirstChild().getNodeValue();
@@ -191,18 +191,18 @@ public class BIFParser implements GraphConstants {
       //creating the probability table for the node
       templist = ((Element)nl.item(i)).getElementsByTagName("TABLE");
       if(templist.getLength()>1)
-        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Second_Alpha") +
+        throw new BIFFormatException("More than one Probability Table for "+
         n.ID);
       
       String probs = templist.item(0).getFirstChild().getNodeValue();
       StringTokenizer tk = new StringTokenizer(probs, " \n\t");
       
       if(parntOutcomes*n.outcomes.length > tk.countTokens())
-        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Third") + n.ID+
-        		Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Fourth"));
+        throw new BIFFormatException("Probability Table for "+n.ID+
+        " contains more values than it should");
       else if(parntOutcomes*n.outcomes.length < tk.countTokens())
-        throw new BIFFormatException(Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Fifth") + n.ID+
-        		Messages.getInstance().getString("BIFParser_Parse_BIFFormatException_Text_Sixth"));
+        throw new BIFFormatException("Probability Table for "+n.ID+
+        " contains less values than it should");
       else {
         n.probs = new double[parntOutcomes][n.outcomes.length];
         for(int r=0; r<parntOutcomes; r++)     //row

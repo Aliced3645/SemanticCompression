@@ -1,26 +1,43 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    Clusterer.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
+
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import weka.clusterers.EM;
 import weka.core.Instances;
@@ -28,27 +45,14 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.Logger;
 import weka.gui.ExtensionFileFilter;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import javax.swing.JPanel;
-import javax.swing.JOptionPane;
-import javax.swing.JFileChooser;
-
-import javax.swing.JPanel;
+import weka.gui.Logger;
 
 /**
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -61,7 +65,8 @@ import javax.swing.JPanel;
 public class Clusterer
   extends JPanel
   implements BeanCommon, Visible, WekaWrapper, EventConstraints, 
-             UserRequestAcceptor, TrainingSetListener, TestSetListener{
+             UserRequestAcceptor, TrainingSetListener, 
+             TestSetListener, ConfigurationProducer {
 
   /** for serialization */
   private static final long serialVersionUID = 7729795159836843810L;
@@ -225,7 +230,8 @@ public class Clusterer
     {
 
     if (!(algorithm instanceof weka.clusterers.Clusterer)) { 
-      throw new IllegalArgumentException(algorithm.getClass() + Messages.getInstance().getString("Clusterer_SetWrappedAlgorithm_IllegalArgumentException_Text"));
+      throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
+					 +"type of algorithm (Clusterer)");
     }
     setClusterer((weka.clusterers.Clusterer)algorithm);
   }
@@ -274,7 +280,7 @@ public class Clusterer
 //		    m_visual.setText("Building clusters...");
 		    if (m_log != null) {
 		      m_log.statusMessage(statusMessagePrefix() 
-		          + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text"));
+		          + "Building clusters...");
 		    }
 		    buildClusterer();
                     if(m_batchClustererListeners.size() > 0){
@@ -293,7 +299,7 @@ public class Clusterer
 		      grphTitle = grphTitle.substring(grphTitle.
 						      lastIndexOf('.')+1, 
 						      grphTitle.length());
-		      grphTitle = Messages.getInstance().getString("Clusterer_AcceptTrainingSet_GrphTitle_Text_First") + e.getSetNumber() + " ("
+		      grphTitle = "Set " + e.getSetNumber() + " ("
 			+e.getTrainingSet().relationName() + ") "
 			+grphTitle;
 		      
@@ -311,14 +317,15 @@ public class Clusterer
 		      titleString = titleString.
 			substring(titleString.lastIndexOf('.') + 1,
 				  titleString.length());
-		      modelString = Messages.getInstance().getString("Clusterer_AcceptTrainingSet_ModelString_Text_First") + titleString +
-		      Messages.getInstance().getString("Clusterer_AcceptTrainingSet_ModelString_Text_Second") + m_trainingSet.relationName() + 
+		      modelString = "=== Clusterer model ===\n\n" +
+			"Scheme:   " +titleString+"\n" +
+			"Relation: "  + m_trainingSet.relationName() + 
 			((e.getMaxSetNumber() > 1) 
-			 ? Messages.getInstance().getString("Clusterer_AcceptTrainingSet_ModelString_Text_Third") + e.getSetNumber()
+			 ? "\nTraining Fold: "+e.getSetNumber()
 			 :"")
 			+ "\n\n"
 			+ modelString;
-		      titleString = Messages.getInstance().getString("Clusterer_AcceptTrainingSet_TitleString_Text") + titleString;
+		      titleString = "Model: " + titleString;
 
 		      TextEvent nt = new TextEvent(Clusterer.this,
 						   modelString,
@@ -330,9 +337,9 @@ public class Clusterer
 		  Clusterer.this.stop(); // stop processing
 		  if (m_log != null) {
 		    m_log.statusMessage(statusMessagePrefix()
-		        + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_First"));
-		    m_log.logMessage(Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_First") + statusMessagePrefix()
-		        + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_First_Alpha") + ex.getMessage());
+		        + "ERROR (See log for details");
+		    m_log.logMessage("[Clusterer] " + statusMessagePrefix()
+		        + " problem training clusterer. " + ex.getMessage());
 		  }
 		  ex.printStackTrace();
 		} finally {
@@ -343,16 +350,16 @@ public class Clusterer
 		    // prevent any clusterer events from being fired
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage(Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_First") + statusMessagePrefix() 
-		          + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_Second"));
+		      m_log.logMessage("[Clusterer]" + statusMessagePrefix() 
+		          + " Build clusterer interrupted!");
 		      m_log.statusMessage(statusMessagePrefix() 
-		          + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_Second"));
+		          + "INTERRUPTED");
 		    }
 		  } else {
 		    // save header
 		    m_trainingSet = new Instances(m_trainingSet, 0);
 		    if (m_log != null) {
-		      m_log.statusMessage(statusMessagePrefix() + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_Third"));
+		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
 		    }
 		  }
 		  block(false);
@@ -403,9 +410,9 @@ public class Clusterer
         stop(); // stop any processing
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_StatusMessage_Text_Fourth"));
-          m_log.logMessage(Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_Third") + statusMessagePrefix()
-              + Messages.getInstance().getString("Clusterer_AcceptTrainingSet_LogMessage_Text_Fourth") + ex.getMessage());
+              + "ERROR (see log for details");
+          m_log.logMessage("[Clusterer] " + statusMessagePrefix()
+              + " problem during testing. " + ex.getMessage());
         }
 	ex.printStackTrace();
       }
@@ -557,6 +564,26 @@ public class Clusterer
 	((TextListener)l.elementAt(i)).acceptText(ge);
       }
     }
+  }
+  
+  /**
+   * We don't have to keep track of configuration listeners (see the
+   * documentation for ConfigurationListener/ConfigurationEvent).
+   * 
+   * @param cl a ConfigurationListener.
+   */
+  public synchronized void addConfigurationListener(ConfigurationListener cl) {
+    
+  }
+  
+  /**
+   * We don't have to keep track of configuration listeners (see the
+   * documentation for ConfigurationListener/ConfigurationEvent).
+   * 
+   * @param cl a ConfigurationListener.
+   */
+  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
+    
   }
 
 
@@ -713,16 +740,16 @@ public class Clusterer
         }
         os.close();
         if (m_log != null) {
-          m_log.logMessage(Messages.getInstance().getString("Clusterer_SaveModel_LogMessage_Text_Fourth") + getCustomName());
+          m_log.logMessage("[Clusterer] Saved clusterer " + getCustomName());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Clusterer.this,
-    		  Messages.getInstance().getString("Clusterer_SaveModel_JOptionPane_ShowMessageDialog_Text_First"),
-    		  Messages.getInstance().getString("Clusterer_SaveModel_JOptionPane_ShowMessageDialog_Text_Second"),
+                                    "Problem saving clusterer.\n",
+                                    "Save Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage(Messages.getInstance().getString("Clusterer_SaveModel_LogMessage_Text_Fifth") 
+        m_log.logMessage("[Clusterer] Problem saving clusterer. " 
             + getCustomName() + ex.getMessage());
       }
     }
@@ -757,17 +784,17 @@ public class Clusterer
         }
         is.close();
         if (m_log != null) {
-          m_log.logMessage(Messages.getInstance().getString("Clusterer_LoadModel_LogMessage_Text_First")
+          m_log.logMessage("[Clusterer] Loaded clusterer: "
                            + m_Clusterer.getClass().toString());
         }
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(Clusterer.this,
-    		  Messages.getInstance().getString("Clusterer_LoadModel_JOptionPane_ShowMessageDialog_Text_First"),
-    		  Messages.getInstance().getString("Clusterer_LoadModel_JOptionPane_ShowMessageDialog_Text_Second"),
+                                    "Problem loading classifier.\n",
+                                    "Load Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage(Messages.getInstance().getString("Clusterer_LoadModel_LogMessage_Text_Second") 
+        m_log.logMessage("[Clusterer] Problem loading classifier. " 
             + ex.getMessage());
       }
     }
@@ -810,7 +837,8 @@ public class Clusterer
     } else if (request.compareTo("Load model") == 0) {
       loadModel();
     } else {
-      throw new IllegalArgumentException(request + " not supported (Clusterer)");
+      throw new IllegalArgumentException(request
+					 + " not supported (Clusterer)");
     }
   }
 

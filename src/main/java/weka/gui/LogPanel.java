@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    LogPanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -53,7 +52,7 @@ import javax.swing.event.ChangeListener;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class LogPanel
   extends JPanel
@@ -63,13 +62,13 @@ public class LogPanel
   private static final long serialVersionUID = -4072464549112439484L;
 
   /** Displays the current status */
-  protected JLabel m_StatusLab = new JLabel(Messages.getInstance().getString("LogPanel_TaskLogger_StatusLab_JLabel_Text"));
+  protected JLabel m_StatusLab = new JLabel("OK");
   
   /** Displays the log messages */
   protected JTextArea m_LogText = new JTextArea(4, 20);
 
   /** The button for viewing the log */
-  protected JButton m_logButton = new JButton(Messages.getInstance().getString("LogPanel_TaskLogger_LogButton_JButton_Text"));
+  protected JButton m_logButton = new JButton("Log");
 
   /** An indicator for whether text has been output yet */
   protected boolean m_First = true;
@@ -131,7 +130,7 @@ public class LogPanel
     m_LogText.setEditable(false);
     m_LogText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_StatusLab.setBorder(BorderFactory.createCompoundBorder(
-			  BorderFactory.createTitledBorder(Messages.getInstance().getString("LogPanel_StatusLab_SetBorder_BorderFactoryCreateCompoundBorder_Text")),
+			  BorderFactory.createTitledBorder("Status"),
 			  BorderFactory.createEmptyBorder(0, 5, 5, 5)));
 
     // create scrolling log
@@ -152,7 +151,7 @@ public class LogPanel
     if (logHidden) {
 
       // create log window
-      final JFrame jf = new JFrame(Messages.getInstance().getString("LogPanel_Jf_JFrame_Text"));
+      final JFrame jf = new JFrame("Log");
       jf.addWindowListener(new WindowAdapter() {
 	  public void windowClosing(WindowEvent e) {
 	    jf.setVisible(false);
@@ -195,7 +194,7 @@ public class LogPanel
       
       JPanel p1 = new JPanel();
       if (titledBorder) {
-        p1.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("LogPanel_P1_SetBorder_BorderFactoryCreateTitledBorder_Text")));
+        p1.setBorder(BorderFactory.createTitledBorder("Log"));
       }
       p1.setLayout(new BorderLayout());
       p1.add(js, BorderLayout.CENTER);
@@ -256,7 +255,7 @@ public class LogPanel
 	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
 	    JPopupMenu gcMenu = new JPopupMenu();
-	    JMenuItem availMem = new JMenuItem(Messages.getInstance().getString("LogPanel_AddPopup_AvailMem_JMenuItem_Text"));
+	    JMenuItem availMem = new JMenuItem("Memory information");
 	    availMem.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent ee) {
 		  System.gc();
@@ -264,17 +263,17 @@ public class LogPanel
 		  long freeM = currR.freeMemory();
 		  long totalM = currR.totalMemory();
 		  long maxM = currR.maxMemory();
-		  logMessage(Messages.getInstance().getString("LogPanel_AddPopup_LogMessage_Text_First") + printLong(freeM) + Messages.getInstance().getString("LogPanel_AddPopup_LogMessage_Text_Second") + printLong(totalM) + Messages.getInstance().getString("LogPanel_AddPopup_LogMessage_Text_Third") + printLong(maxM));
-		  statusMessage(Messages.getInstance().getString("LogPanel_AddPopup_StatusMessage_Text_First") + printLong(freeM) + Messages.getInstance().getString("LogPanel_AddPopup_StatusMessage_Text_Second") + printLong(totalM) + Messages.getInstance().getString("LogPanel_AddPopup_StatusMessage_Text_Third") + printLong(maxM));
+		  logMessage("Memory (free/total/max.) in bytes: " + printLong(freeM) + " / " + printLong(totalM) + " / " + printLong(maxM));
+		  statusMessage("Memory (free/total/max.) in bytes: " + printLong(freeM) + " / " + printLong(totalM) + " / " + printLong(maxM));
 		}
 	      });
 	    gcMenu.add(availMem);
-	    JMenuItem runGC = new JMenuItem(Messages.getInstance().getString("LogPanel_AddPopup_RunGC_JMenuItem_Text"));
+	    JMenuItem runGC = new JMenuItem("Run garbage collector");
 	    runGC.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent ee) {
-		  statusMessage(Messages.getInstance().getString("LogPanel_AddPopup_StatusMessage_Text_Fourth"));
+		  statusMessage("Running garbage collector");
 		  System.gc();
-		  statusMessage(Messages.getInstance().getString("LogPanel_AddPopup_StatusMessage_Text_Fifth"));
+		  statusMessage("OK");
 		}
 	      });
 	    gcMenu.add(runGC);
@@ -348,7 +347,7 @@ public class LogPanel
   public static void main(String [] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(Messages.getInstance().getString("LogPanel_Main_JFrame_Text"));
+      final javax.swing.JFrame jf = new javax.swing.JFrame("Log Panel");
       jf.getContentPane().setLayout(new BorderLayout());
       final LogPanel lp = new LogPanel();
       jf.getContentPane().add(lp, BorderLayout.CENTER);
@@ -360,9 +359,9 @@ public class LogPanel
       });
       jf.pack();
       jf.setVisible(true);
-      lp.logMessage(Messages.getInstance().getString("LogPanel_Main_Lp_LogMessage_Text_First"));
-      lp.statusMessage(Messages.getInstance().getString("LogPanel_Main_Lp_StatusMessage_Text"));
-      lp.logMessage(Messages.getInstance().getString("LogPanel_Main_Lp_LogMessage_Text_Second"));
+      lp.logMessage("Welcome to the generic log panel!");
+      lp.statusMessage("Hi there");
+      lp.logMessage("Funky chickens");
       
     } catch (Exception ex) {
       ex.printStackTrace();

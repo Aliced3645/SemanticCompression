@@ -47,7 +47,7 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
 
     public Instance nextInstance() {
         Instance oldInstance = _nextInstance;
-        _nextInstance = new Instance(_header.numAttributes());
+        _nextInstance = new DenseInstance(_header.numAttributes());
         _nextInstance.setDataset(_header);
         _linesLeftInFile--;
         String line;

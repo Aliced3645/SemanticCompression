@@ -1,26 +1,36 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    ClusterEvaluation.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package  weka.clusterers;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 import weka.core.Drawable;
 import weka.core.Instance;
@@ -34,17 +44,6 @@ import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
  * Class for evaluating clustering models.<p/>
@@ -87,7 +86,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 7753 $
+ * @version  $Revision: 8034 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -221,7 +220,7 @@ public class ClusterEvaluation
    * 
    * @throws Exception if something goes wrong
    */
-  public void evaluateClusterer(Instances test, String testFileName,
+  public void evaluateClusterer(Instances test, String testFileName, 
       boolean outputModel) throws Exception {
     int i = 0;
     int cnum;
@@ -295,8 +294,9 @@ public class ClusterEvaluation
     loglk /= sum;
     m_logL = loglk;
     m_clusterAssignments = new double [clusterAssignments.size()];
-    for (i = 0; i < clusterAssignments.size(); i++)
+    for (i = 0; i < clusterAssignments.size(); i++) {
       m_clusterAssignments[i] = clusterAssignments.get(i);
+    }
     int numInstFieldWidth = (int)((Math.log(clusterAssignments.size())/Math.log(10))+1);
     
     if (outputModel) {
@@ -324,10 +324,11 @@ public class ClusterEvaluation
     if (m_Clusterer instanceof DensityBasedClusterer)
       m_clusteringResults.append("\n\nLog likelihood: " 
 				 + Utils.doubleToString(loglk, 1, 5) 
-				 + "\n");
+				 + "\n");       
     
-    if (hasClass)
+    if (hasClass) {
       evaluateClustersWithRespectToClass(test, testFileName);
+    }
   }
 
   /**
@@ -343,6 +344,8 @@ public class ClusterEvaluation
   private void evaluateClustersWithRespectToClass(Instances inst, String fileName)
     throws Exception {
     
+    
+    
     int numClasses = inst.classAttribute().numValues();
     int[][] counts = new int [m_numClusters][numClasses];
     int[] clusterTotals = new int[m_numClusters];
@@ -353,12 +356,14 @@ public class ClusterEvaluation
     Instance instance = null;
     int i;
     int numInstances;
+        
 
     if (fileName == null)
       fileName = "";
     
-    if (fileName.length() != 0)
+    if (fileName.length() != 0) {
       source = new DataSource(fileName);
+    }
     else
       source = new DataSource(inst);
     instances = source.getStructure(inst.classIndex());
@@ -368,7 +373,7 @@ public class ClusterEvaluation
       instance = source.nextElement(instances);
       if (m_clusterAssignments[i] >= 0) {
         counts[(int)m_clusterAssignments[i]][(int)instance.classValue()]++;
-        clusterTotals[(int)m_clusterAssignments[i]]++;
+        clusterTotals[(int)m_clusterAssignments[i]]++;        
       }
       i++;
     }
@@ -772,7 +777,7 @@ public class ClusterEvaluation
       DataSource test = new DataSource(testFileName);
       Instances testStructure = test.getStructure();
       if (!trainHeader.equalHeaders(testStructure)) {
-        throw new Exception("Training and testing data are not compatible");
+        throw new Exception("Training and testing data are not compatible\n" + trainHeader.equalHeadersMsg(testStructure));
       }
 
       text.append("\n\n=== Clustering stats for testing data ===\n\n" 
@@ -1260,7 +1265,7 @@ public class ClusterEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 7753 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 
   /**

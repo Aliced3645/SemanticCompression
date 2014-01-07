@@ -1,37 +1,36 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * TreePerformanceStats.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.neighboursearch;
 
-import weka.core.RevisionUtils;
-
 import java.util.Enumeration;
 import java.util.Vector;
+
+import weka.core.RevisionUtils;
 
 /**
  * The class that measures the performance of a tree based 
  * nearest neighbour search algorithm.
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 8034 $
  */
 public class TreePerformanceStats
   extends PerformanceStats {
@@ -237,11 +236,11 @@ public class TreePerformanceStats
    * @return An enumeration of the measure names.
    */
   public Enumeration enumerateMeasures() {
-    Vector newVector = new Vector();
+    Vector<String> newVector = new Vector<String>();
     
     Enumeration en = super.enumerateMeasures();
     while(en.hasMoreElements())
-      newVector.addElement(en.nextElement());
+      newVector.addElement((String)en.nextElement());
     
     newVector.addElement("measureTotal_nodes_visited");
     newVector.addElement("measureMean_nodes_visited");
@@ -317,6 +316,6 @@ public class TreePerformanceStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 }

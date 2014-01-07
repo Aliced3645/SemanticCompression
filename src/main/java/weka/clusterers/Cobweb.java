@@ -1,29 +1,34 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    Cobweb.java
- *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2001-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.clusterers;
 
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -32,19 +37,13 @@ import weka.core.Option;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 import weka.experiment.Stats;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
-
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -103,7 +102,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 6790 $
+ * @version $Revision: 8034 $
  * @see RandomizableClusterer
  * @see Drawable
  */
@@ -119,7 +118,7 @@ public class Cobweb
    *
    * @see Serializable
    */
-  private class CNode 
+  public class CNode 
     implements Serializable, RevisionHandler {
 
     /** for serialization */
@@ -308,7 +307,7 @@ public class Cobweb
       double bestHostCU = categoryUtility();
       CNode finalBestHost = newLeaf;
       
-      // remove new leaf when seaching for best and second best nodes to
+      // remove new leaf when searching for best and second best nodes to
       // consider for merging and splitting
       m_children.removeElementAt(m_children.size()-1);
 
@@ -762,7 +761,7 @@ public class Cobweb
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 6790 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
 
@@ -949,9 +948,9 @@ public class Cobweb
 	break;
       }
 
-      //host.updateStats(instance, false);
+//      host.updateStats(instance, false);
       temp = host.findHost(instance, true);
-      // host.updateStats(instance, true);
+//      host.updateStats(instance, true);
       
       if (temp != null) {
 	host = temp;
@@ -993,6 +992,15 @@ public class Cobweb
   public int numberOfClusters() {
     determineNumberOfClusters();
     return m_numberOfClusters;
+  }
+  
+  /**
+   * Get the root of the tree.
+   * 
+   * @return the root of the tree.
+   */
+  public CNode getTreeRoot() {
+    return m_cobwebTree;
   }
 
   /**
@@ -1247,7 +1255,7 @@ public class Cobweb
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 6790 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
   
   /**

@@ -12,8 +12,8 @@
 jdbcDriver=org.gjt.mm.mysql.Driver
 
 # database URL
-# jdbcURL=jdbc:mysql://localhost:3306/testdb?user=shu&password=shu
-jdbcURL=jdbc:mysql://localhost:3306/testdb
+jdbcURL=jdbc:mysql://localhost:3306/testdb?user=shu&password=shu
+#jdbcURL=jdbc:mysql://localhost:3306/testdb
 
 # specific data types
 # string, getString() = 0;    --> nominal

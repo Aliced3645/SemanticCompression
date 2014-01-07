@@ -1,28 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    ClassAssigner.java
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
-
-import weka.core.Instances;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
@@ -31,11 +28,14 @@ import java.util.Vector;
 
 import javax.swing.JPanel;
 
+import weka.core.Attribute;
+import weka.core.Instances;
+
 /**
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 7439 $
+ * @version $Revision: 8034 $
  */
 public class ClassAssigner
   extends JPanel
@@ -70,14 +70,15 @@ public class ClassAssigner
     new BeanVisual("ClassAssigner", 
 		   BeanVisual.ICON_PATH+"ClassAssigner.gif",
 		   BeanVisual.ICON_PATH+"ClassAssigner_animated.gif");
-
+  
   /**
    * Global info for this bean
    *
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return Messages.getInstance().getString("ClassAssigner_GlobalInfo_Text");
+    return "Designate which column is to be considered the class column "
+      +"in incoming data.";
   }
 
   public ClassAssigner() {
@@ -109,7 +110,7 @@ public class ClassAssigner
    * @return a <code>String</code> value
    */
   public String classColumnTipText() {
-    return Messages.getInstance().getString("ClassAssigner_ClassColumnTipText_Text");
+    return "Specify the number of the column that contains the class attribute";
   }
   
   private Instances getUpstreamStructure() {
@@ -181,7 +182,10 @@ public class ClassAssigner
       m_connectedFormat = getUpstreamStructure();
     }
     
-    assignClass(m_connectedFormat);
+    if (m_connectedFormat != null) {
+      assignClass(m_connectedFormat);
+    }
+    
     return m_connectedFormat;
   }
 
@@ -191,7 +195,7 @@ public class ClassAssigner
    * @return an <code>Instances</code> value
    */
   public Instances getConnectedFormat() {
- // loaders will push instances format to us
+    // loaders will push instances format to us
     // when the user makes configuration changes
     // to the loader in the gui. However, if a fully
     // configured flow is loaded then we won't get
@@ -247,7 +251,6 @@ public class ClassAssigner
     Instances testSet = e.getTestSet();
     assignClass(testSet);
     notifyTestListeners(e);
-    
     if (e.isStructureOnly()) {
       m_connectedFormat = e.getTestSet();
       // tell any listening customizers (or other
@@ -265,7 +268,7 @@ public class ClassAssigner
       notifyInstanceListeners(e);
 
       // tell any listening customizers (or other interested parties)
-      System.err.println(Messages.getInstance().getString("ClassAssigner_AcceptInstance_Error_Text"));
+      System.err.println("Notifying customizer...");
       notifyDataFormatListeners();
     } else {
       //      Instances dataSet = e.getInstance().dataset();
@@ -276,18 +279,36 @@ public class ClassAssigner
 
   private void assignClass(Instances dataSet) {
     int classCol = -1;
-    if (m_classColumn.toLowerCase().compareTo("last") == 0) {
+
+    if (m_classColumn.trim().toLowerCase().compareTo("last") == 0 ||
+        m_classColumn.equalsIgnoreCase("/last")) {
       dataSet.setClassIndex(dataSet.numAttributes()-1);
-    } else if (m_classColumn.toLowerCase().compareTo("first") == 0) {
+    } else if (m_classColumn.trim().toLowerCase().compareTo("first") == 0 ||
+        m_classColumn.equalsIgnoreCase("/first")) {
       dataSet.setClassIndex(0);
     } else {
-      classCol = Integer.parseInt(m_classColumn) - 1;
-      if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
-	if (m_logger != null) {
-	  m_logger.logMessage(Messages.getInstance().getString("ClassAssigner_AssignClass_LogMessage_Text"));
-	}
+      // try to look up the class attribute as a string
+      Attribute classAtt = dataSet.attribute(m_classColumn.trim());
+      if (classAtt != null) {
+        dataSet.setClass(classAtt);
       } else {
-	dataSet.setClassIndex(classCol);
+        // parse it as a number
+        try {
+          classCol = Integer.parseInt(m_classColumn.trim()) - 1;
+        } catch (NumberFormatException ex) {
+          if (m_logger != null) {
+            m_logger.logMessage("Warning : can't parse '" + m_classColumn.trim() + "' as a number "
+                +" or find it as an attribute in the incoming data (ClassAssigner)");
+          }
+        }
+        if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
+          if (m_logger != null) {
+            m_logger.logMessage("Class column outside range of data "
+                +"(ClassAssigner)");
+          }
+        } else {
+          dataSet.setClassIndex(classCol);
+        }
       }
     }
   }
@@ -299,7 +320,8 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyTestListeners_Error_Text"));
+	System.err.println("Notifying test listeners "
+			   +"(ClassAssigner)");
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -312,7 +334,8 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyTrainingListeners_Error_Text"));
+	System.err.println("Notifying training listeners "
+			   +"(ClassAssigner)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
     }
@@ -325,7 +348,8 @@ public class ClassAssigner
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println(Messages.getInstance().getString("ClassAssigner_NotifyDataListeners_Error_Text"));
+	System.err.println("Notifying data listeners "
+			   +"(ClassAssigner)");
 	((DataSourceListener)l.elementAt(i)).acceptDataSet(tse);
       }
     }

@@ -1,35 +1,32 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    DotParser.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.gui.graphvisualizer;
 
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StreamTokenizer;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.FileWriter;
 
 import weka.core.FastVector;
-import weka.gui.graphvisualizer.GraphNode;
-import weka.gui.graphvisualizer.GraphEdge;
 
 
 
@@ -48,7 +45,7 @@ import weka.gui.graphvisualizer.GraphEdge;
  * grouping of nodes.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 7059 $ - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 8034 $ - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class DotParser implements GraphConstants  {
   
@@ -140,7 +137,7 @@ public class DotParser implements GraphConstants  {
           }
           
           while(tk.ttype!='{') {
-            System.err.println(Messages.getInstance().getString("DotParser_Graph_Error_Text_First") + tk.lineno()+Messages.getInstance().getString("DotParser_Graph_Error_Text_Second")+
+            System.err.println("Error at line "+tk.lineno()+" ignoring token "+
             tk.sval);
             tk.nextToken();
             if(tk.ttype==tk.TT_EOF)
@@ -149,9 +146,9 @@ public class DotParser implements GraphConstants  {
           stmtList(tk);
         }
         else if(tk.sval.equalsIgnoreCase("graph"))
-          System.err.println(Messages.getInstance().getString("DotParser_Graph_Error_Text_Third"));
+          System.err.println("Error. Undirected graphs cannot be used");
         else
-          System.err.println(Messages.getInstance().getString("DotParser_Graph_Error_Text_Fourth")+
+          System.err.println("Error. Expected graph or digraph at line "+
           tk.lineno());
       }
     }
@@ -230,10 +227,10 @@ public class DotParser implements GraphConstants  {
         else if(tk.ttype == '-')
           edgeStmt(tk, nodeindex);
         else
-          System.err.println(Messages.getInstance().getString("DotParser_Stmt_Error_Text_First") + tk.lineno() + Messages.getInstance().getString("DotParser_Stmt_Error_Text_Second"));
+          System.err.println("error at lineno "+tk.lineno()+" in stmt");
       }
       catch(Exception ex) {
-        System.err.println(Messages.getInstance().getString("DotParser_Stmt_Error_Text_Third") + tk.lineno()+Messages.getInstance().getString("DotParser_Stmt_Error_Text_Fourth"));
+        System.err.println("error at lineno "+tk.lineno()+" in stmtException");
         ex.printStackTrace();
       }
     }
@@ -274,12 +271,12 @@ public class DotParser implements GraphConstants  {
           if(tk.ttype==tk.TT_WORD || tk.ttype=='"')
             temp.lbl = tk.sval;
           else {
-            System.err.println(Messages.getInstance().getString("DotParser_NodeStmt_Error_Text_First") + tk.lineno());
+            System.err.println("couldn't find label at line "+tk.lineno());
             tk.pushBack();
           }
         }
         else {
-          System.err.println(Messages.getInstance().getString("DotParser_NodeStmt_Error_Text_Second") + tk.lineno());
+          System.err.println("couldn't find label at line "+tk.lineno());
           tk.pushBack();
         }
       }
@@ -292,12 +289,12 @@ public class DotParser implements GraphConstants  {
           if(tk.ttype==tk.TT_WORD || tk.ttype=='"')
             ;
           else {
-            System.err.println(Messages.getInstance().getString("DotParser_NodeStmt_Error_Text_Third") + tk.lineno());
+            System.err.println("couldn't find color at line "+tk.lineno());
             tk.pushBack();
           }
         }
         else {
-          System.err.println(Messages.getInstance().getString("DotParser_NodeStmt_Error_Text_Fourth") + tk.lineno());
+          System.err.println("couldn't find color at line "+tk.lineno());
           tk.pushBack();
         }
       }
@@ -310,12 +307,12 @@ public class DotParser implements GraphConstants  {
           if(tk.ttype==tk.TT_WORD || tk.ttype=='"')
             ;
           else {
-            System.err.println(Messages.getInstance().getString("DotParser_NodeStmt_Error_Text_Fifth") + tk.lineno());
+            System.err.println("couldn't find style at line "+tk.lineno());
             tk.pushBack();
           }
         }
         else {
-          System.err.println(Messages.getInstance().getString("DotParser_NodeStmt_Error_Text_Sixth") + tk.lineno());
+          System.err.println("couldn't find style at line "+tk.lineno());
           tk.pushBack();
         }
       }
@@ -365,14 +362,14 @@ public class DotParser implements GraphConstants  {
       }
     }
     else if(tk.ttype=='-') {
-      System.err.println(Messages.getInstance().getString("DotParser_EdgeStmt_Error_Text_First") + tk.lineno()+
-    		  Messages.getInstance().getString("DotParser_EdgeStmt_Error_Text_Second"));
+      System.err.println("Error at line "+tk.lineno()+
+      ". Cannot deal with undirected edges");
       if(tk.ttype==tk.TT_WORD)
         tk.pushBack();
       return;
     }
     else {
-      System.err.println(Messages.getInstance().getString("DotParser_EdgeStmt_Error_Text_Third") + tk.lineno()+Messages.getInstance().getString("DotParser_EdgeStmt_Error_Text_Fourth"));
+      System.err.println("Error at line "+tk.lineno()+" in edgeStmt");
       if(tk.ttype==tk.TT_WORD)
         tk.pushBack();
       return;
@@ -401,14 +398,14 @@ public class DotParser implements GraphConstants  {
         if(tk.ttype=='=') {
           tk.nextToken();
           if(tk.ttype==tk.TT_WORD || tk.ttype=='"')
-            System.err.println(Messages.getInstance().getString("DotParser_EdgeAttrib_Text") + tk.sval);//e.lbl = tk.sval;
+            System.err.println("found label "+tk.sval);//e.lbl = tk.sval;
           else {
-            System.err.println(Messages.getInstance().getString("DotParser_EdgeAttrib_Error_Text") + tk.lineno());
+            System.err.println("couldn't find label at line "+tk.lineno());
             tk.pushBack();
           }
         }
         else {
-          System.err.println(Messages.getInstance().getString("DotParser_EdgeAttrib_Error_Text_First") + tk.lineno());
+          System.err.println("couldn't find label at line "+tk.lineno());
           tk.pushBack();
         }
       }
@@ -420,12 +417,12 @@ public class DotParser implements GraphConstants  {
           if(tk.ttype==tk.TT_WORD || tk.ttype=='"')
             ;
           else {
-            System.err.println(Messages.getInstance().getString("DotParser_EdgeAttrib_Error_Text_Second") + tk.lineno());
+            System.err.println("couldn't find color at line "+tk.lineno());
             tk.pushBack();
           }
         }
         else {
-          System.err.println(Messages.getInstance().getString("DotParser_EdgeAttrib_Error_Text_Third") + tk.lineno());
+          System.err.println("couldn't find color at line "+tk.lineno());
           tk.pushBack();
         }
       }
@@ -438,12 +435,12 @@ public class DotParser implements GraphConstants  {
           if(tk.ttype==tk.TT_WORD || tk.ttype=='"')
             ;
           else {
-            System.err.println(Messages.getInstance().getString("DotParser_EdgeAttrib_Error_Text_Fourth") + tk.lineno());
+            System.err.println("couldn't find style at line "+tk.lineno());
             tk.pushBack();
           }
         }
         else {
-          System.err.println(Messages.getInstance().getString("DotParser_EdgeAttrib_Error_Text_Fifth") + tk.lineno());
+          System.err.println("couldn't find style at line "+tk.lineno());
           tk.pushBack();
         }
       }

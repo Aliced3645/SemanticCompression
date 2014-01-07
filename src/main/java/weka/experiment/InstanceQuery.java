@@ -1,28 +1,37 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    InstanceQuery.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.experiment;
 
+import java.io.File;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Time;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -31,14 +40,6 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Time;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * Convert the results of a database query into instances. The jdbc driver and
@@ -88,18 +89,22 @@ import java.util.Vector;
  * <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 9184 $
+ * @version $Revision: 9183 $
  */
-public class InstanceQuery extends DatabaseUtils implements OptionHandler {
+public class InstanceQuery extends DatabaseUtils implements OptionHandler,
+		InstanceQueryAdapter {
 
 	/** for serialization */
 	static final long serialVersionUID = 718158370917782584L;
 
 	/** Determines whether sparse data is created */
-	boolean m_CreateSparseData = false;
+	protected boolean m_CreateSparseData = false;
 
 	/** Query to execute */
-	String m_Query = "SELECT * from ?";
+	protected String m_Query = "SELECT * from ?";
+
+	/** the custom props file to use instead of default one. */
+	protected File m_CustomPropsFile = null;
 
 	/**
 	 * Sets up the database drivers
@@ -132,6 +137,12 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
 		result.addElement(new Option("\tThe password to use for connecting.",
 				"P", 1, "-P <password>"));
+
+		result.add(new Option(
+				"\tThe custom properties file to use instead of default ones,\n"
+						+ "\tcontaining the database parameters.\n"
+						+ "\t(default: none)", "custom-props", 1,
+				"-custom-props <file>"));
 
 		result.addElement(new Option("\tEnables debug output.", "D", 0, "-D"));
 
@@ -193,6 +204,12 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 		tmpStr = Utils.getOption('P', options);
 		if (tmpStr.length() != 0)
 			setPassword(tmpStr);
+
+		tmpStr = Utils.getOption("custom-props", options);
+		if (tmpStr.length() == 0)
+			setCustomPropsFile(null);
+		else
+			setCustomPropsFile(new File(tmpStr));
 
 		setDebug(Utils.getFlag('D', options));
 	}
@@ -256,6 +273,37 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	}
 
 	/**
+	 * Sets the custom properties file to use.
+	 * 
+	 * @param value
+	 *            the custom props file to load database parameters from, use
+	 *            null or directory to disable custom properties.
+	 * @see #initialize(File)
+	 */
+	public void setCustomPropsFile(File value) {
+		m_CustomPropsFile = value;
+		initialize(m_CustomPropsFile);
+	}
+
+	/**
+	 * Returns the custom properties file in use, if any.
+	 * 
+	 * @return the custom props file, null if none used
+	 */
+	public File getCustomPropsFile() {
+		return m_CustomPropsFile;
+	}
+
+	/**
+	 * The tip text for this property.
+	 * 
+	 * @return the tip text
+	 */
+	public String customPropsFileTipText() {
+		return "The custom properties that the user can use to override the default ones.";
+	}
+
+	/**
 	 * Gets the current settings of InstanceQuery
 	 * 
 	 * @return an array of strings suitable for passing to setOptions()
@@ -280,6 +328,11 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 			options.add(getPassword());
 		}
 
+		if ((m_CustomPropsFile != null) && !m_CustomPropsFile.isDirectory()) {
+			options.add("-custom-props");
+			options.add(m_CustomPropsFile.toString());
+		}
+
 		if (getDebug())
 			options.add("-D");
 
@@ -298,37 +351,12 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 		return retrieveInstances(m_Query);
 	}
 
-	/**
-	 * Makes a database query to convert a table into a set of instances
-	 * 
-	 * @param query
-	 *            the query to convert to instances
-	 * @return the instances contained in the result of the query, NULL if the
-	 *         SQL query doesn't return a ResultSet, e.g., DELETE/INSERT/UPDATE
-	 * @throws Exception
-	 *             if an error occurs
-	 */
-	public Instances retrieveInstances(String query) throws Exception {
-
-		if (m_Debug)
-			System.err.println("Executing query: " + query);
-		connectToDatabase();
-		if (execute(query) == false) {
-			if (m_PreparedStatement.getUpdateCount() == -1) {
-				throw new Exception("Query didn't produce results");
-			} else {
-				if (m_Debug)
-					System.err.println(m_PreparedStatement.getUpdateCount()
-							+ " rows affected.");
-				close();
-				return null;
-			}
-		}
-		ResultSet rs = getResultSet();
-		if (m_Debug)
+	public static Instances retrieveInstances(InstanceQueryAdapter adapter,
+			ResultSet rs) throws Exception {
+		if (adapter.getDebug())
 			System.err.println("Getting metadata...");
 		ResultSetMetaData md = rs.getMetaData();
-		if (m_Debug)
+		if (adapter.getDebug())
 			System.err.println("Completed getting metadata...");
 
 		// Determine structure of the instances
@@ -343,7 +371,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 			 * Types.VARBINARY: case Types.LONGVARBINARY:
 			 */
 
-			switch (translateDBColumnType(md.getColumnTypeName(i))) {
+			switch (adapter.translateDBColumnType(md.getColumnTypeName(i))) {
 
 			case STRING:
 				// System.err.println("String --> nominal");
@@ -412,13 +440,13 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 		}
 
 		// Step through the tuples
-		if (m_Debug)
+		if (adapter.getDebug())
 			System.err.println("Creating instances...");
 		FastVector instances = new FastVector();
 		int rowCount = 0;
 		while (rs.next()) {
 			if (rowCount % 100 == 0) {
-				if (m_Debug) {
+				if (adapter.getDebug()) {
 					System.err.print("read " + rowCount + " instances \r");
 					System.err.flush();
 				}
@@ -430,12 +458,12 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				 * Types.VARCHAR: case Types.LONGVARCHAR: case Types.BINARY:
 				 * case Types.VARBINARY: case Types.LONGVARBINARY:
 				 */
-				switch (translateDBColumnType(md.getColumnTypeName(i))) {
+				switch (adapter.translateDBColumnType(md.getColumnTypeName(i))) {
 				case STRING:
 					String str = rs.getString(i);
 
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						Double index = (Double) nominalIndexes[i - 1].get(str);
 						if (index == null) {
@@ -450,7 +478,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 					String txt = rs.getString(i);
 
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						Double index = (Double) nominalIndexes[i - 1].get(txt);
 						if (index == null) {
@@ -467,7 +495,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case BOOL:
 					boolean boo = rs.getBoolean(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						vals[i - 1] = (boo ? 1.0 : 0.0);
 					}
@@ -477,7 +505,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 					double dd = rs.getDouble(i);
 					// Use the column precision instead of 4?
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						// newInst.setValue(i - 1, bd.doubleValue());
 						vals[i - 1] = dd;
@@ -486,7 +514,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case BYTE:
 					byte by = rs.getByte(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						vals[i - 1] = (double) by;
 					}
@@ -494,7 +522,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case SHORT:
 					short sh = rs.getShort(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						vals[i - 1] = (double) sh;
 					}
@@ -502,7 +530,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case INTEGER:
 					int in = rs.getInt(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						vals[i - 1] = (double) in;
 					}
@@ -510,7 +538,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case LONG:
 					long lo = rs.getLong(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						vals[i - 1] = (double) lo;
 					}
@@ -518,7 +546,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case FLOAT:
 					float fl = rs.getFloat(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						vals[i - 1] = (double) fl;
 					}
@@ -526,7 +554,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case DATE:
 					Date date = rs.getDate(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						// TODO: Do a value check here.
 						vals[i - 1] = (double) date.getTime();
@@ -535,21 +563,21 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 				case TIME:
 					Time time = rs.getTime(i);
 					if (rs.wasNull()) {
-						vals[i - 1] = Instance.missingValue();
+						vals[i - 1] = Utils.missingValue();
 					} else {
 						// TODO: Do a value check here.
 						vals[i - 1] = (double) time.getTime();
 					}
 					break;
 				default:
-					vals[i - 1] = Instance.missingValue();
+					vals[i - 1] = Utils.missingValue();
 				}
 			}
 			Instance newInst;
-			if (m_CreateSparseData) {
+			if (adapter.getSparseData()) {
 				newInst = new SparseInstance(1.0, vals);
 			} else {
-				newInst = new Instance(1.0, vals);
+				newInst = new DenseInstance(1.0, vals);
 			}
 			instances.addElement(newInst);
 			rowCount++;
@@ -557,13 +585,13 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 		// disconnectFromDatabase(); (perhaps other queries might be made)
 
 		// Create the header and add the instances to the dataset
-		if (m_Debug)
+		if (adapter.getDebug())
 			System.err.println("Creating header...");
 		FastVector attribInfo = new FastVector();
 		for (int i = 0; i < numAttributes; i++) {
 			/* Fix for databases that uppercase column names */
 			// String attribName = attributeCaseFix(md.getColumnName(i + 1));
-			String attribName = attributeCaseFix(columnNames.get(i));
+			String attribName = adapter.attributeCaseFix(columnNames.get(i));
 			switch (attributeTypes[i]) {
 			case Attribute.NOMINAL:
 				attribInfo.addElement(new Attribute(attribName,
@@ -591,6 +619,41 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 		for (int i = 0; i < instances.size(); i++) {
 			result.add((Instance) instances.elementAt(i));
 		}
+
+		return result;
+	}
+
+	/**
+	 * Makes a database query to convert a table into a set of instances
+	 * 
+	 * @param query
+	 *            the query to convert to instances
+	 * @return the instances contained in the result of the query, NULL if the
+	 *         SQL query doesn't return a ResultSet, e.g., DELETE/INSERT/UPDATE
+	 * @throws Exception
+	 *             if an error occurs
+	 */
+	public Instances retrieveInstances(String query) throws Exception {
+
+		if (m_Debug)
+			System.err.println("Executing query: " + query);
+		connectToDatabase();
+		if (execute(query) == false) {
+			if (m_PreparedStatement.getUpdateCount() == -1) {
+				throw new Exception("Query didn't produce results");
+			} else {
+				if (m_Debug)
+					System.err.println(m_PreparedStatement.getUpdateCount()
+							+ " rows affected.");
+				close();
+				return null;
+			}
+		}
+		ResultSet rs = getResultSet();
+		if (m_Debug)
+			System.err.println("Getting metadata...");
+
+		Instances result = retrieveInstances(this, rs);
 		close(rs);
 
 		return result;
@@ -653,6 +716,6 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 	 * @return the revision
 	 */
 	public String getRevision() {
-		return RevisionUtils.extract("$Revision: 9184 $");
+		return RevisionUtils.extract("$Revision: 9183 $");
 	}
 }

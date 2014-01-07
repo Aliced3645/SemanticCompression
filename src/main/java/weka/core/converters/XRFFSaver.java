@@ -1,35 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * XRFFSaver.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
-
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-import weka.core.xml.XMLInstances;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +28,15 @@ import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.zip.GZIPOutputStream;
+
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Utils;
+import weka.core.xml.XMLInstances;
 
 /**
  <!-- globalinfo-start -->
@@ -65,7 +64,7 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 8034 $
  * @see Saver
  */
 public class XRFFSaver 
@@ -109,13 +108,13 @@ public class XRFFSaver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector      result;
+    Vector<Option>      result;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+      result.addElement((Option)en.nextElement());
     
     result.addElement(
         new Option(
@@ -142,10 +141,10 @@ public class XRFFSaver
    */
   public String[] getOptions(){
     int       	i;
-    Vector    	result;
+    Vector<String>    	result;
     String[]  	options;
 
-    result = new Vector();
+    result = new Vector<String>();
 
     if (getClassIndex().length() != 0) {
       result.add("-C");
@@ -396,7 +395,7 @@ public class XRFFSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
   
   /**

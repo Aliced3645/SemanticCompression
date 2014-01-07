@@ -1,39 +1,40 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    InstancesResultListener.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Hashtable;
+
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -51,7 +52,7 @@ import java.util.Hashtable;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 8034 $
  */
 public class InstancesResultListener 
   extends CSVResultListener {
@@ -219,7 +220,7 @@ public class InstancesResultListener
       throw new Error("Unrecognized ResultProducer sending results!!");
     }
     
-    Instance newInst = new Instance(m_AttributeTypes.length);
+    Instance newInst = new DenseInstance(m_AttributeTypes.length);
     for(int i = 0; i < m_AttributeTypes.length; i++) {
       Object val = null;
       if (i < key.length) {
@@ -228,7 +229,7 @@ public class InstancesResultListener
 	val = result[i - key.length];
       }
       if (val == null) {
-	newInst.setValue(i, Instance.missingValue());
+	newInst.setValue(i, Utils.missingValue());
       } else {
 	switch (m_AttributeTypes[i]) {
 	case Attribute.NOMINAL:
@@ -246,7 +247,7 @@ public class InstancesResultListener
 	  newInst.setValue(i, (double)dou);
 	  break;
 	default:
-	  newInst.setValue(i, Instance.missingValue());
+	  newInst.setValue(i, Utils.missingValue());
 	}
       }
     }
@@ -259,6 +260,6 @@ public class InstancesResultListener
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 } // InstancesResultListener

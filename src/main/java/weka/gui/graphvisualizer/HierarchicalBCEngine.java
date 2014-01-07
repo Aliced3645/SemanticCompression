@@ -1,42 +1,39 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    HierarchicalBCEngine.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.graphvisualizer;
 
-import weka.core.FastVector;
-import weka.gui.graphvisualizer.GraphNode;
-import weka.gui.graphvisualizer.GraphEdge;
-
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JCheckBox;
-import javax.swing.ButtonGroup;
-import javax.swing.BorderFactory;
-import javax.swing.JProgressBar;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+
+import weka.core.FastVector;
 
 /**
  * This class lays out the vertices of a graph in a
@@ -57,7 +54,7 @@ import java.awt.GridBagConstraints;
  * vertices present in each level.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 7059 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 8034 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  *
  */
 public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
@@ -149,8 +146,8 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
    * This methods makes the gui extra controls panel "m_controlsPanel"
    */
   protected void makeGUIPanel(boolean edgeConc) {
-    m_jRbNaiveLayout = new JRadioButton(Messages.getInstance().getString("HierarchicalBCEngine_JRbTopdown_JRadioButton_Text"));
-    m_jRbPriorityLayout = new JRadioButton(Messages.getInstance().getString("HierarchicalBCEngine_JRbPriorityLayout_JRadioButton_Text"));
+    m_jRbNaiveLayout = new JRadioButton("Naive Layout");
+    m_jRbPriorityLayout = new JRadioButton("Priority Layout");
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_jRbNaiveLayout);
     bg.add(m_jRbPriorityLayout);
@@ -162,8 +159,8 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
       }
     };
     
-    m_jRbTopdown = new JRadioButton(Messages.getInstance().getString("HierarchicalBCEngine_JRbTopdown_JRadioButton_Text"));
-    m_jRbBottomup = new JRadioButton(Messages.getInstance().getString("HierarchicalBCEngine_JRbBottomup_JRadioButton_Text"));
+    m_jRbTopdown = new JRadioButton("Top Down");
+    m_jRbBottomup = new JRadioButton("Bottom Up");
     m_jRbTopdown.addActionListener(a);
     m_jRbBottomup.addActionListener(a);
     bg = new ButtonGroup();
@@ -171,7 +168,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
     bg.add(m_jRbBottomup);
     m_jRbBottomup.setSelected(true);
     
-    m_jCbEdgeConcentration = new JCheckBox(Messages.getInstance().getString("HierarchicalBCEngine_JP1_JPanel_BorderFactoryCreateTitledBorder_Text"), edgeConc);
+    m_jCbEdgeConcentration = new JCheckBox("With Edge Concentration", edgeConc);
     m_jCbEdgeConcentration.setSelected(edgeConc);
     m_jCbEdgeConcentration.addActionListener(a);
     
@@ -183,12 +180,12 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
     gbc.fill = gbc.HORIZONTAL;
     jp1.add(m_jRbNaiveLayout, gbc);
     jp1.add(m_jRbPriorityLayout, gbc);
-    jp1.setBorder( BorderFactory.createTitledBorder(Messages.getInstance().getString("HierarchicalBCEngine_JP1_SetBorder_Text")));
+    jp1.setBorder( BorderFactory.createTitledBorder("Layout Type") );
     
     JPanel jp2 = new JPanel( new GridBagLayout() );
     jp2.add(m_jRbTopdown, gbc);
     jp2.add(m_jRbBottomup, gbc);
-    jp2.setBorder( BorderFactory.createTitledBorder(Messages.getInstance().getString("HierarchicalBCEngine_JP2_BorderFactoryCreateTitledBorder_Text")));
+    jp2.setBorder( BorderFactory.createTitledBorder("Layout Method") );
     
     
     m_progress = new JProgressBar(0, 11);
@@ -273,10 +270,10 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
           return;
         }
       }
-      System.err.println(Messages.getInstance().getString("HierarchicalBCEngine_RemoveLayoutCompleteEventListener_Error_Text_First"));
+      System.err.println("layoutCompleteListener to be remove not present");
     }
     else
-      System.err.println(Messages.getInstance().getString("HierarchicalBCEngine_RemoveLayoutCompleteEventListener_Error_Text_Second"));
+      System.err.println("layoutCompleteListener to be remove not present");
   }
   
   /**
@@ -329,7 +326,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
           int crossbefore=crossings(nodeLevels), crossafter=0, i=0;
           do {
             m_progress.setValue(i+4);
-            m_progress.setString(Messages.getInstance().getString("HierarchicalBCEngine_LayoutGraph_Progress_SetString_Text_First") + (i+1));
+            m_progress.setString("Minimizing Crossings: Pass"+(i+1));
             if(i!=0)
               crossbefore = crossafter;
             nodeLevels = minimizeCrossings(false, nodeLevels);
@@ -342,7 +339,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
           int crossbefore=crossings(nodeLevels), crossafter=0, i=0;
           do {
             m_progress.setValue(i+4);
-            m_progress.setString(Messages.getInstance().getString("HierarchicalBCEngine_LayoutGraph_Progress_SetString_Text_Second") + (i+1));
+            m_progress.setString("Minimizing Crossings: Pass"+(i+1));
             if(i!=0)
               crossbefore = crossafter;
             nodeLevels = minimizeCrossings(true, nodeLevels);
@@ -356,14 +353,14 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
         //                   "\n---------------------------------");
         
         m_progress.setValue(10);
-        m_progress.setString(Messages.getInstance().getString("HierarchicalBCEngine_LayoutGraph_Progress_SetString_Text_Third"));
+        m_progress.setString("Laying out vertices");
         //Laying out graph
         if(m_jRbNaiveLayout.isSelected())
           naiveLayout();
         else
           priorityLayout1();
         m_progress.setValue(11);
-        m_progress.setString(Messages.getInstance().getString("HierarchicalBCEngine_LayoutGraph_Progress_SetString_Text_Fourth"));
+        m_progress.setString("Layout Complete");
         m_progress.repaint();
         
         fireLayoutCompleteEvent( new LayoutCompleteEvent(this) );
@@ -452,12 +449,12 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
     processGraph();
     
     m_progress.setValue(1);
-    m_progress.setString(Messages.getInstance().getString("HierarchicalBCEngine_MakeProperHierarchy_Progress_SetString_Text_First"));
+    m_progress.setString("Removing Cycles");
     //****removing cycles
     removeCycles();
     
     m_progress.setValue(2);
-    m_progress.setString(Messages.getInstance().getString("HierarchicalBCEngine_MakeProperHierarchy_Progress_SetString_Text_Second"));
+    m_progress.setString("Assigning levels to nodes");
     //****Assigning vertical level to each node
     int nodesLevel[] = new int[m_nodes.size()];
     int depth=0;
@@ -507,7 +504,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
     }
     
     m_progress.setValue(3);
-    m_progress.setString(Messages.getInstance().getString("HierarchicalBCEngine_MakeProperHierarchy_Progress_SetString_Text_Third"));
+    m_progress.setString("Removing gaps by adding dummy vertices");
     //*Making a proper Hierarchy by putting in dummy vertices to close all gaps
     if(m_jCbEdgeConcentration.isSelected())
       removeGapsWithEdgeConcentration(nodesLevel);
@@ -823,6 +820,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
           }
       }
     }
+    
   }
   
   
@@ -840,9 +838,9 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
     for(int i=0; i<level.length; i++)
       if(level[i]==element)
         return i;
-    throw new Exception(Messages.getInstance().getString("HierarchicalBCEngine_IndexOfElementInLevel_Exception_Text_First") +
+    throw new Exception("Error. Didn't find element "+
                         ((GraphNode)m_nodes.elementAt(element)).ID+
-                        Messages.getInstance().getString("HierarchicalBCEngine_IndexOfElementInLevel_Exception_Text_Second")  +
+                        " in level. Inspect code for "+
                         "weka.gui.graphvisualizer.HierarchicalBCEngine");
   }
   
@@ -886,10 +884,10 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
               } while(temp!=lastOcrnce[levels[i][uidx]]);
             }
             catch(NullPointerException ex) {
-              System.out.println(Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_First") + levels[i][uidx]+
-            		  Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_Second") + ((GraphNode)m_nodes.elementAt(levels[i][uidx])).ID+
-            		  Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_Third") + temp+
-            		  Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_Fourth") + upper.first);
+              System.out.println("levels[i][uidx]: "+levels[i][uidx]+
+              " which is: "+((GraphNode)m_nodes.elementAt(levels[i][uidx])).ID+
+              " temp: "+temp+
+              " upper.first: "+upper.first);
             ex.printStackTrace();
             System.exit(-1);}
             
@@ -949,11 +947,11 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
               } while(temp!=lastOcrnce[levels[i+1][lidx]]);
             }
             catch(NullPointerException ex) {
-              System.out.print(Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_Fifth") + levels[i+1][lidx]+
-            		  Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_Sixth") +
+              System.out.print("levels[i+1][lidx]: "+levels[i+1][lidx]+
+              " which is: "+
               ((GraphNode)m_nodes.elementAt(levels[i+1][lidx])).ID+
-              Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_Seventh") + temp);
-              System.out.println(Messages.getInstance().getString("HierarchicalBCEngine_Crossings_Exception_Text_Eighth") + lower.first);
+              " temp: "+temp);
+              System.out.println(" lower.first: "+lower.first);
               ex.printStackTrace();
               System.exit(-1); 
             }
@@ -1482,7 +1480,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
       for(int k=0; k<levels[i+1].length; k++)
         System.out.print(colBC[k]+" ");
     }
-    System.out.println(Messages.getInstance().getString("HierarchicalBCEngine_PrintMatrices_Text_Second") + i + Messages.getInstance().getString("HierarchicalBCEngine_PrintMatrices_Text_First") + levels.length);
+    System.out.println("\nAt the end i: "+i+" levels.length: "+levels.length);
   }
   
   /**
@@ -1989,7 +1987,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
           last = last.next;
         }
         else {
-          System.err.println(Messages.getInstance().getString("HierarchicalBCEngine_MyList_Add_Error_Text_First")); 
+          System.err.println("Error shouldn't be in here. Check MyList code"); 
           size--;
         }
       size++;
@@ -2005,7 +2003,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
           last = last.next;
         }
         else {
-          System.err.println(Messages.getInstance().getString("HierarchicalBCEngine_MyList_Add_Error_Text_Second")); 
+          System.err.println("Error shouldn't be in here. Check MyList code"); 
           size--; 
         }
       
@@ -2030,7 +2028,7 @@ public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {
       while(temp!=null && temp.n!=i) temp=temp.next;
       
       if(temp==null){ 
-        System.err.println(Messages.getInstance().getString("HierarchicalBCEngine_MyList_Remove_Error_Text_First") + i + Messages.getInstance().getString("HierarchicalBCEngine_MyList_Remove_Error_Text_Second"));
+        System.err.println("element "+i+"not present in the list");
         return;
       }
       

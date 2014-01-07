@@ -1,47 +1,44 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
- *    AbstractAssociator.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Associator.java
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.associations;
 
+import java.io.Serializable;
+
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
-import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
-import java.io.Serializable;
-
 /** 
  * Abstract scheme for learning associations. All schemes for learning
- * associations extend this class
+ * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 5503 $ 
+ * @version $Revision: 8034 $ 
  */
 public abstract class AbstractAssociator 
   implements Cloneable, Associator, Serializable, CapabilitiesHandler, RevisionHandler {
- 
   /** for serialization */
   private static final long serialVersionUID = -3017644543382432070L;
   
@@ -112,10 +109,10 @@ public abstract class AbstractAssociator
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities result = new Capabilities(this);
-    result.enableAll();
+    Capabilities defaultC = new Capabilities(this);
+    defaultC.enableAll();
     
-    return result;
+    return defaultC;
   }
   
   /**
@@ -124,7 +121,7 @@ public abstract class AbstractAssociator
    * @return            the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5503 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
   
   /**
@@ -133,7 +130,7 @@ public abstract class AbstractAssociator
    * @param associator	the associator to run
    * @param options	the commandline options
    */
-  protected static void runAssociator(Associator associator, String[] options) {
+  public static void runAssociator(Associator associator, String[] options) {
     try {
       System.out.println(
 	  AssociatorEvaluation.evaluate(associator, options));

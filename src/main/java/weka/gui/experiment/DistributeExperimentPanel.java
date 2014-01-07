@@ -1,29 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    DistributeExperimentPanel.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
-
-import weka.experiment.Experiment;
-import weka.experiment.RemoteExperiment;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -40,12 +36,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import weka.experiment.Experiment;
+import weka.experiment.RemoteExperiment;
+
 /** 
  * This panel enables an experiment to be distributed to multiple hosts;
  * it also allows remote host names to be specified.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class DistributeExperimentPanel
   extends JPanel {
@@ -63,7 +62,7 @@ public class DistributeExperimentPanel
     new JCheckBox();
 
   /** Popup the HostListPanel */
-  protected JButton m_configureHostNames = new JButton(Messages.getInstance().getString("DistributeExperimentPanel_ConfigureHostNames_JButton_Text"));
+  protected JButton m_configureHostNames = new JButton("Hosts");
 
   /** The host list panel */
   protected HostListPanel m_hostList = new HostListPanel();
@@ -71,30 +70,30 @@ public class DistributeExperimentPanel
   /**
    * Split experiment up by data set.
    */
-  protected JRadioButton m_splitByDataSet = new JRadioButton(Messages.getInstance().getString("DistributeExperimentPanel_SplitByDataSet_JRadioButton_Text"));
+  protected JRadioButton m_splitByDataSet = new JRadioButton("By data set");
 
   /**
    * Split experiment up by run number.
    */
-  protected JRadioButton m_splitByRun = new JRadioButton(Messages.getInstance().getString("DistributeExperimentPanel_SplitByRun_JRadioButton_Text"));
+  protected JRadioButton m_splitByRun = new JRadioButton("By run");
 
   /** Handle radio buttons */
   ActionListener m_radioListener = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	updateRadioLinks();
       }
-  };
-
+    };
+  
   /**
    * Constructor
    */
   public DistributeExperimentPanel() {
     m_enableDistributedExperiment.setSelected(false);
     m_enableDistributedExperiment.
-      setToolTipText(Messages.getInstance().getString("DistributeExperimentPanel_EnableDistributedExperiment_SetToolTipText_Text"));
+      setToolTipText("Allow this experiment to be distributed to remote hosts");
     m_enableDistributedExperiment.setEnabled(false);
     m_configureHostNames.setEnabled(false);
-    m_configureHostNames.setToolTipText(Messages.getInstance().getString("DistributeExperimentPanel_ConfigureHostNames_SetToolTipText_Text"));
+    m_configureHostNames.setToolTipText("Edit the list of remote hosts");
     
     m_enableDistributedExperiment.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -103,7 +102,8 @@ public class DistributeExperimentPanel
 	  m_splitByDataSet.setEnabled(m_enableDistributedExperiment.
 					  isSelected());
 	  m_splitByRun.setEnabled(m_enableDistributedExperiment.
-					  isSelected());	  
+					  isSelected());
+	  
 	}
       });
 
@@ -113,8 +113,8 @@ public class DistributeExperimentPanel
 	}
       });
 
-    m_splitByDataSet.setToolTipText(Messages.getInstance().getString("DistributeExperimentPanel_SetBorder_BorderFactoryCreateTitledBorder_Text"));
-    m_splitByRun.setToolTipText(Messages.getInstance().getString("DistributeExperimentPanel_SplitByRun_SetToolTipText_Text"));
+    m_splitByDataSet.setToolTipText("Distribute experiment by data set");
+    m_splitByRun.setToolTipText("Distribute experiment by run number");
     m_splitByDataSet.setSelected(true);
     m_splitByDataSet.setEnabled(false);
     m_splitByRun.setEnabled(false);
@@ -131,7 +131,7 @@ public class DistributeExperimentPanel
     rbuts.add(m_splitByRun);
 
     setLayout(new BorderLayout());
-    setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("DistributeExperimentPanel_SetBorder_BorderFactoryCreateTitledBorder_Text")));
+    setBorder(BorderFactory.createTitledBorder("Distribute experiment"));
     add(m_enableDistributedExperiment, BorderLayout.WEST);
     add(m_configureHostNames, BorderLayout.CENTER);
     add(rbuts, BorderLayout.SOUTH);
@@ -152,7 +152,8 @@ public class DistributeExperimentPanel
    *
    * @param exp a value of type 'Experiment'
    */
-  public void setExperiment(Experiment exp) {    
+  public void setExperiment(Experiment exp) {
+    
     m_enableDistributedExperiment.setEnabled(true);
     m_Exp = null;
     if (exp instanceof RemoteExperiment) {
@@ -172,7 +173,7 @@ public class DistributeExperimentPanel
    */
   private void popupHostPanel() {
     try {
-      final JFrame jf = new JFrame(Messages.getInstance().getString("DistributeExperimentPanel_PopupHostPanel_Text"));
+      final JFrame jf = new JFrame("Edit host names");
       
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_hostList,
@@ -222,7 +223,7 @@ public class DistributeExperimentPanel
    */
   public static void main(String [] args) {
     try {
-      final JFrame jf = new JFrame(Messages.getInstance().getString("DistributeExperimentPanel_Main_JFrame_Text"));
+      final JFrame jf = new JFrame("DistributeExperiment");
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(new DistributeExperimentPanel(new Experiment()),
 			      BorderLayout.CENTER);

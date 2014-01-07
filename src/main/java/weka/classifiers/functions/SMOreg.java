@@ -1,34 +1,37 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    SMOreg.java
- *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers.functions;
 
-import weka.classifiers.Classifier;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RegOptimizer;
 import weka.classifiers.functions.supportVector.RegSMOImproved;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -37,20 +40,16 @@ import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
-
-import java.util.Enumeration;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -156,10 +155,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 8126 $
+ * @version $Revision: 8123 $
  */
 public class SMOreg 
-  extends Classifier 
+  extends AbstractClassifier 
   implements WeightedInstancesHandler, AdditionalMeasureProducer, 
              TechnicalInformationHandler {
   
@@ -522,7 +521,7 @@ public class SMOreg
     m_Missing = new ReplaceMissingValues();
     m_Missing.setInputFormat(instances);
     instances = Filter.useFilter(instances, m_Missing);
-
+    
     if (getCapabilities().handles(Capability.NUMERIC_ATTRIBUTES)) {
       if (!m_onlyNumeric) {
         m_NominalToBinary = new NominalToBinary();
@@ -806,7 +805,7 @@ public class SMOreg
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 8126 $");
+    return RevisionUtils.extract("$Revision: 8123 $");
   }
   
   /**

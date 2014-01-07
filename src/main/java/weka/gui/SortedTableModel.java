@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * SortedTableModel.java
- * Copyright (C) 2005-2010 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -42,7 +41,7 @@ import weka.core.ClassDiscovery;
  * Represents a TableModel with sorting functionality.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 
 public class SortedTableModel
@@ -140,10 +139,10 @@ public class SortedTableModel
      * @return		the string representation (value + index)
      */
     public String toString() {
-      return Messages.getInstance().getString("SortedTableModel_ToString_Text_First") + m_Value + Messages.getInstance().getString("SortedTableModel_ToString_Text_Second") + m_Index;
+      return "value=" + m_Value + ", index=" + m_Index;
     }
   }
-
+  
   /** the actual table model */
   protected TableModel mModel;
 
@@ -155,7 +154,7 @@ public class SortedTableModel
 
   /** whether sorting is ascending or descending */
   protected boolean mAscending;
-
+  
   /**
    * initializes with no model
    */
@@ -234,7 +233,7 @@ public class SortedTableModel
   /**
    * Returns the actual underlying row the given visible one represents. Useful
    * for retrieving "non-visual" data that is also stored in a TableModel.
-   *
+   * 
    * @param visibleRow	the displayed row to retrieve the original row for
    * @return		the original row
    */
@@ -244,7 +243,7 @@ public class SortedTableModel
     else
       return mIndices[visibleRow];
   }
-
+  
   /**
    * Returns the most specific superclass for all the cell values in the
    * column.
@@ -363,7 +362,7 @@ public class SortedTableModel
          || (getModel().getRowCount() != mIndices.length) ) {
 
       System.out.println(
-          this.getClass().getName() + Messages.getInstance().getString("SortedTableModel_Sort_Text_Firt"));
+          this.getClass().getName() + ": Table model not initialized!");
 
       return;
     }
@@ -372,7 +371,7 @@ public class SortedTableModel
     mSortColumn = columnIndex;
     mAscending  = ascending;
     initializeIndices();
-
+    
     // determine the column type: 0=string/other, 1=comparable
     if (ClassDiscovery.hasInterface(Comparable.class, getColumnClass(mSortColumn)))
       columnType = 1;
@@ -412,10 +411,10 @@ public class SortedTableModel
     initializeIndices();
     if (isSorted())
       sort(mSortColumn, mAscending);
-
+    
     fireTableChanged(e);
   }
-
+  
   /**
    * Adds a mouselistener to the header: left-click on the header sorts in
    * ascending manner, using shift-left-click in descending manner.
@@ -434,8 +433,8 @@ public class SortedTableModel
           TableColumnModel columnModel = tableFinal.getColumnModel();
           int viewColumn = columnModel.getColumnIndexAtX(e.getX());
           int column = tableFinal.convertColumnIndexToModel(viewColumn);
-          if (    e.getButton() == MouseEvent.BUTTON1
-               && e.getClickCount() == 1
+          if (    e.getButton() == MouseEvent.BUTTON1 
+               && e.getClickCount() == 1 
                && !e.isAltDown()
                && column != -1 ) {
             int shiftPressed = e.getModifiers() & InputEvent.SHIFT_MASK;
@@ -444,7 +443,7 @@ public class SortedTableModel
           }
         }
       };
-
+      
       header.addMouseListener(listMouseListener);
     }
   }

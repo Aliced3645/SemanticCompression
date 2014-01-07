@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * ResultSetTableCellRenderer.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +34,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  * DefaultTableCellRenderer.
  *
  * @author     FracPete (fracpete at waikato dot ac dot nz)
- * @version    $Revision: 7059 $
+ * @version    $Revision: 8034 $
  */
 public class ResultSetTableCellRenderer
   extends DefaultTableCellRenderer {
@@ -87,7 +86,7 @@ public class ResultSetTableCellRenderer
       // normal cell
       if (row >= 0) {
         if (model.isNullAt(row, column)) {
-          setToolTipText(Messages.getInstance().getString("ResultSetTableCellRenderer_GetTableCellRendererComponent_SetToolTipText_Text"));
+          setToolTipText("NULL");
           if (isSelected)
             result.setBackground(missingColorSelected);
           else

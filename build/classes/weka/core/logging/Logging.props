@@ -1,7 +1,7 @@
 # Defines the logging used in Weka
 #
 # Author: FracPete (fracpete at waikato dot ac dot nz)
-# Version: $Revision: 4716 $
+# Version: $Revision: 6680 $
 
 # the logging class to use
 Logger=weka.core.logging.OutputLogger
@@ -28,5 +28,6 @@ DateFormat=yyyy-MM-dd HH:mm:ss
 #   %t - the temp directory
 #   %h - the user's home directory
 #   %c - the current directory
+#   %w - WEKA_HOME
 #   %% - gets replaced by a single percentage sign
-LogFile=%h/weka.log
+LogFile=%w/weka.log

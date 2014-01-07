@@ -1,41 +1,26 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    Experiment.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
-
-import weka.core.AdditionalMeasureProducer;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.ConverterUtils;
-import weka.core.xml.KOML;
-import weka.core.xml.XMLOptions;
-import weka.experiment.xml.XMLExperiment;
 
 import java.beans.PropertyDescriptor;
 import java.io.BufferedInputStream;
@@ -52,6 +37,20 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
+
+import weka.core.AdditionalMeasureProducer;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
+import weka.core.xml.KOML;
+import weka.core.xml.XMLOptions;
+import weka.experiment.xml.XMLExperiment;
 
 /**
  * Holds all the necessary configuration information for a standard
@@ -146,7 +145,7 @@ import javax.swing.DefaultListModel;
  * All options after -- will be passed to the result producer. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 5401 $
+ * @version $Revision: 8034 $
  */
 public class Experiment 
   implements Serializable, OptionHandler, RevisionHandler {
@@ -589,13 +588,34 @@ public class Experiment
     }
   }
 
-  /**
-   * Runs all iterations of the experiment, continuing past errors.
-   */
-  public void runExperiment() {
+  
+  public void runExperiment(boolean verbose) {
 
     while (hasMoreIterations()) {
       try {
+        if (verbose) {
+          String current = "Iteration:";
+          if (getUsePropertyIterator()) {
+            int cnum = getCurrentPropertyNumber();
+            String ctype = getPropertyArray().getClass().getComponentType().getName();
+            int lastDot = ctype.lastIndexOf('.');
+            if (lastDot != -1) {
+              ctype = ctype.substring(lastDot + 1);
+            }
+            String cname = " " + ctype + "="
+              + (cnum + 1) + ":"
+              + getPropertyArrayValue(cnum).getClass().getName();
+            current += cname;
+          }
+          String dname = ((File) getDatasets()
+              .elementAt(getCurrentDatasetNumber()))
+              .getName();
+          current += " Dataset=" + dname
+          + " Run=" + (getCurrentRunNumber());
+          
+          System.out.println(current);
+        }
+        
 	nextIteration();
       } catch (Exception ex) {
 	ex.printStackTrace();
@@ -603,6 +623,13 @@ public class Experiment
 	advanceCounters(); // Try to keep plowing through
       }
     }
+  }
+
+  /**
+   * Runs all iterations of the experiment, continuing past errors.
+   */
+  public void runExperiment() {
+    runExperiment(false);
   }
 
   /**
@@ -1133,6 +1160,7 @@ public class Experiment
       String expFile = Utils.getOption('l', args);
       String saveFile = Utils.getOption('s', args);
       boolean runExp = Utils.getFlag('r', args);
+      boolean verbose = Utils.getFlag("verbose", args);
       if (expFile.length() == 0) {
 	exp = new Experiment();
 	try {
@@ -1153,7 +1181,9 @@ public class Experiment
 	    + "-r\n"
 	    + "\tRun experiment (default don't run)\n"
 	    + "-xml <filename | xml-string>\n"
-	    + "\tget options from XML-Data instead from parameters\n"
+	    + "\tget options from XML-Data instead from parameters.\n"
+	    + "-verbose\n"
+	    + "\toutput progress information to std out."
             + "\n";
 	  Enumeration enm = ((OptionHandler)exp).listOptions();
 	  while (enm.hasMoreElements()) {
@@ -1186,7 +1216,7 @@ public class Experiment
 	System.err.println("Initializing...");
 	exp.initialize();
 	System.err.println("Iterating...");
-	exp.runExperiment();
+	exp.runExperiment(verbose);
 	System.err.println("Postprocessing...");
 	exp.postProcess();
       }
@@ -1202,6 +1232,6 @@ public class Experiment
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5401 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 } // Experiment

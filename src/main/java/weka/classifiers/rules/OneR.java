@@ -27,6 +27,7 @@ import java.util.Vector;
 import java.util.ListIterator;
 import java.util.LinkedList;
 
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
@@ -76,10 +77,10 @@ import weka.core.WekaException;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 9918 $ 
+ * @version $Revision: 9920 $ 
 */
 public class OneR 
-  extends Classifier 
+  extends AbstractClassifier 
   implements TechnicalInformationHandler, Sourcable {
     
   /** for serialization */
@@ -222,7 +223,7 @@ public class OneR
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 9918 $");
+      return RevisionUtils.extract("$Revision: 9920 $");
     }
   }
   
@@ -747,7 +748,7 @@ public class OneR
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 9918 $");
+    return RevisionUtils.extract("$Revision: 9920 $");
   }
   
   /**

@@ -28,7 +28,7 @@ import javax.swing.JMenuItem;
  * visualize classifier results in the explorer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 9053 $
+ * @version $Revision: 8034 $
  */
 public interface TreeVisualizePlugin {
 

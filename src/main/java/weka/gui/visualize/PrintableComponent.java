@@ -1,29 +1,25 @@
- /*
-  *    This program is free software; you can redistribute it and/or modify
-  *    it under the terms of the GNU General Public License as published by
-  *    the Free Software Foundation; either version 2 of the License, or
-  *    (at your option) any later version.
-  *
-  *    This program is distributed in the hope that it will be useful,
-  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *    GNU General Public License for more details.
-  *
-  *    You should have received a copy of the GNU General Public License
-  *    along with this program; if not, write to the Free Software
-  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-  */
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
  /*
   *    PrintableComponent.java
-  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
   *
   */
 
 package weka.gui.visualize;
-
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
 
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
@@ -49,6 +45,9 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+
 /** 
  * This class extends the component which is handed over in the constructor
  * by a print dialog.
@@ -59,7 +58,7 @@ import javax.swing.event.DocumentListener;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class PrintableComponent
   implements PrintableHandler {
@@ -83,7 +82,7 @@ public class PrintableComponent
   protected static JCheckBox m_AspectRatioCheckBox;
   
   /** the title of the save dialog. */
-  protected String m_SaveDialogTitle = Messages.getInstance().getString("PrintableComponent_SaveDialogTitle_Text");
+  protected String m_SaveDialogTitle = "Save as...";
   
   /** the x scale factor. */
   protected double m_xScale = 1.0;
@@ -132,7 +131,7 @@ public class PrintableComponent
   /** output if we're in debug mode */
   static {
     if (DEBUG)
-      System.err.println(PrintablePanel.class.getName() + Messages.getInstance().getString("PrintableComponent_Error_Text_First"));
+      System.err.println(PrintablePanel.class.getName() + ": DEBUG ON");
   }
   
   /**
@@ -187,8 +186,10 @@ public class PrintableComponent
       
       retVal = JOptionPane.showConfirmDialog(
           component.getComponent(),
-          Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_First"),
-          Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_Second"),
+            "Some panels enable the user to save the content as JPEG or EPS.\n"
+          + "In order to see which panels support this, a tooltip can be "
+          + "displayed. Enable tooltip?",
+          "ToolTip for Panels...",
           JOptionPane.YES_NO_OPTION);
 
       m_ShowToolTip = (retVal == JOptionPane.YES_OPTION);
@@ -218,26 +219,29 @@ public class PrintableComponent
         // inform user about location of props file and name of property
         JOptionPane.showMessageDialog(
             component.getComponent(), 
-            Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_Third")
+            "You can still manually enable or disable the ToolTip via the following property\n"
             + "    " + PROPERTY_SHOW + "\n"
-            + Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_Fourth")
+            + "in the following file\n"
             + "    " + filename);
       }
       catch (Exception e) {
         JOptionPane.showMessageDialog(
             component.getComponent(), 
-            Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_Fifth")
-            + e.getMessage() + 
-            Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_Sixth")
-            + "    " + PROPERTY_USERASKED + Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_Seventh")
+              "Error saving the props file!\n"
+            + e.getMessage() + "\n\n"
+            + "Note:\n"
+            + "If you want to disable these messages from popping up, place a file\n"
+            + "called 'Visualize.props' either in your home directory or in the directory\n"
+            + "you're starting Weka from and add the following lines:\n"
+            + "    " + PROPERTY_USERASKED + "=true\n"
             + "    " + PROPERTY_SHOW + "=" + m_ShowToolTip,
-            Messages.getInstance().getString("PrintableComponent_GetToolTipText_JOptionPaneShowConfirmDialog_Text_Eighth"),
+            "Error...",
             JOptionPane.ERROR_MESSAGE);
       }
     }
     
     if (m_ShowToolTip)
-      result = Messages.getInstance().getString("PrintableComponent_GetToolTipText_Result_Text");
+      result = "Click left mouse button while holding <alt> and <shift> to display a save dialog.";
     else
       result = null;
 
@@ -271,7 +275,7 @@ public class PrintableComponent
     accessory.revalidate();
     m_FileChooserPanel.setAccessory(accessory);
  
-    m_CustomDimensionsCheckBox = new JCheckBox(Messages.getInstance().getString("PrintableComponent_InitFileChooser_CustomDimensionsCheckBox_JCheckBox_Text"));
+    m_CustomDimensionsCheckBox = new JCheckBox("Use custom dimensions");
     m_CustomDimensionsCheckBox.setBounds(14, 7, 200, 21);
     m_CustomDimensionsCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
@@ -312,7 +316,7 @@ public class PrintableComponent
 	updateDimensions(m_CustomWidthText);
       }
     });
-    label = new JLabel(Messages.getInstance().getString("PrintableComponent_InitFileChooser_Label_Jlabel_Text_First"));
+    label = new JLabel("Width");
     label.setLabelFor(m_CustomWidthText);
     label.setDisplayedMnemonic('W');
     label.setBounds(14, 35, 50, 21);
@@ -336,14 +340,14 @@ public class PrintableComponent
 	updateDimensions(m_CustomHeightText);
       }
     });
-    label = new JLabel(Messages.getInstance().getString("PrintableComponent_InitFileChooser_Label_Jlabel_Text_Second"));
+    label = new JLabel("Height");
     label.setLabelFor(m_CustomHeightText);
     label.setDisplayedMnemonic('H');
     label.setBounds(14, 63, 50, 21);
     accessory.add(label);
     accessory.add(m_CustomHeightText);
     
-    m_AspectRatioCheckBox = new JCheckBox(Messages.getInstance().getString("PrintableComponent_InitFileChooser_AspectRatioCheckBox_JCheckBox_Text"));
+    m_AspectRatioCheckBox = new JCheckBox("Keep aspect ratio");
     m_AspectRatioCheckBox.setBounds(14, 91, 200, 21);
     m_AspectRatioCheckBox.setEnabled(false);
     m_AspectRatioCheckBox.setSelected(true);
@@ -370,7 +374,7 @@ public class PrintableComponent
         m_FileChooserPanel.addChoosableFileFilter(
             new JComponentWriterFileFilter(
         	writer.getExtension(), 
-        	writer.getDescription() + Messages.getInstance().getString("PrintableComponent_InitFileChooser_JComponentWriterFileFilter_Text_First") + writer.getExtension() + Messages.getInstance().getString("PrintableComponent_InitFileChooser_JComponentWriterFileFilter_Text_Second"), 
+        	writer.getDescription() + " (*" + writer.getExtension() + ")", 
         	writer));
       }
       catch (Exception e) {
@@ -492,7 +496,7 @@ public class PrintableComponent
     m_xScale = x;
     m_yScale = y;
     if (DEBUG)
-      System.err.println(Messages.getInstance().getString("PrintableComponent_SetScale_Error_Text_First") + x + Messages.getInstance().getString("PrintableComponent_SetScale_Error_Text_Second") + y);
+      System.err.println("x = " + x + ", y = " + y);
   }
   
   /**

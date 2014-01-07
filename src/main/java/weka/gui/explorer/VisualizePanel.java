@@ -1,37 +1,36 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * VisualizePanel.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.explorer;
+
+import java.awt.BorderLayout;
 
 import weka.core.Instances;
 import weka.gui.explorer.Explorer.ExplorerPanel;
 import weka.gui.visualize.MatrixPanel;
 
-import java.awt.BorderLayout;
-
 /**
  * A slightly extended MatrixPanel for better support in the Explorer.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  * @see MatrixPanel
  */
 public class VisualizePanel
@@ -69,7 +68,7 @@ public class VisualizePanel
    * @return 		the title of this tab
    */
   public String getTabTitle() {
-    return Messages.getInstance().getString("VisualizePanel_GetTabTitle_Text");
+    return "Visualize";
   }
   
   /**
@@ -78,7 +77,7 @@ public class VisualizePanel
    * @return 		the tooltip of this tab
    */
   public String getTabTitleToolTip() {
-    return Messages.getInstance().getString("VisualizePanel_GetTabTitleToolTip_Text");
+    return "Explore the data";
   }
 
   /**
@@ -90,7 +89,7 @@ public class VisualizePanel
 
     try {
       final javax.swing.JFrame jf =
-	new javax.swing.JFrame(Messages.getInstance().getString("VisualizePanel_Main_JFrame_Text"));
+	new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -104,7 +103,7 @@ public class VisualizePanel
       jf.setSize(800, 600);
       jf.setVisible(true);
       if (args.length == 1) {
-	System.err.println(Messages.getInstance().getString("VisualizePanel_Main_Error_Text") + args[0]);
+	System.err.println("Loading instances from " + args[0]);
 	java.io.Reader r = new java.io.BufferedReader(
 			   new java.io.FileReader(args[0]));
 	Instances i = new Instances(r);

@@ -6,7 +6,7 @@
 # url:     http://www.sqlite.org/
 # jdbc:    http://www.zentus.com/sqlitejdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 5836 $
+# version: $Revision: 5837 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.sqlite.JDBC

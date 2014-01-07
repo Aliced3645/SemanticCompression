@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    ListSelectorDialog.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -40,31 +39,31 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 
-/**
+/** 
  * A dialog to present the user with a list of items, that the user can
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 7899 $
+ * @version $Revision: 8034 $
  */
 public class ListSelectorDialog
   extends JDialog {
 
   /** for serialization */
   private static final long serialVersionUID = 906147926840288895L;
-
+  
   /** Click to choose the currently selected property */
-  protected JButton m_SelectBut = new JButton(Messages.getInstance().getString("ListSelectorDialog_SelectBut_JButton_Text"));
+  protected JButton m_SelectBut = new JButton("Select");
 
   /** Click to cancel the property selection */
-  protected JButton m_CancelBut = new JButton(Messages.getInstance().getString("ListSelectorDialog_CancelBut_JButton_Text"));
+  protected JButton m_CancelBut = new JButton("Cancel");
 
   /** Click to enter a regex pattern for selection */
-  protected JButton m_PatternBut = new JButton(Messages.getInstance().getString("ListSelectorDialog_PatternBut_JButton_Text"));
+  protected JButton m_PatternBut = new JButton("Pattern");
 
   /** The list component */
   protected JList m_List;
-
+  
   /** Whether the selection was made or cancelled */
   protected int m_Result;
 
@@ -76,7 +75,7 @@ public class ListSelectorDialog
 
   /** The current regular expression. */
   protected String m_PatternRegEx = ".*";
-
+  
   /**
    * Create the list selection dialog.
    *
@@ -84,8 +83,8 @@ public class ListSelectorDialog
    * @param userList the JList component the user will select from
    */
   public ListSelectorDialog(Frame parentFrame, JList userList) {
-
-    super(parentFrame, Messages.getInstance().getString("ListSelectorDialog_Text"), ModalityType.DOCUMENT_MODAL);
+    
+    super(parentFrame, "Select items", ModalityType.DOCUMENT_MODAL);
     m_List = userList;
     m_CancelBut.setMnemonic('C');
     m_CancelBut.addActionListener(new ActionListener() {
@@ -107,7 +106,7 @@ public class ListSelectorDialog
         selectPattern();
       }
     });
-
+    
     Container c = getContentPane();
     c.setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Select a property"));
@@ -121,14 +120,14 @@ public class ListSelectorDialog
     c.add(new JScrollPane(m_List), BorderLayout.CENTER);
 
     getRootPane().setDefaultButton(m_SelectBut);
-
+    
     pack();
 
     // make sure, it's not bigger than the screen
     Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-    int width  = getWidth() > screen.getWidth()
+    int width  = getWidth() > screen.getWidth() 
                     ? (int) screen.getWidth() : getWidth();
-    int height = getHeight() > screen.getHeight()
+    int height = getHeight() > screen.getHeight() 
                     ? (int) screen.getHeight() : getHeight();
     setSize(width, height);
   }
@@ -156,7 +155,7 @@ public class ListSelectorDialog
   protected void selectPattern() {
     String pattern = JOptionPane.showInputDialog(
                         m_PatternBut.getParent(),
-                        Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Pattern_JOptionPaneShowInputDialog_Text"),
+                        "Enter a Perl regular expression ('.*' for all)",
                         m_PatternRegEx);
     if (pattern != null) {
       try {
@@ -172,13 +171,14 @@ public class ListSelectorDialog
       catch (Exception ex) {
         JOptionPane.showMessageDialog(
           m_PatternBut.getParent(),
-          Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Exception_JOptionPaneShowInputDialog_Text_First") + pattern + Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Exception_JOptionPaneShowInputDialog_Text_Second") + ex,
-          Messages.getInstance().getString("ListSelectorDialog_SelectPattern_Exception_JOptionPaneShowInputDialog_Text_Third"),
+          "'" + pattern + "' is not a valid Perl regular expression!\n" 
+          + "Error: " + ex, 
+          "Error in Pattern...", 
           JOptionPane.ERROR_MESSAGE);
       }
     }
   }
-
+  
   /**
    * Tests out the list selector from the command line.
    *
@@ -187,24 +187,24 @@ public class ListSelectorDialog
   public static void main(String [] args) {
 
     try {
-      DefaultListModel lm = new DefaultListModel();
-      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_First"));
-      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Second"));
-      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Third"));
-      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Fourth"));
-      lm.addElement(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_AddElement_Text_Fifth"));
+      DefaultListModel lm = new DefaultListModel();      
+      lm.addElement("one");
+      lm.addElement("two");
+      lm.addElement("three");
+      lm.addElement("four");
+      lm.addElement("five");
       JList jl = new JList(lm);
       final ListSelectorDialog jd = new ListSelectorDialog(null, jl);
       int result = jd.showDialog();
       if (result == ListSelectorDialog.APPROVE_OPTION) {
-	System.err.println(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_Error_Text_First"));
+	System.err.println("Fields Selected");
 	int [] selected = jl.getSelectedIndices();
 	for (int i = 0; i < selected.length; i++) {
 	  System.err.println("" + selected[i]
 			     + " " + lm.elementAt(selected[i]));
 	}
       } else {
-	System.err.println(Messages.getInstance().getString("ListSelectorDialog_Main_DefaultListModel_Error_Text_Second"));
+	System.err.println("Cancelled");
       }
       System.exit(0);
     } catch (Exception ex) {

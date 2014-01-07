@@ -1,41 +1,42 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    ScatterPlotMatrix.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.beans;
 
+import java.awt.BorderLayout;
+
+import javax.swing.Icon;
+
 import weka.core.Instances;
 import weka.gui.visualize.MatrixPanel;
-
-import java.awt.BorderLayout;
 
 /**
  * Bean that encapsulates weka.gui.visualize.MatrixPanel for displaying a
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class ScatterPlotMatrix
-  extends DataVisualizer {
+  extends DataVisualizer implements KnowledgeFlowApp.KFPerspective {
 
   /** for serialization */
   private static final long serialVersionUID = -657856527563507491L;
@@ -56,7 +57,8 @@ public class ScatterPlotMatrix
    * @return a <code>String</code> value
    */
   public String globalInfo() {
-    return Messages.getInstance().getString("ScatterPlotMatrix_GlobalInfo_Text");
+    return "Visualize incoming data/training/test sets in a scatter "
+      +"plot matrix.";
   }
 
   protected void appearanceDesign() {
@@ -92,10 +94,93 @@ public class ScatterPlotMatrix
    */
   public void setInstances(Instances inst) throws Exception {
     if (m_design) {
-      throw new Exception(Messages.getInstance().getString("ScatterPlotMatrix_SetInstances_Exception_Text"));
+      throw new Exception("This method is not to be used during design "
+			  +"time. It is meant to be used if this "
+			  +"bean is being used programatically as as "
+			  +"stand alone component.");
     }
     m_visualizeDataSet = inst;
     m_matrixPanel.setInstances(m_visualizeDataSet);
+  }
+  
+  /**
+   * Returns true if this perspective accepts instances
+   * 
+   * @return true if this perspective can accept instances
+   */
+  public boolean acceptsInstances() {
+    return true;
+  }
+  
+  /**
+   * Get the title of this perspective
+   * 
+   * @return the title of this perspective
+   */
+  public String getPerspectiveTitle() {
+    return "Scatter plot matrix";
+  }
+  
+  /**
+   * Get the tool tip text for this perspective.
+   * 
+   * @return the tool tip text for this perspective
+   */
+  public String getPerspectiveTipText() {
+    return "Scatter plot matrix";
+  }
+  
+  /**
+   * Get the icon for this perspective.
+   * 
+   * @return the Icon for this perspective (or null if the
+   * perspective does not have an icon)
+   */
+  public Icon getPerspectiveIcon() {
+    java.awt.Image pic = null;
+    java.net.URL imageURL = this.getClass().getClassLoader().
+      getResource("weka/gui/beans/icons/application_view_tile.png");
+
+    if (imageURL == null) {
+    } else {
+      pic = java.awt.Toolkit.getDefaultToolkit().
+        getImage(imageURL);
+    }
+    return new javax.swing.ImageIcon(pic);
+  }
+  
+  /**
+   * Set active status of this perspective. True indicates
+   * that this perspective is the visible active perspective
+   * in the KnowledgeFlow
+   * 
+   * @param active true if this perspective is the active one
+   */
+  public void setActive(boolean active) {
+    
+  }
+  
+  /**
+   * Set whether this perspective is "loaded" - i.e. whether
+   * or not the user has opted to have it available in the
+   * perspective toolbar. The perspective can make the decision
+   * as to allocating or freeing resources on the basis of this.
+   * 
+   * @param loaded true if the perspective is available in
+   * the perspective toolbar of the KnowledgeFlow
+   */
+  public void setLoaded(boolean loaded) {
+    
+  }
+  
+  /**
+   * Set a reference to the main KnowledgeFlow perspective - i.e.
+   * the perspective that manages flow layouts.
+   * 
+   * @param main the main KnowledgeFlow perspective.
+   */
+  public void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main) {
+    
   }
 
   /**
@@ -114,7 +199,7 @@ public class ScatterPlotMatrix
 	  vis.setInstances(m_visualizeDataSet);
 
 	  final javax.swing.JFrame jf = 
-	    new javax.swing.JFrame(Messages.getInstance().getString("ScatterPlotMatrix_PerformRequest_Jf_JFrame_Text"));
+	    new javax.swing.JFrame("Visualize");
 	  jf.setSize(800,600);
 	  jf.getContentPane().setLayout(new BorderLayout());
 	  jf.getContentPane().add(vis, BorderLayout.CENTER);
@@ -135,14 +220,14 @@ public class ScatterPlotMatrix
       }
     } else {
       throw new IllegalArgumentException(request
-					 + Messages.getInstance().getString("ScatterPlotMatrix_PerformRequest_IllegalArgumentException_Text"));
+					 + " not supported (ScatterPlotMatrix)");
     }
   }
 
   public static void main(String [] args) {
     try {
       if (args.length != 1) {
-	System.err.println(Messages.getInstance().getString("ScatterPlotMatrix_Main_Error_Text"));
+	System.err.println("Usage: ScatterPlotMatrix <dataset>");
 	System.exit(1);
       }
       java.io.Reader r = new java.io.BufferedReader(

@@ -1,33 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *   BoundaryPanel.java
- *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
-
-import weka.classifiers.Classifier;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.gui.visualize.JPEGWriter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -59,13 +51,21 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.core.DenseInstance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
 /**
  * BoundaryPanel. A class to handle the plotting operations
  * associated with generating a 2D picture of a classifier's decision
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 7883 $
+ * @version $Revision: 8034 $
  * @since 1.0
  * @see JPanel
  */
@@ -165,13 +165,16 @@ public class BoundaryPanel
 	return null;
       }
       
-      String pVec = Messages.getInstance().getString("BoundaryPanel_GetToolTipText_Text_First") + Utils.doubleToString(convertFromPanelX((double)event.getX()), 2) 
-      				+ Messages.getInstance().getString("BoundaryPanel_GetToolTipText_Text_Second") + Utils.doubleToString(convertFromPanelY((double)event.getY()), 2)
-      				+ Messages.getInstance().getString("BoundaryPanel_GetToolTipText_Text_Third");
-      
+      String pVec = "(X: "
+	+Utils.doubleToString(convertFromPanelX((double)event.getX()), 2)
+	+" Y: "
+	+Utils.doubleToString(convertFromPanelY((double)event.getY()), 2)+") ";
       // construct a string holding the probability vector
       for (int i = 0; i < m_trainingData.classAttribute().numValues(); i++) {
-    	  pVec += Utils.doubleToString(m_probabilityCache[event.getY()][event.getX()][i], 3)+" ";
+	pVec += 
+	  Utils.
+	  doubleToString(m_probabilityCache[event.getY()][event.getX()][i],
+			 3)+" ";
       }
       return pVec;
     }
@@ -317,7 +320,7 @@ public class BoundaryPanel
 		Instance inst = m_trainingData.instance(i);
 		double x = inst.value(m_xAttribute);
 		double y = inst.value(m_yAttribute);
-		if (!Instance.isMissingValue(x) && !Instance.isMissingValue(y)) {
+		if (!Utils.isMissingValue(x) && !Utils.isMissingValue(y)) {
 			if (x < m_minX) {
 			m_minX = x;
 			}
@@ -402,17 +405,18 @@ public class BoundaryPanel
 
     m_stopReplotting = true;
     if (m_trainingData == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_NoTrainingDataSet_Text"));
+      throw new Exception("No training data set (BoundaryPanel)");
     }
     if (m_classifier == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_NoClassifierSet_Text"));
+      throw new Exception("No classifier set (BoundaryPanel)");
     }
     if (m_dataGenerator == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_NoDataGeneratorSet_Text"));
+      throw new Exception("No data generator set (BoundaryPanel)");
     }
     if (m_trainingData.attribute(m_xAttribute).isNominal() || 
 	m_trainingData.attribute(m_yAttribute).isNominal()) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_Start_Error_VisualizationDimensionsMustBeNumeric_Text"));
+      throw new Exception("Visualization dimensions must be numeric "
+			  +"(BoundaryPanel)");
     }
     
     computeMinMaxAtts();
@@ -455,7 +459,7 @@ public class BoundaryPanel
         // generate samples
         m_weightingAttsValues = new double [m_attsToWeightOn.length];
         m_vals = new double[m_trainingData.numAttributes()];
-        m_predInst = new Instance(1.0, m_vals);
+        m_predInst = new DenseInstance(1.0, m_vals);
         m_predInst.setDataset(m_trainingData);
 
 	
@@ -541,7 +545,7 @@ public class BoundaryPanel
 	      
       } catch (Exception ex) {
         ex.printStackTrace();
-	JOptionPane.showMessageDialog(null, Messages.getInstance().getString("BoundaryPanel_PlotThread_JOptionPaneShowMessageDialog_Text_Front") + ex.getMessage() + Messages.getInstance().getString("BoundaryPanel_PlotThread_JOptionPaneShowMessageDialog_Text_End"));
+	JOptionPane.showMessageDialog(null,"Error while plotting: \"" + ex.getMessage() + "\"");
       } finally {
         m_plotThread = null;
         // notify any listeners that we are finished
@@ -773,7 +777,7 @@ public class BoundaryPanel
 
     m_trainingData = trainingData;
     if (m_trainingData.classIndex() < 0) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetTrainingData_Error_Text"));
+      throw new Exception("No class attribute set (BoundaryPanel)");
     }
     m_classIndex = m_trainingData.classIndex();
   }
@@ -784,7 +788,7 @@ public class BoundaryPanel
   	
   	if (m_trainingData == null) {
 		//TODO
-		System.err.println(Messages.getInstance().getString("BoundaryPanel_AddTrainingInstance_Error_Text"));
+		System.err.println("Trying to add to a null training set (BoundaryPanel)");
 	}
   	
   	m_trainingData.add(instance);
@@ -834,14 +838,15 @@ public class BoundaryPanel
    */
   public void setXAttribute(int xatt) throws Exception {
     if (m_trainingData == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetXAttribute_Error_Text_First"));
+      throw new Exception("No training data set (BoundaryPanel)");
     }
     if (xatt < 0 || 
         xatt > m_trainingData.numAttributes()) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetXAttribute_Error_Text_Second"));
+      throw new Exception("X attribute out of range (BoundaryPanel)");
     }
     if (m_trainingData.attribute(xatt).isNominal()) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetXAttribute_Error_Text_Third"));
+      throw new Exception("Visualization dimensions must be numeric "
+                          +"(BoundaryPanel)");
     }
     /*if (m_trainingData.numDistinctValues(xatt) < 2) {
       throw new Exception("Too few distinct values for X attribute "
@@ -858,14 +863,15 @@ public class BoundaryPanel
    */
   public void setYAttribute(int yatt) throws Exception {
     if (m_trainingData == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetYAttribute_Error_Text_First"));
+      throw new Exception("No training data set (BoundaryPanel)");
     }
     if (yatt < 0 || 
         yatt > m_trainingData.numAttributes()) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetYAttribute_Error_Text_Second"));
+      throw new Exception("X attribute out of range (BoundaryPanel)");
     }
     if (m_trainingData.attribute(yatt).isNominal()) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanel_SetYAttribute_Error_Text_Third"));
+      throw new Exception("Visualization dimensions must be numeric "
+                          +"(BoundaryPanel)");
     }
     /*if (m_trainingData.numDistinctValues(yatt) < 2) {
       throw new Exception("Too few distinct values for Y attribute "
@@ -1004,7 +1010,7 @@ public class BoundaryPanel
       if (iter.hasNext())
 	writer = (ImageWriter) iter.next();
       else
-	throw new Exception(Messages.getInstance().getString("BoundaryPanel_SaveImage_Error_Text"));
+	throw new Exception("No JPEG writer available!");
 
       // prepare output file
       ios = ImageIO.createImageOutputStream(new File(fileName));
@@ -1042,7 +1048,7 @@ public class BoundaryPanel
 	double y = convertFromPanelY(mouseY);
 	
 	//build the training instance
-	Instance newInstance = new Instance(m_trainingData.numAttributes());
+	Instance newInstance = new DenseInstance(m_trainingData.numAttributes());
 	for (int i = 0; i < newInstance.numAttributes(); i++) {
 		if (i == classAttIndex) {
 			newInstance.setValue(i,classValue);
@@ -1150,14 +1156,19 @@ public class BoundaryPanel
   public static void main (String [] args) {
     try {
       if (args.length < 8) {
-	System.err.println(Messages.getInstance().getString("BoundaryPanel_Main_Error_Text_First"));
+	System.err.println("Usage : BoundaryPanel <dataset> "
+			   +"<class col> <xAtt> <yAtt> "
+			   +"<base> <# loc/pixel> <kernel bandwidth> "
+			   +"<display width> "
+			   +"<display height> <classifier "
+			   +"[classifier options]>");
 	System.exit(1);
       }
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame(Messages.getInstance().getString("BoundaryPanel_Main_Title_JFrame_Text"));
+	new javax.swing.JFrame("Weka classification boundary visualizer");
       jf.getContentPane().setLayout(new BorderLayout());
 
-      System.err.println(Messages.getInstance().getString("BoundaryPanel_Main_Error_Text_Second") + args[0]);
+      System.err.println("Loading instances from : "+args[0]);
       java.io.Reader r = new java.io.BufferedReader(
 			 new java.io.FileReader(args[0]));
       final Instances i = new Instances(r);
@@ -1208,7 +1219,7 @@ public class BoundaryPanel
 	  argsR[j-10] = args[j];
 	}
       }
-      Classifier c = Classifier.forName(args[9], argsR);
+      Classifier c = AbstractClassifier.forName(args[9], argsR);
       KDDataGenerator dataGen = new KDDataGenerator();
       dataGen.setKernelBandwidth(bandWidth);
       bv.setDataGenerator(dataGen);
@@ -1226,7 +1237,7 @@ public class BoundaryPanel
 	FastVector colors = (FastVector)ois.readObject();
 	bv.setColors(colors);	
       } catch (Exception ex) {
-	System.err.println(Messages.getInstance().getString("BoundaryPanel_Main_Error_Text_Third"));
+	System.err.println("No color map file");
       }
       bv.start();
     } catch (Exception ex) {

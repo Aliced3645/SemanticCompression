@@ -1,26 +1,29 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * SnowballStemmer.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.stemmers;
+
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import weka.core.ClassDiscovery;
 import weka.core.Option;
@@ -28,10 +31,6 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.gui.GenericObjectEditor;
-
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -58,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 5836 $
+ * @version   $Revision: 8034 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -79,7 +78,7 @@ public class SnowballStemmer
   protected static boolean m_Present = false;
 
   /** contains the all the found stemmers (language names). */
-  protected static Vector m_Stemmers;
+  protected static Vector<String> m_Stemmers;
 
   /** the current stemmer. */
   protected Object m_Stemmer;
@@ -159,9 +158,9 @@ public class SnowballStemmer
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector        result;
+    Vector<Option>        result;
     
-    result = new Vector();
+    result = new Vector<Option>();
     
     result.addElement(new Option(
         "\tThe name of the snowball stemmer (default 'porter').\n"
@@ -206,9 +205,9 @@ public class SnowballStemmer
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
+    Vector<String>        result;
     
-    result  = new Vector();
+    result  = new Vector<String>();
     
     if (getStemmer() != null) {
       result.add("-S");
@@ -249,7 +248,7 @@ public class SnowballStemmer
     if (m_Stemmers != null)
       return;
     
-    m_Stemmers = new Vector();
+    m_Stemmers = new Vector<String>();
     
     if (!m_Present)
       return;
@@ -338,7 +337,7 @@ public class SnowballStemmer
    * @param name        the name of the stemmer, e.g., "porter"
    */
   public void setStemmer(String name) {
-    Class       snowballClass;
+    Class<?>       snowballClass;
     Class[]     argClasses;
     
     initStemmers();
@@ -444,7 +443,7 @@ public class SnowballStemmer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5836 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 
   /**

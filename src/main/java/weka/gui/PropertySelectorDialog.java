@@ -1,28 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    PropertySelectorDialog.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
-
-import weka.experiment.PropertyNode;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -48,24 +45,26 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-/**
+import weka.experiment.PropertyNode;
+
+/** 
  * Allows the user to select any (supported) property of an object, including
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 7899 $
+ * @version $Revision: 8034 $
  */
 public class PropertySelectorDialog
   extends JDialog {
 
   /** for serialization */
   private static final long serialVersionUID = -3155058124137930518L;
-
+  
   /** Click to choose the currently selected property */
-  protected JButton m_SelectBut = new JButton(Messages.getInstance().getString("PropertySelectorDialog_SelectBut_JButton_Text"));
+  protected JButton m_SelectBut = new JButton("Select");
 
   /** Click to cancel the property selection */
-  protected JButton m_CancelBut = new JButton(Messages.getInstance().getString("PropertySelectorDialog_CancelBut_JButton_Text"));
+  protected JButton m_CancelBut = new JButton("Cancel");
 
   /** The root of the property tree */
   protected DefaultMutableTreeNode m_Root;
@@ -87,7 +86,7 @@ public class PropertySelectorDialog
 
   /** Signifies a cancelled property selection */
   public static final int CANCEL_OPTION = 1;
-
+  
   /**
    * Create the property selection dialog.
    *
@@ -95,8 +94,8 @@ public class PropertySelectorDialog
    * @param rootObject the object containing properties to select from
    */
   public PropertySelectorDialog(Frame parentFrame, Object rootObject) {
-
-    super(parentFrame, Messages.getInstance().getString("PropertySelectorDialog_Text"), ModalityType.DOCUMENT_MODAL);
+    
+    super(parentFrame, "Select a property", ModalityType.DOCUMENT_MODAL);
     m_CancelBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_Result = CANCEL_OPTION;
@@ -116,7 +115,7 @@ public class PropertySelectorDialog
 	  } else {
 	    m_Result = APPROVE_OPTION;
 	  }
-	}
+	} 
 	setVisible(false);
       }
     });
@@ -124,7 +123,7 @@ public class PropertySelectorDialog
     m_Root = new DefaultMutableTreeNode(
 	     new PropertyNode(m_RootObject));
     createNodes(m_Root);
-
+    
     Container c = getContentPane();
     c.setLayout(new BorderLayout());
     //    setBorder(BorderFactory.createTitledBorder("Select a property"));
@@ -182,7 +181,7 @@ public class PropertySelectorDialog
       BeanInfo bi = Introspector.getBeanInfo(localObject.getClass());
       localProperties = bi.getPropertyDescriptors();
     } catch (IntrospectionException ex) {
-      System.err.println(Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_First"));
+      System.err.println("PropertySelectorDialog: Couldn't introspect");
       return;
     }
 
@@ -219,14 +218,14 @@ public class PropertySelectorDialog
 	  continue;
 	}
       } catch (InvocationTargetException ex) {
-	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Second") + name
-			   + Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Third")
+	System.err.println("Skipping property " + name
+			   + " ; exception on target: "
 			   + ex.getTargetException());
 	ex.getTargetException().printStackTrace();
 	continue;
       } catch (Exception ex) {
-	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Fourth") + name
-			   + Messages.getInstance().getString("PropertySelectorDialog_CreateNodes_Error_Text_Fifth") + ex);
+	System.err.println("Skipping property " + name
+			   + " ; exception: " + ex);
 	ex.printStackTrace();
 	continue;
       }
@@ -240,7 +239,7 @@ public class PropertySelectorDialog
     }
   }
 
-
+  
   /**
    * Tests out the property selector from the command line.
    *
@@ -256,7 +255,7 @@ public class PropertySelectorDialog
       final PropertySelectorDialog jd = new PropertySelectorDialog(null, rp);
       int result = jd.showDialog();
       if (result == PropertySelectorDialog.APPROVE_OPTION) {
-	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_Main_Error_Text_First"));
+	System.err.println("Property Selected");
 	PropertyNode [] path = jd.getPath();
 	for (int i = 0; i < path.length; i++) {
 	  PropertyNode pn = path[i];
@@ -264,7 +263,7 @@ public class PropertySelectorDialog
 			     + " " + pn.value.toString());
 	}
       } else {
-	System.err.println(Messages.getInstance().getString("PropertySelectorDialog_Main_Error_Text_Second"));
+	System.err.println("Cancelled");
       }
       System.exit(0);
     } catch (Exception ex) {

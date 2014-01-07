@@ -1,35 +1,35 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *   RemoteBoundaryVisualizerSubTask.java
- *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
 
+import java.util.Random;
+
 import weka.classifiers.Classifier;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.experiment.Task;
 import weka.experiment.TaskStatusInfo;
-
-import java.util.Random;
 
 /**
  * Class that encapsulates a sub task for distributed boundary
@@ -37,7 +37,7 @@ import java.util.Random;
  * in one row of the visualization.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  * @since 1.0
  * @see Task
  */
@@ -240,17 +240,18 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
       m_numOfSamplesPerGenerator = 
 	(int)Math.pow(m_samplesBase, m_trainingData.numAttributes()-3);
       if (m_trainingData == null) {
-	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_TrainingData_Error_Text_First"));
+	throw new Exception("No training data set (BoundaryPanel)");
       }
       if (m_classifier == null) {
-	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_Classifier_Error_Text"));
+	throw new Exception("No classifier set (BoundaryPanel)");
       }
       if (m_dataGenerator == null) {
-	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_DataGenerator_Error_Text"));
+	throw new Exception("No data generator set (BoundaryPanel)");
       }
       if (m_trainingData.attribute(m_xAttribute).isNominal() || 
 	m_trainingData.attribute(m_yAttribute).isNominal()) {
-	throw new Exception(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_TrainingData_Error_Text_Second"));
+	throw new Exception("Visualization dimensions must be numeric "
+			    +"(RemoteBoundaryVisualizerSubTask)");
       }
       
       m_attsToWeightOn = new boolean[m_trainingData.numAttributes()];
@@ -260,10 +261,10 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
       // generate samples
       m_weightingAttsValues = new double [m_attsToWeightOn.length];
       m_vals = new double[m_trainingData.numAttributes()];
-      m_predInst = new Instance(1.0, m_vals);
+      m_predInst = new DenseInstance(1.0, m_vals);
       m_predInst.setDataset(m_trainingData);
 
-      System.err.println(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_Error_Text") + m_rowNumber);
+      System.err.println("Executing row number "+m_rowNumber);
       for (int j = 0; j < m_panelWidth; j++) {
 	double [] preds = calculateRegionProbs(j, m_rowNumber);
 	m_result.setLocationProbs(j, preds);
@@ -272,14 +273,14 @@ public class RemoteBoundaryVisualizerSubTask implements Task {
       }
     } catch (Exception ex) {
       m_status.setExecutionStatus(TaskStatusInfo.FAILED);
-      m_status.setStatusMessage(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_Front_First") + m_rowNumber + Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_End_First"));
+      m_status.setStatusMessage("Row "+m_rowNumber+" failed.");
       System.err.print(ex);
       return;
     }
 
     // finished
     m_status.setExecutionStatus(TaskStatusInfo.FINISHED);
-    m_status.setStatusMessage(Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_Front") + m_rowNumber + Messages.getInstance().getString("RemoteBoundaryVisualizerSubTask_Execute_StatusMessage_Text_End"));
+    m_status.setStatusMessage("Row "+m_rowNumber+" completed successfully.");
   }
 
 

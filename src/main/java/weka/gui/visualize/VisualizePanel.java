@@ -1,33 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    VisualizePanel.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.visualize;
-
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -67,6 +59,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
+
 /** 
  * This panel allows the user to visualize a dataset (and if provided) a
  * classifier's/clusterer's predictions in two dimensions.
@@ -86,7 +85,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 7406 $
+ * @version $Revision: 8034 $
  */
 public class VisualizePanel
   extends PrintablePanel {
@@ -335,8 +334,8 @@ public class VisualizePanel
 		    }
 		    m_shapes.addElement(m_shapePoints);
 
-		    m_submit.setText(Messages.getInstance().getString("VisualizePanel_PlotPanel_MouseClicked_Submit_SetText_Text_First"));
-		    m_submit.setActionCommand(Messages.getInstance().getString("VisualizePanel_PlotPanel_MouseClicked_Submit_SetActionCommand_Text_First"));
+		    m_submit.setText("Submit");
+		    m_submit.setActionCommand("Submit");
 		    
 		    m_submit.setEnabled(true);
 		  }
@@ -356,8 +355,8 @@ public class VisualizePanel
 		    }
 		    m_shapes.addElement(m_shapePoints);
 			   
-		    m_submit.setText(Messages.getInstance().getString("VisualizePanel_PlotPanel_MouseClicked_Submit_SetText_Text_Second"));
-		    m_submit.setActionCommand(Messages.getInstance().getString("VisualizePanel_PlotPanel_MouseClicked_Submit_SetActionCommand_Text_Second"));
+		    m_submit.setText("Submit");
+		    m_submit.setActionCommand("Submit");
 		    
 		    m_submit.setEnabled(true);
 		  }
@@ -459,8 +458,8 @@ public class VisualizePanel
 		    
 		    m_shapes.addElement(m_shapePoints);
 		    
-		    m_submit.setText(Messages.getInstance().getString("VisualizePanel_PlotPanel_MouseReleased_Submit_SetText_Text"));
-		    m_submit.setActionCommand(Messages.getInstance().getString("VisualizePanel_PlotPanel_MouseReleased_Submit_SetActionCommand_Text"));
+		    m_submit.setText("Submit");
+		    m_submit.setActionCommand("Submit");
 		    
 		    m_submit.setEnabled(true);
 
@@ -540,7 +539,7 @@ public class VisualizePanel
       m_submit.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
 	 
-	    if (e.getActionCommand().equals(Messages.getInstance().getString("VisualizePanel_PlotPanel_ActionPerformed_Submit_ActionCommand_Text"))) {
+	    if (e.getActionCommand().equals("Submit")) {
 	      if (m_splitListener != null && m_shapes != null) {
 		//then send the split to the listener
 		Instances sub_set1 = new Instances(m_plot2D.getMasterPlot().
@@ -641,13 +640,13 @@ public class VisualizePanel
 		  VisualizePanel.this.setXIndex(x);
 		  VisualizePanel.this.setYIndex(y);
 		} catch(Exception er) {
-		  System.out.println(Messages.getInstance().getString("VisualizePanel_PlotPanel_ActionPerformed_Error_Text_First") + er);
+		  System.out.println("Error : " + er);
 		  //  System.out.println("Part of user input so had to" +
 		  //		 " catch here");
 		}
 	      }
 	    }
-	    else if (e.getActionCommand().equals(Messages.getInstance().getString("VisualizePanel_PlotPanel_ActionPerformed_Reset_ActionCommand_Text"))) {
+	    else if (e.getActionCommand().equals("Reset")) {
 	      int x = m_xIndex;
 	      int y = m_yIndex;
 
@@ -663,7 +662,7 @@ public class VisualizePanel
 		VisualizePanel.this.setXIndex(x);
 		VisualizePanel.this.setYIndex(y);
 	      } catch(Exception er) {
-		System.out.println(Messages.getInstance().getString("VisualizePanel_PlotPanel_ActionPerformed_Error_Text_Second") + er);
+		System.out.println("Error : " + er);
 	      }
 	    }
 	  }  
@@ -701,8 +700,8 @@ public class VisualizePanel
     public void cancelShapes() {
        
       if (m_splitListener == null) {
-	m_submit.setText(Messages.getInstance().getString("VisualizePanel_PlotPanel_CancelShapes_Submit_SetText_Text"));
-	m_submit.setActionCommand(Messages.getInstance().getString("VisualizePanel_PlotPanel_CancelShapes_Submit_SetActionCommand_Text"));
+	m_submit.setText("Reset");
+	m_submit.setActionCommand("Reset");
 
 	if (m_originalPlot == null || 
 	    m_originalPlot.m_plotInstances == m_plotInstances) {
@@ -1065,9 +1064,11 @@ public class VisualizePanel
 	    // more attributes than the panel can handle?
 	    // Due to hard coded constraints in GridBagLayout
 	    m_plotSurround.remove(m_attrib);
-	    System.err.println(Messages.getInstance().getString("VisualizePanel_PlotPanel_Error_Text_First"));
+	    System.err.println("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
 	    if (m_Log != null) {
-	      m_Log.logMessage(Messages.getInstance().getString("VisualizePanel_PlotPanel_Log_LogMessage_Text_First"));
+	      m_Log.logMessage("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
 	    }
 	  }
 	} else if (m_showAttBars) {
@@ -1082,9 +1083,11 @@ public class VisualizePanel
 	    constraints.weighty=5;
 	    m_plotSurround.add(m_attrib, constraints);
 	  } catch (Exception ex) {
-	    System.err.println(Messages.getInstance().getString("VisualizePanel_PlotPanel_Error_Text_Second"));
+	    System.err.println("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
 	    if (m_Log != null) {
-	      m_Log.logMessage(Messages.getInstance().getString("VisualizePanel_PlotPanel_Log_LogMessage_Text_Second"));
+	      m_Log.logMessage("Warning : data contains more attributes "
+			       +"than can be displayed as attribute bars.");
 	    }
 	  }
 	}
@@ -1159,9 +1162,11 @@ public class VisualizePanel
           constraints.weighty=5;
           m_plotSurround.add(m_attrib, constraints);
         } catch (Exception ex) {
-          System.err.println(Messages.getInstance().getString("VisualizePanel_PlotPanel_SwitchToBars_Error_Text"));
+          System.err.println("Warning : data contains more attributes "
+                             +"than can be displayed as attribute bars.");
           if (m_Log != null) {
-            m_Log.logMessage(Messages.getInstance().getString("VisualizePanel_PlotPanel_SwitchToBars_Log_LogMessage_Text"));
+            m_Log.logMessage("Warning : data contains more attributes "
+                             +"than can be displayed as attribute bars.");
           }
         }
       }
@@ -1175,8 +1180,8 @@ public class VisualizePanel
      */
     private void plotReset(Instances inst, int cIndex) {
       if (m_splitListener == null) {
-	m_submit.setText(Messages.getInstance().getString("VisualizePanel_PlotPanel_PlotReset_Submit_SetText_Text"));
-	m_submit.setActionCommand(Messages.getInstance().getString("VisualizePanel_PlotPanel_PlotReset_Submit_SetActionCommand_Text"));
+	m_submit.setText("Reset");
+	m_submit.setActionCommand("Reset");
 	//if (m_origInstances == null || m_origInstances == inst) {
 	if (m_originalPlot == null || m_originalPlot.m_plotInstances == inst) {
 	  m_submit.setEnabled(false);
@@ -1617,16 +1622,16 @@ public class VisualizePanel
   protected JComboBox m_ShapeCombo = new JComboBox();
 
   /** Button for the user to enter the splits. */
-  protected JButton m_submit = new JButton(Messages.getInstance().getString("VisualizePanel_PlotPanel_Submit_JButton_Text"));
+  protected JButton m_submit = new JButton("Submit");
   
   /** Button for the user to remove all splits. */
-  protected JButton m_cancel = new JButton(Messages.getInstance().getString("VisualizePanel_PlotPanel_Cancel_JButton_Text"));
+  protected JButton m_cancel = new JButton("Clear");
 
   /** Button for the user to open the visualized set of instances */
-  protected JButton m_openBut = new JButton(Messages.getInstance().getString("VisualizePanel_PlotPanel_OpenBut_JButton_Text"));
+  protected JButton m_openBut = new JButton("Open");
 
   /** Button for the user to save the visualized set of instances */
-  protected JButton m_saveBut = new JButton(Messages.getInstance().getString("VisualizePanel_PlotPanel_SaveBut_JButton_Text"));
+  protected JButton m_saveBut = new JButton("Save");
 
   /** Stop the combos from growing out of control */
   private Dimension COMBO_SIZE = new Dimension(250, m_saveBut
@@ -1638,10 +1643,10 @@ public class VisualizePanel
 
   /** Filter to ensure only arff files are selected */  
   protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(Instances.FILE_EXTENSION, Messages.getInstance().getString("VisualizePanel_PlotPanel_ArffFilter_FileFilter_Text"));
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
   /** Label for the jitter slider */
-  protected JLabel m_JitterLab= new JLabel(Messages.getInstance().getString("VisualizePanel_PlotPanel_JitterLab_JLabel_Text"),SwingConstants.RIGHT);
+  protected JLabel m_JitterLab= new JLabel("Jitter",SwingConstants.RIGHT);
 
   /** The jitter slider */
   protected JSlider m_Jitter = new JSlider(0,50,0);
@@ -1853,10 +1858,10 @@ public class VisualizePanel
     m_FileChooser.setFileFilter(m_ArffFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    m_XCombo.setToolTipText(Messages.getInstance().getString("VisualizePanel_XCombo_SetToolTipText_Text"));
-    m_YCombo.setToolTipText(Messages.getInstance().getString("VisualizePanel_YCombo_SetToolTipText_Text"));
-    m_ColourCombo.setToolTipText(Messages.getInstance().getString("VisualizePanel_ColourCombo_SetToolTipText_Text"));
-    m_ShapeCombo.setToolTipText(Messages.getInstance().getString("VisualizePanel_ShapeCombo_SetToolTipText_Text")); 
+    m_XCombo.setToolTipText("Select the attribute for the x axis");
+    m_YCombo.setToolTipText("Select the attribute for the y axis");
+    m_ColourCombo.setToolTipText("Select the attribute to colour on");
+    m_ShapeCombo.setToolTipText("Select the shape to use for data selection"); 
 
     m_XCombo.setPreferredSize(COMBO_SIZE);
     m_YCombo.setPreferredSize(COMBO_SIZE);
@@ -1993,7 +1998,7 @@ public class VisualizePanel
 	}
       });
 
-    m_openBut.setToolTipText(Messages.getInstance().getString("VisualizePanel_OpenBut_SetToolTipText_Text"));
+    m_openBut.setToolTipText("Loads previously saved instances from a file");
     m_openBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  openVisibleInstances();
@@ -2001,7 +2006,7 @@ public class VisualizePanel
       });
     
     m_saveBut.setEnabled(false);
-    m_saveBut.setToolTipText(Messages.getInstance().getString("VisualizePanel_SaveBut_SetToolTipText_Text"));
+    m_saveBut.setToolTipText("Save the visible instances to a file");
     m_saveBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  saveVisibleInstances();
@@ -2057,14 +2062,14 @@ public class VisualizePanel
 
     m_classSurround = new JPanel();
     m_classSurround.
-      setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("VisualizePanel_ClassSurround_BorderFactoryCreateTitledBorder_Text"))); 
+      setBorder(BorderFactory.createTitledBorder("Class colour")); 
     m_classSurround.setLayout(new BorderLayout());
 
     m_classPanel.setBorder(BorderFactory.createEmptyBorder(15,10,10,10));
     m_classSurround.add(m_classPanel, BorderLayout.CENTER);
 
     GridBagLayout gb2 = new GridBagLayout();
-    m_plotSurround.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("VisualizePanel_PlotSurround_BorderFactoryCreateTitledBorder_Text")));
+    m_plotSurround.setBorder(BorderFactory.createTitledBorder("Plot"));
     m_plotSurround.setLayout(gb2);
 
     constraints.fill = GridBagConstraints.BOTH;
@@ -2086,10 +2091,10 @@ public class VisualizePanel
     add(m_classSurround, BorderLayout.SOUTH);
     
     String [] SNames = new String [4];
-    SNames[0] = Messages.getInstance().getString("VisualizePanel_SNames_0_Text");
-    SNames[1] = Messages.getInstance().getString("VisualizePanel_SNames_1_Text");
-    SNames[2] = Messages.getInstance().getString("VisualizePanel_SNames_2_Text");
-    SNames[3] = Messages.getInstance().getString("VisualizePanel_SNames_3_Text");
+    SNames[0] = "Select Instance";
+    SNames[1] = "Rectangle";
+    SNames[2] = "Polygon";
+    SNames[3] = "Polyline";
 
     m_ShapeCombo.setModel(new DefaultComboBoxModel(SNames));
     m_ShapeCombo.setEnabled(true);
@@ -2113,9 +2118,9 @@ public class VisualizePanel
     while (parent != null) {
       if (parent instanceof JFrame) {
 	((JFrame) parent).setTitle(
-			Messages.getInstance().getString("VisualizePanel_OpenVisibleInstances_JFrame_Text_First") 
+	    "Weka Classifier Visualize: " 
 	    + insts.relationName() 
-	    + Messages.getInstance().getString("VisualizePanel_OpenVisibleInstances_JFrame_Text_Second"));
+	    + " (display only)");
 	break;
       }
       else {
@@ -2146,7 +2151,7 @@ public class VisualizePanel
       JOptionPane.showMessageDialog(
 	  this, 
 	  ex.getMessage(), 
-	  Messages.getInstance().getString("VisualizePanel_OpenVisibleInstances_JOptionPane.showMessageDialog_Text"), 
+	  "Error loading file...", 
 	  JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -2212,7 +2217,7 @@ public class VisualizePanel
     if (index >= 0 && index < m_XCombo.getItemCount()) {
       m_XCombo.setSelectedIndex(index);
     } else {
-      throw new Exception(Messages.getInstance().getString("VisualizePanel_SetXIndex_Text"));
+      throw new Exception("x index is out of range!");
     }
   }
 
@@ -2233,7 +2238,7 @@ public class VisualizePanel
     if (index >= 0 && index < m_YCombo.getItemCount()) {
       m_YCombo.setSelectedIndex(index);
     } else {
-      throw new Exception(Messages.getInstance().getString("VisualizePanel_SetYIndex_Text"));
+      throw new Exception("y index is out of range!");
     }
   }
   
@@ -2271,7 +2276,7 @@ public class VisualizePanel
       m_ShapeCombo.setSelectedIndex(index);
     }
     else {
-      throw new Exception(Messages.getInstance().getString("VisualizePanel_SetSIndex_Text"));
+      throw new Exception("s index is out of range!");
     }
   }
 
@@ -2384,29 +2389,10 @@ public class VisualizePanel
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
     for (int i = 0; i < XNames.length; i++) {
-      String type = " ";
-      switch (inst.attribute(i).type()) {
-      case Attribute.NOMINAL:
-	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeNOMINAL_Text");
-	break;
-      case Attribute.NUMERIC:
-	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeNUMERIC_Text");
-	break;
-      case Attribute.STRING:
-	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeSTRING_Text");
-	break;
-      case Attribute.DATE:
-	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeDATE_Text");
-	break;
-      case Attribute.RELATIONAL:
-	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeRELATIONAL_Text");
-	break;
-      default:
-	type += Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_AttributeDEFAULT_Text");
-      }
-      XNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_XNames_Text") + " " + inst.attribute(i).name()+type;
-      YNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_YNames_Text") + " " + inst.attribute(i).name()+type;
-      CNames[i] = Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_CNames_Text") + " " + inst.attribute(i).name()+type;
+      String type = " (" + Attribute.typeToStringShort(inst.attribute(i)) + ")";
+      XNames[i] = "X: "+ inst.attribute(i).name()+type;
+      YNames[i] = "Y: "+ inst.attribute(i).name()+type;
+      CNames[i] = "Colour: "+ inst.attribute(i).name()+type;
       if (m_preferredXDimension != null) {
 	if (m_preferredXDimension.compareTo(inst.attribute(i).name()) == 0) {
 	  prefX = i;
@@ -2440,7 +2426,7 @@ public class VisualizePanel
       m_ColourCombo.setEnabled(true);
       m_ColourCombo.setSelectedIndex(inst.numAttributes()-1);
     }
-    m_plotSurround.setBorder((BorderFactory.createTitledBorder(Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_PlotSurround_BorderFactoryCreateTitledBorder_Text")
+    m_plotSurround.setBorder((BorderFactory.createTitledBorder("Plot: "
 			      +inst.relationName())));
     try {
       if (prefX != -1) {
@@ -2453,7 +2439,7 @@ public class VisualizePanel
 	m_ColourCombo.setSelectedIndex(prefC);
       }
     } catch (Exception ex) {
-      System.err.println(Messages.getInstance().getString("VisualizePanel_SetUpComboBoxes_Error_Text"));
+      System.err.println("Problem setting preferred Visualization dimensions");
     }
   }
 
@@ -2507,13 +2493,14 @@ public class VisualizePanel
   public static void main(String [] args) {
     try {
       if (args.length < 1) {
-	System.err.println(Messages.getInstance().getString("VisualizePanel_Main_Error_Text_First"));
+	System.err.println("Usage : weka.gui.visualize.VisualizePanel "
+			   +"<dataset> [<dataset> <dataset>...]");
 	System.exit(1);
       }
 
-      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("VisualizePanel_Main_Logger_Text"));
+      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame(Messages.getInstance().getString("VisualizePanel_Main_JFrame_Text"));
+	new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500,400);
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
@@ -2529,7 +2516,7 @@ public class VisualizePanel
       jf.setVisible(true);
       if (args.length >= 1) {
 	for (int j = 0; j < args.length; j++) {
-	  System.err.println(Messages.getInstance().getString("VisualizePanel_Main_Error_Text_Second") + args[j]);
+	  System.err.println("Loading instances from " + args[j]);
 	  java.io.Reader r = new java.io.BufferedReader(
 			     new java.io.FileReader(args[j]));
 	  Instances i = new Instances(r);
@@ -2537,10 +2524,10 @@ public class VisualizePanel
 	  PlotData2D pd1 = new PlotData2D(i);
 	  
 	  if (j == 0) {
-	    pd1.setPlotName(Messages.getInstance().getString("VisualizePanel_Main_Pd1_SetPlotName_Text_First"));
+	    pd1.setPlotName("Master plot");
 	    sp.setMasterPlot(pd1);
 	  } else {
-	    pd1.setPlotName(Messages.getInstance().getString("VisualizePanel_Main_Pd1_SetPlotName_Text_Second")+(j+1));
+	    pd1.setPlotName("Plot "+(j+1));
 	    pd1.m_useCustomColour = true;
 	    pd1.m_customColour = (j % 2 == 0) ? Color.red : Color.blue; 
 	    sp.addPlot(pd1);

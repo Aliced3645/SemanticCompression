@@ -16,7 +16,6 @@ import java.util.Random;
 public class ReservoirSampler extends AbstractMOAObject implements InstanceStream {
     InstanceStream _stream;
     Instances _sampledData;
-
     int _numSamples, _maxInstances, _currInstance;
 
     public ReservoirSampler(InstanceStream stream, int numSamples, int maxInstances) {
@@ -45,30 +44,26 @@ public class ReservoirSampler extends AbstractMOAObject implements InstanceStrea
     }
 
     public Instance nextInstance() {
-        return _sampledData.instance(_currInstance++);
+        return _sampledData.get(_currInstance++);
     }
 
     public boolean isRestartable() {
         return true;
     }
 
-    /**
-     * TODO: integrate with weka..
-     */
     public void restart() {
         _currInstance = 0;
         if (_stream.isRestartable())
             _stream.restart();
         _sampledData = new Instances(_stream.getHeader(), _numSamples);
         for (int i = 0; i < _numSamples && _stream.hasMoreInstances(); i++) {
-            _sampledData.add(_stream.nextInstance());
+            _sampledData.add(i, _stream.nextInstance());
         }
         Random rand = new Random();
         double doubleNumSamples = (double) _numSamples;
         for (int i = _numSamples; _stream.hasMoreInstances() && (i < _maxInstances || _maxInstances < 0); i++) {
             if (rand.nextDouble() < (doubleNumSamples / i))
-                //_sampledData.set(rand.nextInt(_numSamples), _stream.nextInstance());
-            	 _sampledData.add(_stream.nextInstance());
+                _sampledData.set(rand.nextInt(_numSamples), _stream.nextInstance());
             else
                 _stream.nextInstance();
         }

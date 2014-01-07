@@ -1,28 +1,28 @@
- /*
-  *    This program is free software; you can redistribute it and/or modify
-  *    it under the terms of the GNU General Public License as published by
-  *    the Free Software Foundation; either version 2 of the License, or
-  *    (at your option) any later version.
-  *
-  *    This program is distributed in the hope that it will be useful,
-  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *    GNU General Public License for more details.
-  *
-  *    You should have received a copy of the GNU General Public License
-  *    along with this program; if not, write to the Free Software
-  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-  */
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
  /*
   *    JComponentWriter.java
-  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+  *    Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
   *
   */
 
 package weka.gui.visualize;
 
 import java.io.File;
+
 import javax.swing.JComponent;
 
 /** 
@@ -38,7 +38,7 @@ import javax.swing.JComponent;
  *
  * @see #setScalingEnabled(boolean)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public abstract class JComponentWriter {
   /** whether to print some debug information */
@@ -47,7 +47,7 @@ public abstract class JComponentWriter {
   /** output if we're in debug mode */
   static {
     if (DEBUG)
-      System.err.println(JComponentWriter.class.getName() + Messages.getInstance().getString("JComponentWriter_Error_Text_First"));
+      System.err.println(JComponentWriter.class.getName() + ": DEBUG ON");
   }
   
   /** the component to print in the output format */
@@ -202,7 +202,7 @@ public abstract class JComponentWriter {
     }
     
     if (DEBUG)
-      System.err.println(Messages.getInstance().getString("JComponentWriter_SetScale_Error_Text_First") + m_xScale + Messages.getInstance().getString("JComponentWriter_SetScale_Error_Text_Second") + m_yScale);
+      System.err.println("xScale = " + m_xScale + ", yScale = " + m_yScale);
   }
   
   /**
@@ -299,9 +299,9 @@ public abstract class JComponentWriter {
     int		oldHeight;
 
     if (getFile() == null)
-      throw new Exception(Messages.getInstance().getString("JComponentWriter_ToOutput_Exception_Text_First"));
+      throw new Exception("The file is not set!");
     if (getComponent() == null)
-      throw new Exception(Messages.getInstance().getString("JComponentWriter_ToOutput_Exception_Text_Second"));
+      throw new Exception("The component is not set!");
 
     // backup original dimensions and set custom ones if necessary
     oldWidth  = getComponent().getWidth();

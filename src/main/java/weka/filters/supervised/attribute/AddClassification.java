@@ -1,29 +1,37 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * AddClassification.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.supervised.attribute;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.ObjectInputStream;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -35,59 +43,52 @@ import weka.core.Utils;
 import weka.core.WekaException;
 import weka.filters.SimpleBatchFilter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.ObjectInputStream;
-import java.util.Enumeration;
-import java.util.Vector;
-
 /**
  <!-- globalinfo-start -->
  * A filter for adding the classification, the class distribution and an error flag to a dataset with a classifier. The classifier is either trained on the data itself or provided as serialized model.
  * <p/>
  <!-- globalinfo-end -->
- *
+ * 
  <!-- options-start -->
  * Valid options are: <p/>
- *
+ * 
  * <pre> -D
  *  Turns on output of debugging information.</pre>
- *
+ * 
  * <pre> -W &lt;classifier specification&gt;
  *  Full class name of classifier to use, followed
  *  by scheme options. eg:
  *   "weka.classifiers.bayes.NaiveBayes -D"
  *  (default: weka.classifiers.rules.ZeroR)</pre>
- *
+ * 
  * <pre> -serialized &lt;file&gt;
  *  Instead of training a classifier on the data, one can also provide
  *  a serialized model and use that for tagging the data.</pre>
- *
+ * 
  * <pre> -classification
  *  Adds an attribute with the actual classification.
  *  (default: off)</pre>
- *
+ * 
  * <pre> -remove-old-class
  *  Removes the old class attribute.
  *  (default: off)</pre>
- *
+ * 
  * <pre> -distribution
- *  Adds attributes with the distribution for all classes
- *  (for numeric classes this will be identical to the attribute
+ *  Adds attributes with the distribution for all classes 
+ *  (for numeric classes this will be identical to the attribute 
  *  output with '-classification').
  *  (default: off)</pre>
- *
+ * 
  * <pre> -error
- *  Adds an attribute indicating whether the classifier output
- *  a wrong classification (for numeric classes this is the numeric
+ *  Adds an attribute indicating whether the classifier output 
+ *  a wrong classification (for numeric classes this is the numeric 
  *  difference).
  *  (default: off)</pre>
- *
+ * 
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 6900 $
+ * @version $Revision: 8034 $
  */
 public class AddClassification
   extends SimpleBatchFilter {
@@ -100,22 +101,22 @@ public class AddClassification
 
   /** The file from which to load a serialized classifier. */
   protected File m_SerializedClassifierFile = new File(System.getProperty("user.dir"));
-
+  
   /** The actual classifier used to do the classification. */
   protected Classifier m_ActualClassifier = null;
 
   /** the header of the file the serialized classifier was trained with. */
   protected Instances m_SerializedHeader = null;
-
+  
   /** whether to output the classification. */
   protected boolean m_OutputClassification = false;
 
   /** whether to remove the old class attribute. */
   protected boolean m_RemoveOldClass = false;
-
+  
   /** whether to output the class distribution. */
   protected boolean m_OutputDistribution = false;
-
+  
   /** whether to output the error flag. */
   protected boolean m_OutputErrorFlag = false;
 
@@ -126,7 +127,7 @@ public class AddClassification
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return
+    return 
         "A filter for adding the classification, the class distribution and "
       + "an error flag to a dataset with a classifier. The classifier is "
       + "either trained on the data itself or provided as serialized model.";
@@ -191,40 +192,40 @@ public class AddClassification
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   *
+   * 
    * <pre> -D
    *  Turns on output of debugging information.</pre>
-   *
+   * 
    * <pre> -W &lt;classifier specification&gt;
    *  Full class name of classifier to use, followed
    *  by scheme options. eg:
    *   "weka.classifiers.bayes.NaiveBayes -D"
    *  (default: weka.classifiers.rules.ZeroR)</pre>
-   *
+   * 
    * <pre> -serialized &lt;file&gt;
    *  Instead of training a classifier on the data, one can also provide
    *  a serialized model and use that for tagging the data.</pre>
-   *
+   * 
    * <pre> -classification
    *  Adds an attribute with the actual classification.
    *  (default: off)</pre>
-   *
+   * 
    * <pre> -remove-old-class
    *  Removes the old class attribute.
    *  (default: off)</pre>
-   *
+   * 
    * <pre> -distribution
-   *  Adds attributes with the distribution for all classes
-   *  (for numeric classes this will be identical to the attribute
+   *  Adds attributes with the distribution for all classes 
+   *  (for numeric classes this will be identical to the attribute 
    *  output with '-classification').
    *  (default: off)</pre>
-   *
+   * 
    * <pre> -error
-   *  Adds an attribute indicating whether the classifier output
-   *  a wrong classification (for numeric classes this is the numeric
+   *  Adds an attribute indicating whether the classifier output 
+   *  a wrong classification (for numeric classes this is the numeric 
    *  difference).
    *  (default: off)</pre>
-   *
+   * 
    <!-- options-end -->
    *
    * @param options	the options to use
@@ -237,13 +238,13 @@ public class AddClassification
     boolean 	serializedModel;
 
     setOutputClassification(Utils.getFlag("classification", options));
-
+    
     setRemoveOldClass(Utils.getFlag("remove-old-class", options));
-
+    
     setOutputDistribution(Utils.getFlag("distribution", options));
 
     setOutputErrorFlag(Utils.getFlag("error", options));
-
+    
     serializedModel = false;
     tmpStr = Utils.getOption("serialized", options);
     if (tmpStr.length() != 0) {
@@ -260,7 +261,7 @@ public class AddClassification
     else {
       setSerializedClassifierFile(null);
     }
-
+    
     if (!serializedModel) {
       tmpStr = Utils.getOption('W', options);
       if (tmpStr.length() == 0)
@@ -270,7 +271,7 @@ public class AddClassification
 	throw new Exception("Invalid classifier specification string");
       tmpStr = tmpOptions[0];
       tmpOptions[0] = "";
-      setClassifier(Classifier.forName(tmpStr, tmpOptions));
+      setClassifier(AbstractClassifier.forName(tmpStr, tmpOptions));
     }
 
     super.setOptions(options);
@@ -314,8 +315,8 @@ public class AddClassification
       result.add("-W");
       result.add(getClassifierSpec());
     }
-
-    return (String[]) result.toArray(new String[result.size()]);
+    
+    return (String[]) result.toArray(new String[result.size()]);	  
   }
 
   /**
@@ -325,7 +326,7 @@ public class AddClassification
    */
   protected void reset() {
     super.reset();
-
+    
     m_ActualClassifier = null;
     m_SerializedHeader = null;
   }
@@ -333,7 +334,7 @@ public class AddClassification
   /**
    * Returns the actual classifier to use, either from the serialized model
    * or the one specified by the user.
-   *
+   * 
    * @return		the classifier to use, null in case of an error
    */
   protected Classifier getActualClassifier() {
@@ -358,7 +359,7 @@ public class AddClassification
 	  ois.close();
 	}
 	else {
-	  m_ActualClassifier = Classifier.makeCopy(m_Classifier);
+	  m_ActualClassifier = AbstractClassifier.makeCopy(m_Classifier);
 	}
       }
       catch (Exception e) {
@@ -367,11 +368,11 @@ public class AddClassification
 	e.printStackTrace();
       }
     }
-
+    
     return m_ActualClassifier;
   }
-
-  /**
+  
+  /** 
    * Returns the Capabilities of this filter.
    *
    * @return            the capabilities of this object
@@ -379,16 +380,16 @@ public class AddClassification
    */
   public Capabilities getCapabilities() {
     Capabilities 	result;
-
+    
     if (getActualClassifier() == null) {
       result = super.getCapabilities();
       result.disableAll();
     } else {
       result = getActualClassifier().getCapabilities();
     }
-
+    
     result.setMinimumNumberInstances(0);
-
+    
     return result;
   }
 
@@ -410,7 +411,7 @@ public class AddClassification
   public void setClassifier(Classifier value) {
     m_Classifier = value;
   }
-
+  
   /**
    * Gets the classifier used by the filter.
    *
@@ -429,18 +430,18 @@ public class AddClassification
   protected String getClassifierSpec() {
     String	result;
     Classifier 	c;
-
+    
     c      = getClassifier();
     result = c.getClass().getName();
     if (c instanceof OptionHandler)
       result += " " + Utils.joinOptions(((OptionHandler) c).getOptions());
-
+    
     return result;
   }
-
+  
   /**
    * Returns the tip text for this property.
-   *
+   * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
@@ -451,8 +452,8 @@ public class AddClassification
   /**
    * Gets the file pointing to a serialized, trained classifier. If it is
    * null or pointing to a directory it will not be used.
-   *
-   * @return		the file the serialized, trained classifier is located
+   * 
+   * @return		the file the serialized, trained classifier is located 
    * 			in
    */
   public File getSerializedClassifierFile() {
@@ -461,9 +462,9 @@ public class AddClassification
 
   /**
    * Sets the file pointing to a serialized, trained classifier. If the
-   * argument is null, doesn't exist or pointing to a directory, then the
+   * argument is null, doesn't exist or pointing to a directory, then the 
    * value is ignored.
-   *
+   * 
    * @param value	the file pointing to the serialized, trained classifier
    */
   public void setSerializedClassifierFile(File value) {
@@ -472,10 +473,10 @@ public class AddClassification
 
     m_SerializedClassifierFile = value;
   }
-
+  
   /**
    * Returns the tip text for this property.
-   *
+   * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
@@ -491,7 +492,7 @@ public class AddClassification
   public boolean getOutputClassification() {
     return m_OutputClassification;
   }
-
+  
   /**
    * Set whether the classification of the classifier is output.
    *
@@ -500,10 +501,10 @@ public class AddClassification
   public void setOutputClassification(boolean value) {
     m_OutputClassification = value;
   }
-
+  
   /**
    * Returns the tip text for this property.
-   *
+   * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
@@ -519,7 +520,7 @@ public class AddClassification
   public boolean getRemoveOldClass() {
     return m_RemoveOldClass;
   }
-
+  
   /**
    * Set whether the old class attribute is removed.
    *
@@ -528,15 +529,15 @@ public class AddClassification
   public void setRemoveOldClass(boolean value) {
     m_RemoveOldClass = value;
   }
-
+  
   /**
    * Returns the tip text for this property.
-   *
+   * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
   public String outputDistributionTipText() {
-    return
+    return 
         "Whether to add attributes with the distribution for all classes "
       + "(for numeric classes this will be identical to the attribute output "
       + "with 'outputClassification').";
@@ -550,7 +551,7 @@ public class AddClassification
   public boolean getOutputDistribution() {
     return m_OutputDistribution;
   }
-
+  
   /**
    * Set whether the Distribution of the classifier is output.
    *
@@ -559,15 +560,15 @@ public class AddClassification
   public void setOutputDistribution(boolean value) {
     m_OutputDistribution = value;
   }
-
+  
   /**
    * Returns the tip text for this property.
-   *
+   * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
   public String outputErrorFlagTipText() {
-    return
+    return 
         "Whether to add an attribute indicating whether the classifier output "
       + "a wrong classification (for numeric classes this is the numeric "
       + "difference).";
@@ -581,7 +582,7 @@ public class AddClassification
   public boolean getOutputErrorFlag() {
     return m_OutputErrorFlag;
   }
-
+  
   /**
    * Set whether the classification of the classifier is output.
    *
@@ -592,7 +593,7 @@ public class AddClassification
   }
 
   /**
-   * Determines the output format based on the input format and returns
+   * Determines the output format based on the input format and returns 
    * this. In case the output format cannot be returned immediately, i.e.,
    * immediateOutputFormat() returns false, then this method will be called
    * from batchFinished().
@@ -609,9 +610,9 @@ public class AddClassification
     int		i;
     FastVector	values;
     int		classindex;
-
+    
     classindex = -1;
-
+    
     // copy old attributes
     atts = new FastVector();
     for (i = 0; i < inputFormat.numAttributes(); i++) {
@@ -623,7 +624,7 @@ public class AddClassification
 	classindex = i;
       atts.addElement(inputFormat.attribute(i).copy());
     }
-
+    
     // add new attributes
     // 1. classification?
     if (getOutputClassification()) {
@@ -632,7 +633,7 @@ public class AddClassification
 	classindex = atts.size();
       atts.addElement(inputFormat.classAttribute().copy("classification"));
     }
-
+    
     // 2. distribution?
     if (getOutputDistribution()) {
       if (inputFormat.classAttribute().isNominal()) {
@@ -644,7 +645,7 @@ public class AddClassification
 	atts.addElement(new Attribute("distribution"));
       }
     }
-
+    
     // 2. error flag?
     if (getOutputErrorFlag()) {
       if (inputFormat.classAttribute().isNominal()) {
@@ -657,11 +658,11 @@ public class AddClassification
 	atts.addElement(new Attribute("error"));
       }
     }
-
+    
     // generate new header
     result = new Instances(inputFormat.relationName(), atts, 0);
     result.setClassIndex(classindex);
-
+    
     return result;
   }
 
@@ -684,7 +685,7 @@ public class AddClassification
     Instance		newInstance;
     Instance		oldInstance;
     double[]		distribution;
-
+    
     // load or train classifier
     if (!isFirstBatchDone()) {
       getActualClassifier();
@@ -693,35 +694,35 @@ public class AddClassification
 	if ((m_SerializedHeader != null) && (!m_SerializedHeader.equalHeaders(instances)))
 	  throw new WekaException(
 	      "Training header of classifier and filter dataset don't match:\n"
-	      + m_SerializedHeader.equalHeaders(instances));
+	      + m_SerializedHeader.equalHeadersMsg(instances));
       }
       else {
 	m_ActualClassifier.buildClassifier(instances);
       }
     }
-
+    
     result = getOutputFormat();
-
+    
     // traverse all instances
     for (i = 0; i < instances.numInstances(); i++) {
       oldInstance = instances.instance(i);
       oldValues   = oldInstance.toDoubleArray();
       newValues   = new double[result.numAttributes()];
-
+      
       start = oldValues.length;
       if (getRemoveOldClass())
 	start--;
 
       // copy old values
       System.arraycopy(oldValues, 0, newValues, 0, start);
-
+      
       // add new values:
       // 1. classification?
       if (getOutputClassification()) {
 	newValues[start] = m_ActualClassifier.classifyInstance(oldInstance);
 	start++;
       }
-
+      
       // 2. distribution?
       if (getOutputDistribution()) {
 	distribution = m_ActualClassifier.distributionForInstance(oldInstance);
@@ -730,7 +731,7 @@ public class AddClassification
 	  start++;
 	}
       }
-
+      
       // 3. error flag?
       if (getOutputErrorFlag()) {
 	if (result.classAttribute().isNominal()) {
@@ -744,29 +745,29 @@ public class AddClassification
 	}
 	start++;
       }
-
+      
       // create new instance
       if (oldInstance instanceof SparseInstance)
 	newInstance = new SparseInstance(oldInstance.weight(), newValues);
       else
-	newInstance = new Instance(oldInstance.weight(), newValues);
+	newInstance = new DenseInstance(oldInstance.weight(), newValues);
 
       // copy string/relational values from input to output
       copyValues(newInstance, false, oldInstance.dataset(), getOutputFormat());
 
       result.add(newInstance);
     }
-
+    
     return result;
   }
-
+  
   /**
    * Returns the revision string.
-   *
+   * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 6900 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 
   /**

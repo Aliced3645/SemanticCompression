@@ -41,7 +41,7 @@ import java.util.*;
  * A parser for parsing mathematical expressions.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 4942 $
+ * @version $Revision: 4939 $
  */
 
 parser code {:

@@ -1,29 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * LogWindow.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui;
-
-import weka.core.Tee;
-import weka.core.Utils;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -55,11 +51,14 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
+import weka.core.Tee;
+import weka.core.Utils;
+
 /** 
  * Frame that shows the output from stdout and stderr.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  */
 public class LogWindow 
   extends JFrame
@@ -90,19 +89,19 @@ public class LogWindow
   protected JTextPane m_Output = new JTextPane();
 
   /** the clear button */
-  protected JButton m_ButtonClear = new JButton(Messages.getInstance().getString("LogWindow_ButtonClear_JButton_Text"));
+  protected JButton m_ButtonClear = new JButton("Clear");
 
   /** the close button */
-  protected JButton m_ButtonClose = new JButton(Messages.getInstance().getString("LogWindow_ButtonClose_JButton_Text"));
+  protected JButton m_ButtonClose = new JButton("Close");
 
   /** the current size */
-  protected JLabel m_LabelCurrentSize = new JLabel(Messages.getInstance().getString("LogWindow_LabelCurrentSize_JLabel_Text"));
+  protected JLabel m_LabelCurrentSize = new JLabel("currently: 0");
 
   /** the spinner for the max number of chars */
   protected JSpinner m_SpinnerMaxSize = new JSpinner();
 
   /** whether to allow wordwrap or not */
-  protected JCheckBox m_CheckBoxWordwrap = new JCheckBox(Messages.getInstance().getString("LogWindow_CheckBoxWordwrap_JCheckBox_Text"));
+  protected JCheckBox m_CheckBoxWordwrap = new JCheckBox("Use wordwrap");
 
   /** for redirecting stdout */
   protected static Tee m_TeeOut = null;
@@ -200,9 +199,9 @@ public class LogWindow
       }
 
       if (x == null)
-        print("null");
+	print("null");
       else
-        print(x.toString());
+	print(x.toString());
     }
 
     /**
@@ -249,7 +248,7 @@ public class LogWindow
    * creates the frame
    */
   public LogWindow() {
-    super(Messages.getInstance().getString("LogWindow_Text"));
+    super("Weka - Log");
 
     createFrame();
 
@@ -350,7 +349,7 @@ public class LogWindow
     model.setValue(new Integer(100000));
     model.addChangeListener(this);
 
-    label = new JLabel(Messages.getInstance().getString("LogWindow_CreateFrame_JLabel_Text"));
+    label = new JLabel("max. Size");
     label.setDisplayedMnemonic('m');
     label.setLabelFor(m_SpinnerMaxSize);
 
@@ -486,7 +485,7 @@ public class LogWindow
    */
   public void caretUpdate(CaretEvent e) {
     m_LabelCurrentSize.setText(
-    		Messages.getInstance().getString("LogWindow_CaretUpdate_Text") + m_Output.getStyledDocument().getLength());
+        "currently: " + m_Output.getStyledDocument().getLength());
 
     if (DEBUG)
       System.out.println(e);
@@ -517,9 +516,9 @@ public class LogWindow
     log.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
     // test output
-    System.out.print(Messages.getInstance().getString("LogWindow_Main_Text_First"));
-    System.err.print(Messages.getInstance().getString("LogWindow_Main_Error_Text_First"));
-    System.out.print(Messages.getInstance().getString("LogWindow_Main_Text_Second"));
+    System.out.print("a");
+    System.err.print("a");
+    System.out.print("a");
     System.out.println();
     System.err.println(new java.util.Date());
   }

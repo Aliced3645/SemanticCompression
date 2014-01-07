@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * PropertyPath.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -42,7 +41,7 @@ import java.util.Vector;
  * ridge parameter and <code>setValue(...)</code> will set it.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 4742 $
+ * @version $Revision: 8034 $
  */
 public class PropertyPath
   implements RevisionHandler {
@@ -51,7 +50,7 @@ public class PropertyPath
    * Represents a single element of a property path
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 4742 $
+   * @version $Revision: 8034 $
    */
   public static class PathElement
     implements Cloneable, RevisionHandler {
@@ -139,7 +138,7 @@ public class PropertyPath
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 4742 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
   
@@ -147,13 +146,13 @@ public class PropertyPath
    * Contains a (property) path structure
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 4742 $
+   * @version $Revision: 8034 $
    */
   public static class Path
     implements RevisionHandler {
     
     /** the structure */
-    protected Vector m_Elements;
+    protected Vector<PathElement> m_Elements;
     
     /**
      * default constructor, only used internally
@@ -161,7 +160,7 @@ public class PropertyPath
     protected Path() {
       super();
       
-      m_Elements = new Vector();
+      m_Elements = new Vector<PathElement>();
     }
     
     /**
@@ -180,11 +179,11 @@ public class PropertyPath
      * 
      * @param elements	the PathElements to use
      */
-    public Path(Vector elements) {
+    public Path(Vector<PathElement> elements) {
       this();
       
       for (int i = 0; i < elements.size(); i++)
-	m_Elements.add(((PathElement) elements.get(i)).clone());
+	m_Elements.add((PathElement) elements.get(i).clone());
     }
     
     /**
@@ -205,11 +204,11 @@ public class PropertyPath
      * @param path	the path to break up
      * @return		the single elements of the path
      */
-    protected Vector breakUp(String path) {
-      Vector		result;
+    protected Vector<PathElement> breakUp(String path) {
+      Vector<PathElement>		result;
       StringTokenizer	tok;
       
-      result = new Vector();
+      result = new Vector<PathElement>();
       
       tok = new StringTokenizer(path, ".");
       while (tok.hasMoreTokens())
@@ -269,10 +268,10 @@ public class PropertyPath
      * @return			the new subpath
      */
     public Path subpath(int startIndex, int endIndex) {
-      Vector	list;
+      Vector<PathElement>	list;
       int	i;
       
-      list = new Vector();
+      list = new Vector<PathElement>();
       for (i = startIndex; i < endIndex; i++)
 	list.add(get(i));
       
@@ -305,7 +304,7 @@ public class PropertyPath
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 4742 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
 
@@ -313,7 +312,7 @@ public class PropertyPath
    * A helper class that stores Object and PropertyDescriptor together.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 4742 $
+   * @version $Revision: 8034 $
    */
   protected static class PropertyContainer
     implements RevisionHandler {
@@ -361,7 +360,7 @@ public class PropertyPath
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 4742 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
   
@@ -562,7 +561,7 @@ public class PropertyPath
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 4742 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
   
   /**

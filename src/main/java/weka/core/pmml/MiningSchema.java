@@ -1,36 +1,34 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    MiningSchema.java
- *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2008-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.pmml;
 
-import java.lang.String;
 import java.io.Serializable;
 import java.util.ArrayList;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
-import weka.core.FastVector;
 import weka.core.Instances;
 
 /**
@@ -48,7 +46,7 @@ import weka.core.Instances;
  * store them here.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 5562 $
+ * @version $Revision: 8034 $
  */
 public class MiningSchema implements Serializable {
 
@@ -87,17 +85,17 @@ public class MiningSchema implements Serializable {
       Element localT = (Element)temp.item(0);
       
       // Set up some field defs to pass in
-      ArrayList<Attribute> fieldDefs = new ArrayList<Attribute>();
+      /*ArrayList<Attribute> fieldDefs = new ArrayList<Attribute>();
       for (int i = 0; i < m_miningSchemaInstancesStructure.numAttributes(); i++) {
         fieldDefs.add(m_miningSchemaInstancesStructure.attribute(i));
-      }
+      } */
       
       NodeList localDerivedL = localT.getElementsByTagName("DerivedField");
       for (int i = 0; i < localDerivedL.getLength(); i++) {
         Node localDerived = localDerivedL.item(i);
         if (localDerived.getNodeType() == Node.ELEMENT_NODE) {
           DerivedFieldMetaInfo d = 
-            new DerivedFieldMetaInfo((Element)localDerived, fieldDefs, m_transformationDictionary);
+            new DerivedFieldMetaInfo((Element)localDerived, null /*fieldDefs*/, m_transformationDictionary);
           m_derivedMeta.add(d);
         }
       }
@@ -124,7 +122,7 @@ public class MiningSchema implements Serializable {
           + "are not supported yet.");
     }*/
 
-    FastVector attInfo = new FastVector();
+    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
     NodeList fieldList = model.getElementsByTagName("MiningField");
     int classIndex = -1;
     int addedCount = 0;
@@ -142,7 +140,7 @@ public class MiningSchema implements Serializable {
           Attribute miningAtt = dataDictionary.attribute(mfi.getName());
           if (miningAtt != null) {
             mfi.setIndex(addedCount);
-            attInfo.addElement(miningAtt);
+            attInfo.add(miningAtt);
             addedCount++;
 
             if (mfi.getUsageType() == MiningFieldMetaInfo.Usage.PREDICTED) {
@@ -170,13 +168,7 @@ public class MiningSchema implements Serializable {
     m_transformationDictionary = transDict;
     
     // Handle transformation dictionary and any local transformations
-    if (m_transformationDictionary != null) {
-      // first update the field defs for any derived fields in the transformation dictionary
-      // now that we have a fixed ordering for the mining schema attributes (i.e. could
-      // be different from the order of attributes in the data dictionary that was
-      // used when the transformation dictionary was initially constructed
-      m_transformationDictionary.setFieldDefsForDerivedFields(m_miningSchemaInstancesStructure);
-      
+    if (m_transformationDictionary != null) {      
       ArrayList<DerivedFieldMetaInfo> transDerived = transDict.getDerivedFields();
       m_derivedMeta.addAll(transDerived);
     }
@@ -184,15 +176,31 @@ public class MiningSchema implements Serializable {
     // Get any local transformations
     getLocalTransformations(model);
     
-    FastVector newStructure = new FastVector();
+    // Set up the full instances structure: combo of mining schema fields and
+    // all derived fields
+    ArrayList<Attribute> newStructure = new ArrayList<Attribute>();
     for (MiningFieldMetaInfo m : m_miningMeta) {
-      newStructure.addElement(m.getFieldAsAttribute());
+      newStructure.add(m.getFieldAsAttribute());
     }
     
     for (DerivedFieldMetaInfo d : m_derivedMeta) {
-      newStructure.addElement(d.getFieldAsAttribute());
+      newStructure.add(d.getFieldAsAttribute());
     }
     m_fieldInstancesStructure = new Instances("FieldStructure", newStructure, 0);
+    
+    if (m_transformationDictionary != null) {
+      // first update the field defs for any derived fields in the transformation dictionary
+      // and our complete list of derived fields, now that we have a fixed 
+      // ordering for the mining schema + derived attributes (i.e. could
+      // be different from the order of attributes in the data dictionary that was
+      // used when the transformation dictionary was initially constructed
+      m_transformationDictionary.setFieldDefsForDerivedFields(m_fieldInstancesStructure);
+    }
+
+    // update the field defs for all our derived fields.
+    for (DerivedFieldMetaInfo d : m_derivedMeta) {
+      d.setFieldDefs(m_fieldInstancesStructure);
+    }
     
     if (classIndex != -1) {
       m_fieldInstancesStructure.setClassIndex(classIndex);
@@ -330,18 +338,18 @@ public class MiningSchema implements Serializable {
   public void convertStringAttsToNominal() {
     Instances miningSchemaI = getFieldsAsInstances();
     if (miningSchemaI.checkForStringAttributes()) {
-      FastVector attInfo = new FastVector();
+      ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
       for (int i = 0; i < miningSchemaI.numAttributes(); i++) {
         Attribute tempA = miningSchemaI.attribute(i);
         if (tempA.isString()) {
-          FastVector valueVector = new FastVector();
+          ArrayList<String> valueVector = new ArrayList<String>();
           for (int j = 0; j < tempA.numValues(); j++) {
-            valueVector.addElement(tempA.value(j));
+            valueVector.add(tempA.value(j));
           }
           Attribute newAtt = new Attribute(tempA.name(), valueVector);
-          attInfo.addElement(newAtt);
+          attInfo.add(newAtt);
         } else {
-          attInfo.addElement(tempA);
+          attInfo.add(tempA);
         }
       }
       Instances newI = new Instances("miningSchema", attInfo, 0);
@@ -371,19 +379,19 @@ public class MiningSchema implements Serializable {
                                          + "already nominal!");
     }
 
-    FastVector newValues = new FastVector();
+    ArrayList<String> newValues = new ArrayList<String>();
     for (int i = 0; i < newVals.size(); i++) {
-      newValues.addElement(newVals.get(i));
+      newValues.add(newVals.get(i));
     }
 
-    FastVector attInfo = new FastVector();
+    ArrayList<Attribute> attInfo = new ArrayList<Attribute>();
     for (int i = 0; i < miningSchemaI.numAttributes(); i++) {
       Attribute tempA = miningSchemaI.attribute(i);
       if (i == index) {
         Attribute newAtt = new Attribute(tempA.name(), newValues);
-        attInfo.addElement(newAtt);
+        attInfo.add(newAtt);
       } else {
-        attInfo.addElement(tempA);
+        attInfo.add(tempA);
       }
     }
 

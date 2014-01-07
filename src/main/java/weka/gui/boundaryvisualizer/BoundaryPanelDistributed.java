@@ -1,35 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *   BoundaryPanelDistrubuted.java
- *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *   Copyright (C) 2003-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.boundaryvisualizer;
-
-import weka.classifiers.Classifier;
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.experiment.Compute;
-import weka.experiment.RemoteExperimentEvent;
-import weka.experiment.RemoteExperimentListener;
-import weka.experiment.TaskStatusInfo;
 
 import java.awt.BorderLayout;
 import java.io.BufferedReader;
@@ -39,6 +29,16 @@ import java.io.ObjectInputStream;
 import java.rmi.Naming;
 import java.util.Vector;
 
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.experiment.Compute;
+import weka.experiment.RemoteExperimentEvent;
+import weka.experiment.RemoteExperimentListener;
+import weka.experiment.TaskStatusInfo;
+
 /**
  * This class extends BoundaryPanel with code for distributing the
  * processing necessary to create a visualization among a list of
@@ -46,7 +46,7 @@ import java.util.Vector;
  * processed row by row using the available remote computers.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 7059 $
+ * @version $Revision: 8034 $
  * @since 1.0
  * @see BoundaryPanel
  */
@@ -141,7 +141,7 @@ public class BoundaryPanelDistributed
     m_remoteHostsQueue = new weka.core.Queue();
 
     if (m_remoteHosts.size() == 0) {
-      System.err.println(Messages.getInstance().getString("BoundaryPanelDistributed_Initialize_Error_Text"));
+      System.err.println("No hosts specified!");
       System.exit(1);
     }
 
@@ -193,17 +193,18 @@ public class BoundaryPanelDistributed
 
     m_stopReplotting = true;
     if (m_trainingData == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanelDistributed_Start_Error_Text_First"));
+      throw new Exception("No training data set (BoundaryPanel)");
     }
     if (m_classifier == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanelDistributed_Start_Error_Text_Second"));
+      throw new Exception("No classifier set (BoundaryPanel)");
     }
     if (m_dataGenerator == null) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanelDistributed_Start_Error_Text_Third"));
+      throw new Exception("No data generator set (BoundaryPanel)");
     }
     if (m_trainingData.attribute(m_xAttribute).isNominal() || 
 	m_trainingData.attribute(m_yAttribute).isNominal()) {
-      throw new Exception(Messages.getInstance().getString("BoundaryPanelDistributed_Start_Error_Text_Fourth"));
+      throw new Exception("Visualization dimensions must be numeric "
+			  +"(BoundaryPanel)");
     }
     
     computeMinMaxAtts();
@@ -229,9 +230,9 @@ public class BoundaryPanelDistributed
       if (m_remoteHostFailureCounts[hostNum] < MAX_FAILURES) {
 	m_remoteHostsQueue.push(new Integer(hostNum));
       } else {
-	notifyListeners(false,true,false,Messages.getInstance().getString("BoundaryPanelDistributed_AvailableHost_MaxFailuresExceededForHost_Text_Front")
+	notifyListeners(false,true,false,"Max failures exceeded for host "
 			+((String)m_remoteHosts.elementAt(hostNum))
-			+Messages.getInstance().getString("BoundaryPanelDistributed_AvailableHost_MaxFailuresExceededForHost_Text_End"));
+			+". Removed from host list.");
 	m_removedHosts++;
       }
     }
@@ -240,8 +241,8 @@ public class BoundaryPanelDistributed
     // exceeded
     if (m_failedCount == (MAX_FAILURES * m_remoteHosts.size())) {
       m_plottingAborted = true;
-      notifyListeners(false,true,true,
-      Messages.getInstance().getString("BoundaryPanelDistributed_AvailableHost_PlottingAborted_MaxFailure_Text"));
+      notifyListeners(false,true,true,"Plotting aborted! Max failures "
+		      +"exceeded on all remote hosts.");
       return;
     }
 
@@ -256,7 +257,8 @@ public class BoundaryPanelDistributed
       if (m_plotTrainingData) {
 	plotTrainingData();
       }
-      notifyListeners(false,true,true,Messages.getInstance().getString("BoundaryPanelDistributed_AvailableHost_PlottingCompleted_Text"));
+      notifyListeners(false,true,true,"Plotting completed successfully.");
+
       return;
     }
 
@@ -268,8 +270,8 @@ public class BoundaryPanelDistributed
     if (m_plottingAborted && 
 	(m_remoteHostsQueue.size() + m_removedHosts) == 
 	m_remoteHosts.size()) {
-      notifyListeners(false,true,true,
-    		  Messages.getInstance().getString("BoundaryPanelDistributed_AvailableHost_PlottingAborted_AllRemoteTasks_Text"));
+      notifyListeners(false,true,true,"Plotting aborted. All remote tasks "
+		      +"finished.");
     }
 
     if (!m_subExpQueue.empty() && !m_plottingAborted) {
@@ -324,8 +326,8 @@ public class BoundaryPanelDistributed
     }
     if (allbad) {
       m_plottingAborted = true;
-      notifyListeners(false,true,true,
-      Messages.getInstance().getString("BoundaryPanelDistributed_AvailableHost_PlottingAborted_AllConnection_Text"));
+      notifyListeners(false,true,true,"Plotting aborted! All connections "
+		      +"to remote hosts failed.");
     }
     return allbad;
   }
@@ -378,11 +380,15 @@ public class BoundaryPanelDistributed
 	  vSubTask.setNumSamplesPerRegion(m_numOfSamplesPerRegion);
 	  vSubTask.setGeneratorSamplesBase(m_samplesBase);
 	  try {
-	    String name = Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_RemoteHost_Text_Front") +((String)m_remoteHosts.elementAt(ah)) + Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_RemoteHost_Text_End");
+	    String name = "//"
+	      +((String)m_remoteHosts.elementAt(ah))
+	      +"/RemoteEngine";
 	    Compute comp = (Compute) Naming.lookup(name);
 	    // assess the status of the sub-exp
-	    notifyListeners(false,true,false,
-	    		Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_StartingRow_Text_Front") + wtask + Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_StartingRow_Text_End") + ((String)m_remoteHosts.elementAt(ah)));
+	    notifyListeners(false,true,false,"Starting row "
+			    +wtask
+			    +" on host "
+			    +((String)m_remoteHosts.elementAt(ah)));
 	    Object subTaskId = comp.executeTask(vSubTask);
 	    boolean finished = false;
 	    TaskStatusInfo is = null;
@@ -430,7 +436,9 @@ public class BoundaryPanelDistributed
 				  cs.getStatusMessage());
 		  m_remoteHostsStatus[ah] = SOME_OTHER_FAILURE;
 		  //		  m_subExpComplete[wexp] = TaskStatusInfo.FAILED;
-		  notifyListeners(false,true,false,Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_SchedulingRow_Text_Front") + wtask + " " + cs.getStatusMessage() + Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_SchedulingRow_Text_End"));
+		  notifyListeners(false,true,false,"Row "+wtask
+				  +" "+cs.getStatusMessage()
+				  +". Scheduling for execution on another host.");
 		  incrementFailed(ah);
 		  // push experiment back onto queue
 		  waitingTask(wtask);	
@@ -457,18 +465,18 @@ public class BoundaryPanelDistributed
 			if (timeToGo < m_hostPollingTime[ah]) {
 			  m_hostPollingTime[ah] = (int)timeToGo;
 			}
-			String units = Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_UnitsSeconds_Text");
+			String units = "seconds";
 			timeToGo /= 1000.0;
 			if (timeToGo > 60) {
-			  units = Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_UnitsMinutes_Text");
+			  units = "minutes";
 			  timeToGo /= 60.0;
 			}
 			if (timeToGo > 60) {
-			  units = Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_UnitsHours_Text");
+			  units = "hours";
 			  timeToGo /= 60.0;
 			}
-			timeRemaining = Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_TimeRemaining_Text_Front")
-			  +Utils.doubleToString(timeToGo, 1)+" "+units+Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_TimeRemaining_Text_End");
+			timeRemaining = " (approx. time remaining "
+			  +Utils.doubleToString(timeToGo, 1)+" "+units+")";
 		      }
 		      if (percentComplete < 25 
 			  /*&& minTaskPollTime < 30000*/) {		
@@ -484,11 +492,11 @@ public class BoundaryPanelDistributed
 			}
 		      }
 		      notifyListeners(false, true, false,
-				      Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_TimeRemaining_Row_Text_First")+wtask+" "+percentComplete
-				      +Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_TimeRemaining_Row_Text_Second")+timeRemaining+Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_TimeRemaining_Row_Text_Third"));
+				      "Row "+wtask+" "+percentComplete
+				      +"% complete"+timeRemaining+".");
 		    } else {
 		      notifyListeners(false, true, false,
-				      Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_TimeRemaining_RowQueue_Text_Front")+wtask+Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_TimeRemaining_RowQueue_Text_End")
+				      "Row "+wtask+" queued on "
 				      +((String)m_remoteHosts.
 					elementAt(ah)));
 		      if (m_hostPollingTime[ah] < 60000) {
@@ -508,16 +516,16 @@ public class BoundaryPanelDistributed
 	    m_removedHosts++;
 	    System.err.println(ce);
 	    ce.printStackTrace();
-	    notifyListeners(false,true,false,Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_Error_Connection_Text_First")
+	    notifyListeners(false,true,false,"Connection to "
 			    +((String)m_remoteHosts.elementAt(ah))
-			    +Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_Error_Connection_Text_Second")
+			    +" failed. Scheduling row "
 			    +wtask
-			    +Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_Error_Connection_Text_Third"));
+			    +" for execution on another host.");
 	    checkForAllFailedHosts();
 	    waitingTask(wtask);
 	  } finally {
 	    if (isInterrupted()) {
-	      System.err.println(Messages.getInstance().getString("BoundaryPanelDistributed_LaunchNext_Run_Error_Text"));
+	      System.err.println("Sub exp Interupted!");
 	    }
 	  }
 	}
@@ -534,7 +542,12 @@ public class BoundaryPanelDistributed
   public static void main (String [] args) {
     try {
       if (args.length < 8) {
-	System.err.println(Messages.getInstance().getString("BoundaryPanelDistributed_Main_Error_Text_First"));
+	System.err.println("Usage : BoundaryPanelDistributed <dataset> "
+			   +"<class col> <xAtt> <yAtt> "
+			   +"<base> <# loc/pixel> <kernel bandwidth> "
+			   +"<display width> "
+			   +"<display height> <classifier "
+			   +"[classifier options]>");
 	System.exit(1);
       }
       
@@ -544,21 +557,23 @@ public class BoundaryPanelDistributed
 	BufferedReader br = new BufferedReader(new FileReader("hosts.vis"));
 	String hostName = br.readLine();
 	while (hostName != null) {
-	  System.out.println(Messages.getInstance().getString("BoundaryPanelDistributed_Main_Error_Text_First_Alpha") + hostName);
+	  System.out.println("Adding host "+hostName);
 	  hostNames.add(hostName);
 	  hostName = br.readLine();
 	}
 	br.close();
       } catch (Exception ex) {
-	System.err.println(Messages.getInstance().getString("BoundaryPanelDistributed_Main_Error_Text_Second"));
+	System.err.println("No hosts.vis file - create this file in "
+			   +"the current directory with one host name "
+			   +"per line, or use BoundaryPanel instead.");
 	System.exit(1);
       }
 
       final javax.swing.JFrame jf = 
-	new javax.swing.JFrame(Messages.getInstance().getString("BoundaryPanelDistributed_Main_JFrame_Title_Text"));
+	new javax.swing.JFrame("Weka classification boundary visualizer");
       jf.getContentPane().setLayout(new BorderLayout());
 
-      System.err.println(Messages.getInstance().getString("BoundaryPanelDistributed_Main_Error_LoadingInstances_Text")+args[0]);
+      System.err.println("Loading instances from : "+args[0]);
       java.io.Reader r = new java.io.BufferedReader(
 			 new java.io.FileReader(args[0]));
       final Instances i = new Instances(r);
@@ -615,7 +630,7 @@ public class BoundaryPanelDistributed
 	  argsR[j-10] = args[j];
 	}
       }
-      Classifier c = Classifier.forName(args[9], argsR);
+      Classifier c = AbstractClassifier.forName(args[9], argsR);
       KDDataGenerator dataGen = new KDDataGenerator();
       dataGen.setKernelBandwidth(bandWidth);
       bv.setDataGenerator(dataGen);
@@ -633,7 +648,7 @@ public class BoundaryPanelDistributed
 	FastVector colors = (FastVector)ois.readObject();
 	bv.setColors(colors);	
       } catch (Exception ex) {
-	System.err.println(Messages.getInstance().getString("BoundaryPanelDistributed_Main_Error_NoColorMapFile_Text"));
+	System.err.println("No color map file");
       }
       bv.start();
     } catch (Exception ex) {

@@ -1,29 +1,37 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    MathExpression.java
  *    Copyright (C) 2004 Prados Julien
- *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2002-2012 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.attribute;
 
+import java.io.ByteArrayInputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
+
+import java_cup.runtime.DefaultSymbolFactory;
+import java_cup.runtime.SymbolFactory;
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MathematicalExpression;
@@ -32,17 +40,9 @@ import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.mathematicalexpression.Parser;
 import weka.core.mathematicalexpression.Scanner;
-import java_cup.runtime.DefaultSymbolFactory;
-import java_cup.runtime.SymbolFactory;
 import weka.filters.UnsupervisedFilter;
-
-import java.io.ByteArrayInputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
@@ -62,7 +62,10 @@ import java.util.Vector;
  *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
  *  Supported operators are +, -, *, /, pow, log,
  *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
- *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse</pre>
+ *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'
+ *  letter refers to the value of the attribute being processed.
+ *  Other attribute values (numeric only) can be accessed through
+ *  the variables A1, A2, A3, ...</pre>
  * 
  * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of columns to ignore. First and last are valid
@@ -75,7 +78,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 5543 $
+ * @version $Revision: 8034 $
  * @see MathematicalExpression
  */
 public class MathExpression 
@@ -264,12 +267,20 @@ public class MathExpression
       double[] newVals = new double[instance.numAttributes()];
       int[] newIndices = new int[instance.numAttributes()];
       double[] vals = instance.toDoubleArray();
+      double[] valsCopy = instance.toDoubleArray();
+      // add a symbol for all the numeric attributes except the class
+      for (int z = 0; z < getInputFormat().numAttributes(); z++) {
+        if (instance.attribute(z).isNumeric() &&  
+            z != getInputFormat().classIndex()) {
+          symbols.put("A"+(z+1), new Double(valsCopy[z]));
+        }
+      }
       int ind = 0;
       double value;
       for (int j = 0; j < instance.numAttributes(); j++) {
         if (m_SelectCols.isInRange(j)) {          
 	  if (instance.attribute(j).isNumeric() &&
-	    (!Instance.isMissingValue(vals[j])) &&
+	    (!Utils.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
               symbols.put("A", new Double(vals[j]));  
               symbols.put("MAX", new Double(m_attStats[j].numericStats.max));
@@ -282,7 +293,7 @@ public class MathExpression
               value = eval(symbols);
               if (Double.isNaN(value) || Double.isInfinite(value)) {
                   System.err.println("WARNING:Error in evaluating the expression: missing value set");
-                  value = Instance.missingValue();
+                  value = Utils.missingValue();
               }
 	      if (value != 0.0) {
 	        newVals[ind] = value;
@@ -308,12 +319,20 @@ public class MathExpression
                                 instance.numAttributes());
     } else {
       double[] vals = instance.toDoubleArray();
+      double[] valsCopy = instance.toDoubleArray();
+      // add a symbol for all the numeric attributes except the class
+      for (int z = 0; z < getInputFormat().numAttributes(); z++) {
+        if (instance.attribute(z).isNumeric() &&  
+            z != getInputFormat().classIndex()) {
+          symbols.put("A"+(z+1), new Double(valsCopy[z]));
+        }
+      }
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
         if (m_SelectCols.isInRange(j)) {
 	  if (instance.attribute(j).isNumeric() &&
-	      (!Instance.isMissingValue(vals[j])) &&
+	      (!Utils.isMissingValue(vals[j])) &&
 	      (getInputFormat().classIndex() != j)) {
-              symbols.put("A", new Double(vals[j]));  
+              symbols.put("A", new Double(vals[j]));
               symbols.put("MAX", new Double(m_attStats[j].numericStats.max));
               symbols.put("MIN", new Double(m_attStats[j].numericStats.min));
               symbols.put("MEAN", new Double(m_attStats[j].numericStats.mean));
@@ -324,12 +343,12 @@ public class MathExpression
               vals[j] = eval(symbols);
               if (Double.isNaN(vals[j]) || Double.isInfinite(vals[j])) {
                   System.err.println("WARNING:Error in Evaluation the Expression: missing value set");
-                  vals[j] = Instance.missingValue();
+                  vals[j] = Utils.missingValue();
               }
 	  }
         }
       }
-      inst = new Instance(instance.weight(), vals);
+      inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst);
@@ -350,7 +369,10 @@ public class MathExpression
    *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
    *  Supported operators are +, -, *, /, pow, log,
    *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
-   *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse</pre>
+   *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'
+   *  letter refers to the value of the attribute being processed.
+   *  Other attribute values (numeric only) can be accessed through
+   *  the variables A1, A2, A3, ...</pre>
    * 
    * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of columns to ignore. First and last are valid
@@ -427,7 +449,10 @@ public class MathExpression
 	"\tSpecify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)"
 	+"\n\tSupported operators are +, -, *, /, pow, log,"
 	+"\n\tabs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), "
-	+"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse",
+	+"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'"
+	+ "\n\tletter refers to the value of the attribute being processed."
+	+ "\n\tOther attribute values (numeric only) can be accessed through"
+	+ "\n\tthe variables A1, A2, A3, ...",
 	"E",1,"-E <expression>"));
     
     result.addElement(new Option(
@@ -450,9 +475,12 @@ public class MathExpression
    */
   public String expressionTipText() {
     return "Specify the expression to apply. The 'A' letter"
-             + "refers to the attribute value. MIN,MAX,MEAN,SD"
+             + "refers to the value of the attribute being processed. "
+             + "MIN,MAX,MEAN,SD"
              + "refer respectively to minimum, maximum, mean and"
-             + "standard deviation of the attribute."
+             + "standard deviation of the attribute being processed. "
+             + "Other attribute values (numeric only) can be accessed "
+             + "through the variables A1, A2, A3, ..."
 	     +"\n\tSupported operators are +, -, *, /, pow, log,"
              +"abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ),"
              +"A,MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse"
@@ -553,7 +581,7 @@ public class MathExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5543 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
   
   /**
@@ -566,3 +594,4 @@ public class MathExpression
     runFilter(new MathExpression(), argv);
   }
 }
+

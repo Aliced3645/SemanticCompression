@@ -1,33 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * ArffPanel.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
-
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
-import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
-import weka.gui.ListSelectorDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -55,12 +47,20 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 
+import weka.core.Instances;
+import weka.core.Undoable;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.gui.ComponentHelper;
+import weka.gui.JTableHelper;
+import weka.gui.ListSelectorDialog;
+
 /**
  * A Panel representing an ARFF-Table and the associated filename.
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7369 $ 
+ * @version $Revision: 8604 $ 
  */
 
 public class ArffPanel 
@@ -71,7 +71,7 @@ public class ArffPanel
   static final long serialVersionUID = -4697041150989513939L;
   
   /** the name of the tab for instances that were set directly */
-  public final static String TAB_INSTANCES = Messages.getInstance().getString("ArffPanel_TabInstanses_Text");
+  public final static String TAB_INSTANCES = "Instances";
 
   /** the underlying table */
   private ArffTable m_TableArff;
@@ -81,7 +81,9 @@ public class ArffPanel
   private JPopupMenu m_PopupRows;
   /** displays the relation name */
   private JLabel m_LabelName;
-  
+  /** whether to display the attribute index in the table header. */
+  private boolean m_ShowAttributeIndex;
+
   // menu items
   private JMenuItem             menuItemMean;
   private JMenuItem             menuItemSetAllValues;
@@ -130,11 +132,12 @@ public class ArffPanel
    * initializes the panel and loads the specified file
    * 
    * @param filename	the file to load
+   * @param loaders optional varargs loader to use
    */
-  public ArffPanel(String filename) {
+  public ArffPanel(String filename, AbstractFileLoader... loaders) {
     this();
     
-    loadFile(filename);
+    loadFile(filename, loaders);
   }
   
   /**
@@ -154,13 +157,14 @@ public class ArffPanel
    * any member variables are initialized here
    */
   protected void initialize() {
-    m_Filename        = "";
-    m_Title           = "";
-    m_CurrentCol      = -1;
-    m_LastSearch      = "";
-    m_LastReplace     = "";
-    m_Changed         = false;
-    m_ChangeListeners = new HashSet();
+    m_Filename           = "";
+    m_Title              = "";
+    m_CurrentCol         = -1;
+    m_LastSearch         = "";
+    m_LastReplace        = "";
+    m_ShowAttributeIndex = true;
+    m_Changed            = false;
+    m_ChangeListeners    = new HashSet();
   }
   
   /**
@@ -171,48 +175,48 @@ public class ArffPanel
     
     setLayout(new BorderLayout());
     
-    menuItemMean = new JMenuItem(Messages.getInstance().getString("ArffPanel_GetMean_JMenuItem_Text"));
+    menuItemMean = new JMenuItem("Get mean...");
     menuItemMean.addActionListener(this);
-    menuItemSetAllValues = new JMenuItem(Messages.getInstance().getString("ArffPanel_SetAllValuesTo_JMenuItem_Text"));
+    menuItemSetAllValues = new JMenuItem("Set all values to...");
     menuItemSetAllValues.addActionListener(this);
-    menuItemSetMissingValues = new JMenuItem(Messages.getInstance().getString("ArffPanel_SetMissingValues_JMenuItem_Text"));
+    menuItemSetMissingValues = new JMenuItem("Set missing values to...");
     menuItemSetMissingValues.addActionListener(this);
-    menuItemReplaceValues = new JMenuItem(Messages.getInstance().getString("ArffPanel_ReplaceValues_JMenuItem_Text"));
+    menuItemReplaceValues = new JMenuItem("Replace values with...");
     menuItemReplaceValues.addActionListener(this);
-    menuItemRenameAttribute = new JMenuItem(Messages.getInstance().getString("ArffPanel_RenameAttribute_JMenuItem_Text"));
+    menuItemRenameAttribute = new JMenuItem("Rename attribute...");
     menuItemRenameAttribute.addActionListener(this);
-    menuItemAttributeAsClass = new JMenuItem(Messages.getInstance().getString("ArffPanel_AttributeAsClass_JMenuItem_Text"));
+    menuItemAttributeAsClass = new JMenuItem("Attribute as class");
     menuItemAttributeAsClass.addActionListener(this);
-    menuItemDeleteAttribute = new JMenuItem(Messages.getInstance().getString("ArffPanel_DeleteAttribute_JMenuItem_Text"));
+    menuItemDeleteAttribute = new JMenuItem("Delete attribute");
     menuItemDeleteAttribute.addActionListener(this);
-    menuItemDeleteAttributes = new JMenuItem(Messages.getInstance().getString("ArffPanel_DeleteAttributes_JMenuItem_Text"));
+    menuItemDeleteAttributes = new JMenuItem("Delete attributes...");
     menuItemDeleteAttributes.addActionListener(this);
-    menuItemSortInstances = new JMenuItem(Messages.getInstance().getString("ArffPanel_SortInstances_JMenuItem_Text"));
+    menuItemSortInstances = new JMenuItem("Sort data (ascending)");
     menuItemSortInstances.addActionListener(this);
-    menuItemOptimalColWidth = new JMenuItem(Messages.getInstance().getString("ArffPanel_OptimalColWidth_JMenuItem_Text"));
+    menuItemOptimalColWidth = new JMenuItem("Optimal column width (current)");
     menuItemOptimalColWidth.addActionListener(this);
-    menuItemOptimalColWidths = new JMenuItem(Messages.getInstance().getString("ArffPanel_OptimalColWidths_JMenuItem_Text"));
+    menuItemOptimalColWidths = new JMenuItem("Optimal column width (all)");
     menuItemOptimalColWidths.addActionListener(this);
 
     // row popup
-    menuItemUndo = new JMenuItem(Messages.getInstance().getString("ArffPanel_Undo_JMenuItem_Text"));
+    menuItemUndo = new JMenuItem("Undo");
     menuItemUndo.addActionListener(this);
-    menuItemCopy = new JMenuItem(Messages.getInstance().getString("ArffPanel_Copy_JMenuItem_Text"));
+    menuItemCopy = new JMenuItem("Copy");
     menuItemCopy.addActionListener(this);
-    menuItemSearch = new JMenuItem(Messages.getInstance().getString("ArffPanel_Search_JMenuItem_Text"));
+    menuItemSearch = new JMenuItem("Search...");
     menuItemSearch.addActionListener(this);
-    menuItemClearSearch = new JMenuItem(Messages.getInstance().getString("ArffPanel_ClearSearch_JMenuItem_Text"));
+    menuItemClearSearch = new JMenuItem("Clear search");
     menuItemClearSearch.addActionListener(this);
-    menuItemDeleteSelectedInstance = new JMenuItem(Messages.getInstance().getString("ArffPanel_DeleteSelectedInstance_JMenuItem_Text"));
+    menuItemDeleteSelectedInstance = new JMenuItem("Delete selected instance");
     menuItemDeleteSelectedInstance.addActionListener(this);
-    menuItemDeleteAllSelectedInstances = new JMenuItem(Messages.getInstance().getString("ArffPanel_DeleteAllSelectedInstances_JMenuItem_Text"));
+    menuItemDeleteAllSelectedInstances = new JMenuItem("Delete ALL selected instances");
     menuItemDeleteAllSelectedInstances.addActionListener(this);
     
     // table
     m_TableArff = new ArffTable();
-    m_TableArff.setToolTipText(Messages.getInstance().getString("ArffPanel_ToolTipText_Text"));
+    m_TableArff.setToolTipText("Right click (or left+alt) for context menu");
     m_TableArff.getTableHeader().addMouseListener(this);
-    m_TableArff.getTableHeader().setToolTipText(Messages.getInstance().getString("ArffPanel_TableHeader_ToolTipText_Text") + "<html><b>Sort view:</b> left click = ascending / Shift + left click = descending<br><b>Menu:</b> right click (or left+alt)</html>");
+    m_TableArff.getTableHeader().setToolTipText("<html><b>Sort view:</b> left click = ascending / Shift + left click = descending<br><b>Menu:</b> right click (or left+alt)</html>");
     m_TableArff.getTableHeader().setDefaultRenderer(new ArffTableCellRenderer());
     m_TableArff.addChangeListener(this);
     m_TableArff.addMouseListener(this);
@@ -370,6 +374,7 @@ public class ArffPanel
     
     createTitle();
     model = new ArffSortedTableModel(data);
+    model.setShowAttributeIndex(m_ShowAttributeIndex);
     
     m_TableArff.setModel(model);
     clearUndo();
@@ -438,6 +443,28 @@ public class ArffPanel
   }
 
   /**
+   * Sets whether to display the attribute index in the header.
+   * 
+   * @param value	if true then the attribute indices are displayed in the
+   * 			table header
+   */
+  public void setShowAttributeIndex(boolean value) {
+    m_ShowAttributeIndex = value;
+    if (m_TableArff != null)
+      ((ArffSortedTableModel) m_TableArff.getModel()).setShowAttributeIndex(value);
+  }
+  
+  /**
+   * Returns whether to display the attribute index in the header.
+   * 
+   * @return		true if the attribute indices are displayed in the
+   * 			table header
+   */
+  public boolean getShowAttributeIndex() {
+    return m_ShowAttributeIndex;
+  }
+  
+  /**
    * returns whether undo support is enabled
    * 
    * @return 		true if undo is enabled
@@ -500,7 +527,7 @@ public class ArffPanel
     File              file;
     
     if (m_Filename.equals("")) {
-      m_Title = Messages.getInstance().getString("ArffPanel_CreateTitle_Title_Text");
+      m_Title = "-none-";
     }
     else if (m_Filename.equals(TAB_INSTANCES)) {
       m_Title = TAB_INSTANCES;
@@ -511,7 +538,7 @@ public class ArffPanel
         m_Title = file.getName();
       }
       catch (Exception e) {
-        m_Title = Messages.getInstance().getString("ArffPanel_CreateTitle_Title_Text");
+        m_Title = "-none-";
       }
     }
     
@@ -527,7 +554,7 @@ public class ArffPanel
     
     model = (ArffSortedTableModel) m_TableArff.getModel();
     if ((model != null) && (model.getInstances() != null))
-      m_LabelName.setText(Messages.getInstance().getString("ArffPanel_CreateName_Text") + model.getInstances().relationName());
+      m_LabelName.setText("Relation: " + model.getInstances().relationName());
     else
       m_LabelName.setText("");
   }
@@ -536,18 +563,22 @@ public class ArffPanel
    * loads the specified file into the table
    * 
    * @param filename		the file to load
+   * @param loaders optional varargs loader to use
    */
-  private void loadFile(String filename) {
+  private void loadFile(String filename, AbstractFileLoader... loaders) {
     ArffSortedTableModel         model;
     
     this.m_Filename = filename;
     
     createTitle();
     
-    if (filename.equals(""))   
+    if (filename.equals("")) {
       model = null;
-    else
-      model = new ArffSortedTableModel(filename);
+    }
+    else {
+      model = new ArffSortedTableModel(filename, loaders);
+      model.setShowAttributeIndex(getShowAttributeIndex());
+    }
     
     m_TableArff.setModel(model);
     setChanged(false);
@@ -580,10 +611,10 @@ public class ArffPanel
     // show result
     ComponentHelper.showMessageBox(
         getParent(), 
-        Messages.getInstance().getString("ArffPanel_CalcMean_Text_First"),
-        Messages.getInstance().getString("ArffPanel_CalcMean_Text_Second") 
+        "Mean for attribute...",
+        "Mean for attribute '" 
         + m_TableArff.getPlainColumnName(m_CurrentCol) 
-        + Messages.getInstance().getString("ArffPanel_CalcMean_Text_Third") + Utils.doubleToString(mean, 3),
+        + "':\n\t" + Utils.doubleToString(mean, 3),
         JOptionPane.OK_CANCEL_OPTION,
         JOptionPane.PLAIN_MESSAGE);
   }
@@ -605,16 +636,16 @@ public class ArffPanel
     valueNew = "";
     
     if (o == menuItemSetMissingValues) {
-      title = Messages.getInstance().getString("ArffPanel_SetValues_Title_Text_First"); 
-      msg   = Messages.getInstance().getString("ArffPanel_SetValues_Message_Text_First");
+      title = "Replace missing values..."; 
+      msg   = "New value for MISSING values";
     }
     else if (o == menuItemSetAllValues) {
-      title = Messages.getInstance().getString("ArffPanel_SetValues_Title_Text_Second"); 
-      msg   = Messages.getInstance().getString("ArffPanel_SetValues_Message_Text_Second");
+      title = "Set all values..."; 
+      msg   = "New value for ALL values";
     }
     else if (o == menuItemReplaceValues) {
-      title = Messages.getInstance().getString("ArffPanel_SetValues_Title_Text_Third"); 
-      msg   = Messages.getInstance().getString("ArffPanel_SetValues_Message_Text_Third");
+      title = "Replace values..."; 
+      msg   = "Old value";
     }
     else
       return;
@@ -629,7 +660,7 @@ public class ArffPanel
     
     // replacement
     if (o == menuItemReplaceValues) {
-      valueNew = ComponentHelper.showInputBox(m_TableArff.getParent(), title, Messages.getInstance().getString("ArffPanel_SetValues_ComponentHelperShowInputBox_Text"), m_LastReplace);
+      valueNew = ComponentHelper.showInputBox(m_TableArff.getParent(), title, "New value", m_LastReplace);
       if (valueNew == null)
         return;
       m_LastReplace = valueNew;
@@ -655,13 +686,14 @@ public class ArffPanel
         if ( (o == menuItemSetMissingValues) 
             && model.isMissingAt(i, m_CurrentCol) )
           model.setValueAt(value, i, m_CurrentCol);
-        else if ( (o == menuItemReplaceValues)  
+        else if ( (o == menuItemReplaceValues) 
             && model.getValueAt(i, m_CurrentCol).toString().equals(value) ) {
           if (valueNewCopy.equals("NaN") || valueNewCopy.equals("?")) {
             valueNew = null;
           }
           model.setValueAt(valueNew, i, m_CurrentCol);
         }
+          
     }
     model.setUndoEnabled(true);
     model.setNotificationEnabled(true);
@@ -690,9 +722,9 @@ public class ArffPanel
     // really?
     if (ComponentHelper.showMessageBox(
         getParent(), 
-        Messages.getInstance().getString("ArffPanel_DeleteAttribute_ComponentHelperShowMessageBox_Text_First"),
-        Messages.getInstance().getString("ArffPanel_DeleteAttribute_ComponentHelperShowMessageBox_Text_Second") 
-        + model.getAttributeAt(m_CurrentCol).name() + Messages.getInstance().getString("ArffPanel_DeleteAttribute_ComponentHelperShowMessageBox_Text_Third"),
+        "Confirm...",
+        "Do you really want to delete the attribute '" 
+        + model.getAttributeAt(m_CurrentCol).name() + "'?",
         JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION)
       return;
@@ -726,9 +758,9 @@ public class ArffPanel
     // really?
     if (ComponentHelper.showMessageBox(
         getParent(), 
-        Messages.getInstance().getString("ArffPanel_DeleteAttributes_ComponentHelperShowMessageBox_Text_First"),
-        Messages.getInstance().getString("ArffPanel_DeleteAttributes_ComponentHelperShowMessageBox_Text_Second") 
-        + atts.length + Messages.getInstance().getString("ArffPanel_DeleteAttributes_ComponentHelperShowMessageBox_Text_Third"),
+        "Confirm...",
+        "Do you really want to delete these " 
+        + atts.length + " attributes?",
         JOptionPane.YES_NO_OPTION,
         JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION)
       return;
@@ -782,8 +814,7 @@ public class ArffPanel
     if (model.getAttributeAt(m_CurrentCol) == null)
       return;
     
-    newName = ComponentHelper.showInputBox(getParent(), 
-    		Messages.getInstance().getString("ArffPanel_RenameAttribute_ComponentHelperShowInputBox_Text_First"), Messages.getInstance().getString("ArffPanel_RenameAttribute_ComponentHelperShowInputBox_Text_Second"), model.getAttributeAt(m_CurrentCol).name());
+    newName = ComponentHelper.showInputBox(getParent(), "Rename attribute...", "Enter new Attribute name", model.getAttributeAt(m_CurrentCol).name());
     if (newName == null)
       return;
     
@@ -850,8 +881,7 @@ public class ArffPanel
     String              searchString;
     
     // display dialog
-    searchString = ComponentHelper.showInputBox(getParent(), 
-    		Messages.getInstance().getString("ArffPanel_Search_ComponentHelperShowInputBox_Text_First"), Messages.getInstance().getString("ArffPanel_Search_ComponentHelperShowInputBox_Text_Second"), m_LastSearch);
+    searchString = ComponentHelper.showInputBox(getParent(), "Search...", "Enter the string to search for", m_LastSearch);
     if (searchString != null)
       m_LastSearch = searchString;
     

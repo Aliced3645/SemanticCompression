@@ -17,7 +17,7 @@ package weka.core;
  * @author wolfgang.hoschek@cern.ch
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 5619 $
+ * @version $Revision: 5616 $
  */
 public class Statistics
   implements RevisionHandler {
@@ -534,7 +534,7 @@ public class Statistics
    * @param coef the coefficients of the polynomial.
    * @param N the degree of the polynomial.
    */
-  static double polevl( double x, double coef[], int N ) {
+  public static double polevl( double x, double coef[], int N ) {
 
     double ans;
     ans = coef[0];
@@ -728,7 +728,7 @@ public class Statistics
    * Returns the Gamma function computed by Stirling's formula.
    * The polynomial STIR is valid for 33 <= x <= 172.
    */
-  static double stirlingFormula(double x) {
+  public static double stirlingFormula(double x) {
 
     double STIR[] = {
       7.87311395793093628397E-4,
@@ -1008,7 +1008,7 @@ public class Statistics
    * Power series for incomplete beta integral.
    * Use when b*x is small and x not too close to 1.  
    */
-  static double powerSeries( double a, double b, double x ) {
+  public static double powerSeries( double a, double b, double x ) {
 
     double s, t, u, v, n, t1, z, ai;
     
@@ -1048,7 +1048,7 @@ public class Statistics
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 5619 $");
+    return RevisionUtils.extract("$Revision: 5616 $");
   }
 
   /**

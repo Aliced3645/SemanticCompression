@@ -1,22 +1,21 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    PrincipalComponents.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,6 +26,8 @@ import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.DenseInstance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -36,7 +37,6 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Center;
 import weka.filters.unsupervised.attribute.NominalToBinary;
@@ -53,8 +53,10 @@ import weka.filters.unsupervised.attribute.Standardize;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -D
- *  Don't normalize input data.</pre>
+ * <pre> -C
+ *  Center (rather than standardize) the
+ *  data and compute PCA using the covariance (rather
+ *   than the correlation) matrix.</pre>
  * 
  * <pre> -R
  *  Retain enough PC attributes to account 
@@ -73,7 +75,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 6690 $
+ * @version $Revision: 8034 $
  */
 public class PrincipalComponents 
   extends UnsupervisedAttributeEvaluator 
@@ -141,9 +143,6 @@ public class PrincipalComponents
 
   /** The number of attributes in the pc transformed data */
   private int m_outputNumAtts = -1;
-  
-  /** normalize the input data? */
-  //private boolean m_normalize = true;
 
   /** the amount of variance to cover in the original data when
       retaining the best n PC's */
@@ -210,8 +209,10 @@ public class PrincipalComponents
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -D
-   *  Don't normalize input data.</pre>
+   * <pre> -C
+   *  Center (rather than standardize) the
+   *  data and compute PCA using the covariance (rather
+   *   than the correlation) matrix.</pre>
    * 
    * <pre> -R
    *  Retain enough PC attributes to account 
@@ -707,7 +708,7 @@ public class PrincipalComponents
         if (i == j) {
           m_correlation[i][j] = 1.0;
             // store the standard deviation
-            m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
+          m_stdDevs[i] = Math.sqrt(Utils.variance(att1));
         } else {
           corr = Utils.correlation(att1,att2,m_numInstances);
           m_correlation[i][j] = corr;
@@ -850,7 +851,7 @@ public class PrincipalComponents
     if (inst instanceof SparseInstance) {
       return new SparseInstance(inst.weight(), newVals);
     } else {
-      return new Instance(inst.weight(), newVals);
+      return new DenseInstance(inst.weight(), newVals);
     }      
   }
 
@@ -873,7 +874,7 @@ public class PrincipalComponents
     if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: header's don't match: "
                           +"PrincipalComponents\n"
-                          + "Can't convert instance: header's don't match.");
+                          + instance.dataset().equalHeadersMsg(m_trainHeader));
     }
 
     m_replaceMissingFilter.input(tempInst);
@@ -928,14 +929,14 @@ public class PrincipalComponents
       if (instance instanceof SparseInstance) {
       return new SparseInstance(instance.weight(), newVals);
       } else {
-        return new Instance(instance.weight(), newVals);
+        return new DenseInstance(instance.weight(), newVals);
       }      
     } else {
       if (instance instanceof SparseInstance) {
         return convertInstanceToOriginal(new SparseInstance(instance.weight(), 
                                                             newVals));
       } else {
-        return convertInstanceToOriginal(new Instance(instance.weight(),
+        return convertInstanceToOriginal(new DenseInstance(instance.weight(),
                                                       newVals));
       }
     }
@@ -1043,7 +1044,7 @@ public class PrincipalComponents
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 6690 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
 
   /**
@@ -1055,3 +1056,4 @@ public class PrincipalComponents
     runEvaluator(new PrincipalComponents(), argv);
   }
 }
+

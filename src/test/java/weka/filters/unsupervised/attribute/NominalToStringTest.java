@@ -35,7 +35,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.NominalToStringTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 9180 $
+ * @version $Revision: 9178 $
  */
 public class NominalToStringTest
   extends AbstractFilterTest {

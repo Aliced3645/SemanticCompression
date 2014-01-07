@@ -1,34 +1,34 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    PlotData2D.java
- *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui.visualize;
 
+import java.awt.Color;
+import java.io.Serializable;
+
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
-
-import java.awt.Color;
 
 /**
  * This class is a container for plottable data. Instances form the
@@ -36,15 +36,20 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 7059 $
+ * @version $Revision: 9455 $
  */
-public class PlotData2D {
+public class PlotData2D implements Serializable {
+
+  /**
+   * For serialization
+   */
+  private static final long serialVersionUID = -3979972167982697979L;
 
   /** The instances */
   protected Instances m_plotInstances = null;
 
   /** The name of this plot */
-  protected String m_plotName = Messages.getInstance().getString("PlotData2D_PlotName_Text");
+  protected String m_plotName = "new plot";
   
   /**
    * The name of this plot (possibly in html) suitable for using in a 
@@ -131,8 +136,8 @@ public class PlotData2D {
     int originalClassIndex = m_plotInstances.classIndex();
     try {
       Add addF = new Add();
-      addF.setAttributeName(Messages.getInstance().getString("PlotData2D_AddInstanceNumberAttribute_AddF_SetAttributeName_Text"));
-      addF.setAttributeIndex(Messages.getInstance().getString("PlotData2D_AddInstanceNumberAttribute_AddF_SetAttributeIndex_Text"));
+      addF.setAttributeName("Instance_number");
+      addF.setAttributeIndex("first");
       addF.setInputFormat(m_plotInstances);
       m_plotInstances = Filter.useFilter(m_plotInstances, addF);
       m_plotInstances.setClassIndex(originalClassIndex + 1);
@@ -202,13 +207,23 @@ public class PlotData2D {
   public void setShapeType(int [] st) throws Exception {
     m_shapeType = st;
     if (m_shapeType.length != m_plotInstances.numInstances()) {
-      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_First"));
+      throw new Exception("PlotData2D: Shape type array must have the same "
+			  +"number of entries as number of data points!");
     }
-    for (int i = 0; i < st.length; i++) {
+/*    for (int i = 0; i < st.length; i++) {
       if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
       }
-    }
+    } */
+  }
+  
+  /**
+   * Get the shape types for the plot data
+   * 
+   * @return the shape types for the plot data
+   */
+  public int[] getShapeType() {
+    return m_shapeType;
   }
 
   /**
@@ -218,14 +233,15 @@ public class PlotData2D {
    */
   public void setShapeType(FastVector st) throws Exception {
     if (st.size() != m_plotInstances.numInstances()) {
-      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_Second"));
+      throw new Exception("PlotData2D: Shape type vector must have the same "
+			  +"number of entries as number of data points!");
     }
     m_shapeType = new int [st.size()];
     for (int i = 0; i < st.size(); i++) {
       m_shapeType[i] = ((Integer)st.elementAt(i)).intValue();
-      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
+/*      if (m_shapeType[i] == Plot2D.ERROR_SHAPE) {
 	m_shapeSize[i] = 3;
-      }
+      } */
     }
   }
 
@@ -236,8 +252,18 @@ public class PlotData2D {
   public void setShapeSize(int [] ss) throws Exception {
     m_shapeSize = ss;
     if (m_shapeType.length != m_plotInstances.numInstances()) {
-      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_Third"));
+      throw new Exception("PlotData2D: Shape size array must have the same "
+			  +"number of entries as number of data points!");
     }
+  }
+  
+  /**
+   * Get the shape sizes for the plot data
+   * 
+   * @return the shape sizes for the plot data
+   */
+  public int[] getShapeSize() {
+    return m_shapeSize;
   }
   
   /**
@@ -246,7 +272,8 @@ public class PlotData2D {
    */
   public void setShapeSize(FastVector ss) throws Exception {
     if (ss.size() != m_plotInstances.numInstances()) {
-      throw new Exception(Messages.getInstance().getString("PlotData2D_SetShapeType_Exception_Text_Fourth"));
+      throw new Exception("PlotData2D: Shape size vector must have the same "
+			  +"number of entries as number of data points!");
     }
     //System.err.println("Setting connect points ");
     m_shapeSize = new int [ss.size()];
@@ -263,8 +290,8 @@ public class PlotData2D {
   public void setConnectPoints(boolean [] cp) throws Exception {
     m_connectPoints = cp;
     if (m_connectPoints.length != m_plotInstances.numInstances()) {
-      throw new Exception(Messages.getInstance().getString("PlotData2D_SetConnectPoints_Exception_Text_First"));
-    		  
+      throw new Exception("PlotData2D: connect points array must have the "
+			  +"same number of entries as number of data points!");
     }
     m_connectPoints[0] = false;
   }
@@ -276,7 +303,8 @@ public class PlotData2D {
    */
   public void setConnectPoints(FastVector cp) throws Exception {
     if (cp.size() != m_plotInstances.numInstances()) {
-      throw new Exception(Messages.getInstance().getString("PlotData2D_SetConnectPoints_Exception_Text_Second"));
+      throw new Exception("PlotData2D: connect points array must have the "
+			  +"same number of entries as number of data points!");
     }
     //System.err.println("Setting connect points ");
     m_shapeSize = new int [cp.size()];

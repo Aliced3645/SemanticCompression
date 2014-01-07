@@ -1,37 +1,30 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * ArffTable.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.arffviewer;
 
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
-import weka.gui.ViewerDialog;
-
 import java.awt.Component;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.datatransfer.StringSelection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -48,12 +41,18 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.gui.ComponentHelper;
+import weka.gui.JTableHelper;
+import weka.gui.ViewerDialog;
+
 /**
  * A specialized JTable for the Arff-Viewer.
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 7059 $ 
+ * @version $Revision: 8034 $ 
  */
 public class ArffTable
   extends JTable {
@@ -96,7 +95,7 @@ public class ArffTable
       m_RowIndex    = rowIndex;
       m_ColumnIndex = columnIndex;
       
-      m_Button = new JButton(Messages.getInstance().getString("ArffTable_RelationalCellEditor_RelationalCellEditor_JButton_Text"));
+      m_Button = new JButton("...");
       m_Button.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
           ViewerDialog        dialog;
@@ -104,7 +103,7 @@ public class ArffTable
           
           dialog = new ViewerDialog(null);
           dialog.setTitle(
-        		  Messages.getInstance().getString("ArffTable_RelationalCellEditor_RelationalCellEditor_ViewerDialog_Text") 
+              "Relational attribute Viewer - " 
               + ((ArffSortedTableModel) getModel()).getInstances().attribute(m_ColumnIndex - 1).name());
           result = dialog.showDialog(m_CurrentInst);
           if (result == ViewerDialog.APPROVE_OPTION) {
@@ -322,7 +321,7 @@ public class ArffTable
     
     if ( (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0)
-        result = Messages.getInstance().getString("ArffTable_GetPlainColumnName_Result_Text");
+        result = "No.";
       else
         result = arffModel.getAttributeAt(columnIndex).name();
     }
@@ -351,8 +350,8 @@ public class ArffTable
       // really?
       if (ComponentHelper.showMessageBox(
             getParent(),
-            Messages.getInstance().getString("ArffTable_GetStringSelection_ComponentHelperShowMessageBox_Text_First"),
-            Messages.getInstance().getString("ArffTable_GetStringSelection_ComponentHelperShowMessageBox_Text_Second"),
+            "Question...",
+            "Do you really want to copy the whole table?",
             JOptionPane.YES_NO_OPTION,
             JOptionPane.QUESTION_MESSAGE ) != JOptionPane.YES_OPTION)
         return result;

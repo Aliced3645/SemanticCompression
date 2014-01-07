@@ -1,60 +1,25 @@
- /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    PreprocessPanel.java
- *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2003-2013 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.explorer;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractFileSaver;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.Loader;
-import weka.core.converters.SerializedInstancesLoader;
-import weka.core.converters.URLSourcedLoader;
-import weka.datagenerators.DataGenerator;
-import weka.experiment.InstanceQuery;
-import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.AttributeSelectionPanel;
-import weka.gui.AttributeSummaryPanel;
-import weka.gui.AttributeVisualizationPanel;
-import weka.gui.ConverterFileChooser;
-import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
-import weka.gui.Logger;
-import weka.gui.PropertyDialog;
-import weka.gui.PropertyPanel;
-import weka.gui.SysErrLog;
-import weka.gui.TaskLogger;
-import weka.gui.ViewerDialog;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
-import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
-import weka.gui.explorer.Explorer.ExplorerPanel;
-import weka.gui.explorer.Explorer.LogHandler;
-import weka.gui.sql.SqlViewerDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -94,7 +59,44 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.table.TableModel;
+
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.Loader;
+import weka.core.converters.SerializedInstancesLoader;
+import weka.core.converters.URLSourcedLoader;
+import weka.datagenerators.DataGenerator;
+import weka.experiment.InstanceQuery;
+import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.AttributeSelectionPanel;
+import weka.gui.AttributeSummaryPanel;
+import weka.gui.AttributeVisualizationPanel;
+import weka.gui.ConverterFileChooser;
+import weka.gui.GenericObjectEditor;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.Logger;
+import weka.gui.PropertyDialog;
+import weka.gui.PropertyPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.ViewerDialog;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
+import weka.gui.sql.SqlViewerDialog;
 
 /** 
  * This panel controls simple preprocessing of instances. Summary
@@ -118,31 +120,31 @@ public class PreprocessPanel
     new InstancesSummaryPanel();
 
   /** Click to load base instances from a file */
-  protected JButton m_OpenFileBut = new JButton(Messages.getInstance().getString("PreprocessPanel_OpenFileBut_JButton_Text"));
+  protected JButton m_OpenFileBut = new JButton("Open file...");
 
   /** Click to load base instances from a URL */
-  protected JButton m_OpenURLBut = new JButton(Messages.getInstance().getString("PreprocessPanel_OpenURLBut_JButton_Text"));
+  protected JButton m_OpenURLBut = new JButton("Open URL...");
 
   /** Click to load base instances from a Database */
-  protected JButton m_OpenDBBut = new JButton(Messages.getInstance().getString("PreprocessPanel_OpenDBBut_JButton_Text"));
+  protected JButton m_OpenDBBut = new JButton("Open DB...");
 
   /** Click to generate artificial data */
-  protected JButton m_GenerateBut = new JButton(Messages.getInstance().getString("PreprocessPanel_GenerateBut_JButton_Text"));
+  protected JButton m_GenerateBut = new JButton("Generate...");
 
   /** Click to revert back to the last saved point */
-  protected JButton m_UndoBut = new JButton(Messages.getInstance().getString("PreprocessPanel_UndoBut_JButton_Text"));
+  protected JButton m_UndoBut = new JButton("Undo");
 
   /** Click to open the current instances in a viewer */
-  protected JButton m_EditBut = new JButton(Messages.getInstance().getString("PreprocessPanel_EditBut_JButton_Text"));
+  protected JButton m_EditBut = new JButton("Edit...");
 
   /** Click to apply filters and save the results */
-  protected JButton m_SaveBut = new JButton(Messages.getInstance().getString("PreprocessPanel_SaveBut_JButton_Text"));
+  protected JButton m_SaveBut = new JButton("Save...");
   
   /** Panel to let the user toggle attributes */
   protected AttributeSelectionPanel m_AttPanel = new AttributeSelectionPanel();
 
   /** Button for removing attributes */
-  protected JButton m_RemoveButton = new JButton(Messages.getInstance().getString("PreprocessPanel_RemoveButton_JButton_Text"));
+  protected JButton m_RemoveButton = new JButton("Remove");
 
   /** Displays summary stats on the selected attribute */
   protected AttributeSummaryPanel m_AttSummaryPanel =
@@ -156,7 +158,7 @@ public class PreprocessPanel
   protected PropertyPanel m_FilterPanel = new PropertyPanel(m_FilterEditor);
 
   /** Click to apply filters and save the results */
-  protected JButton m_ApplyFilterBut = new JButton(Messages.getInstance().getString("PreprocessPanel_ApplyFilterBut_JButton_Text"));
+  protected JButton m_ApplyFilterBut = new JButton("Apply");
 
   /** The file chooser for selecting data files */
   protected ConverterFileChooser m_FileChooser 
@@ -200,6 +202,7 @@ public class PreprocessPanel
   protected Explorer m_Explorer = null;
   
   static {
+     weka.core.WekaPackageManager.loadPackages(false);
      GenericObjectEditor.registerEditors();
   }
   
@@ -234,19 +237,19 @@ public class PreprocessPanel
         }
       }
     });
-    m_OpenFileBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_OpenFileBut_SetToolTipText_Text"));
-    m_OpenURLBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_OpenURLBut_SetToolTipText_Text"));
-    m_OpenDBBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_OpenDBBut_SetToolTipText_Text"));
-    m_GenerateBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_GenerateBut_SetToolTipText_Text"));
-    m_UndoBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_UndoBut_SetToolTipText_Text"));
+    m_OpenFileBut.setToolTipText("Open a set of instances from a file");
+    m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
+    m_OpenDBBut.setToolTipText("Open a set of instances from a database");
+    m_GenerateBut.setToolTipText("Generates artificial data");
+    m_UndoBut.setToolTipText("Undo the last change to the dataset");
     m_UndoBut.setEnabled(ExplorerDefaults.get("enableUndo", "true").equalsIgnoreCase("true"));
     if (!m_UndoBut.isEnabled()) {
       m_UndoBut.setToolTipText("Undo is disabled - " +
-                "see weka.gui.explorer.Explorer.props to enable");
+      		"see weka.gui.explorer.Explorer.props to enable");
     }
-    m_EditBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_EditBut_SetToolTipText_Text"));
-    m_SaveBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_SaveBut_SetToolTipText_Text"));
-    m_ApplyFilterBut.setToolTipText(Messages.getInstance().getString("PreprocessPanel_ApplyFilterBut_SetToolTipText_Text"));
+    m_EditBut.setToolTipText("Open the current dataset in a Viewer for editing");
+    m_SaveBut.setToolTipText("Save the working relation to a file");
+    m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
 
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -260,7 +263,8 @@ public class PreprocessPanel
         dialog.setVisible(true);
         if (dialog.getReturnValue() == JOptionPane.OK_OPTION)
           setInstancesFromDBQ(dialog.getURL(), dialog.getUser(),
-                              dialog.getPassword(), dialog.getQuery());
+                              dialog.getPassword(), dialog.getQuery(),
+                              dialog.getGenerateSparseData());
       }
     });
     m_OpenFileBut.addActionListener(new ActionListener() {
@@ -310,14 +314,15 @@ public class PreprocessPanel
     });
 
 
-    m_InstSummaryPanel.setBorder(BorderFactory.createTitledBorder(Messages.getInstance().getString("PreprocessPanel_InstSummaryPanel_BorderFactoryCreateTitledBorder_Text")));
+    m_InstSummaryPanel.setBorder(BorderFactory
+				 .createTitledBorder("Current relation"));
     JPanel attStuffHolderPanel = new JPanel();
     attStuffHolderPanel.setBorder(BorderFactory
-				  .createTitledBorder(Messages.getInstance().getString("PreprocessPanel_AttStuffHolderPanel_BorderFactoryCreateTitledBorder_Text")));
+				  .createTitledBorder("Attributes"));
     attStuffHolderPanel.setLayout(new BorderLayout());
     attStuffHolderPanel.add(m_AttPanel, BorderLayout.CENTER);
     m_RemoveButton.setEnabled(false);
-    m_RemoveButton.setToolTipText(Messages.getInstance().getString("PreprocessPanel_RemoveButton_SetToolTipText_Text"));
+    m_RemoveButton.setToolTipText("Remove selected attributes.");
     m_RemoveButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  try {
@@ -329,27 +334,28 @@ public class PreprocessPanel
 	    if (selected.length == m_Instances.numAttributes()) {
 	      // Pop up an error optionpane
 	      JOptionPane.showMessageDialog(PreprocessPanel.this,
-	    		  Messages.getInstance().getString("PreprocessPanel_JOptionPaneShowMessageDialog_Text_First"),
-	    		  Messages.getInstance().getString("PreprocessPanel_JOptionPaneShowMessageDialog_Text_Second"),
+					    "Can't remove all attributes from data!\n",
+					    "Remove Attributes",
 					    JOptionPane.ERROR_MESSAGE);
-	      m_Log.logMessage(Messages.getInstance().getString("PreprocessPanel_Log_LogMessage_Text_First"));
-	      m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_Log_StatusMessage_Text_First"));
+	      m_Log.logMessage("Can't remove all attributes from data!");
+	      m_Log.statusMessage("Problem removing attributes");
 	      return;
 	    }
 	    r.setAttributeIndicesArray(selected);
 	    applyFilter(r);
+	    m_RemoveButton.setEnabled(false);
 	  } catch (Exception ex) {
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskFinished();
 	    }
 	    // Pop up an error optionpane
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
-	    		Messages.getInstance().getString("PreprocessPanel_JOptionPaneShowMessageDialog_Text_Third")
+					  "Problem filtering instances:\n"
 					  + ex.getMessage(),
-					  Messages.getInstance().getString("PreprocessPanel_JOptionPaneShowMessageDialog_Text_Fourth"),
+					  "Remove Attributes",
 					  JOptionPane.ERROR_MESSAGE);
-	    m_Log.logMessage(Messages.getInstance().getString("PreprocessPanel_Log_LogMessage_Text_Second") + ex.getMessage());
-	    m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_Log_StatusMessage_Text_Second"));
+	    m_Log.logMessage("Problem removing attributes: " + ex.getMessage());
+	    m_Log.statusMessage("Problem removing attributes");
 	  }
 	}
       });
@@ -360,7 +366,7 @@ public class PreprocessPanel
     p1.add(m_RemoveButton, BorderLayout.CENTER);
     attStuffHolderPanel.add(p1, BorderLayout.SOUTH);
     m_AttSummaryPanel.setBorder(BorderFactory
-		    .createTitledBorder(Messages.getInstance().getString("PreprocessPanel_AttSummaryPanel_BorderFactoryCreateTitledBorder_Text")));
+		    .createTitledBorder("Selected attribute"));
     m_UndoBut.setEnabled(false);
     m_EditBut.setEnabled(false);
     m_SaveBut.setEnabled(false);
@@ -385,7 +391,7 @@ public class PreprocessPanel
 
     JPanel filter = new JPanel();
     filter.setBorder(BorderFactory
-		    .createTitledBorder(Messages.getInstance().getString("PreprocessPanel_Filter_BorderFactoryCreateTitledBorder_Text")));
+		    .createTitledBorder("Filter"));
     filter.setLayout(new BorderLayout());
     filter.add(m_FilterPanel, BorderLayout.CENTER);
     filter.add(m_ApplyFilterBut, BorderLayout.EAST); 
@@ -395,7 +401,8 @@ public class PreprocessPanel
     attVis.add(m_AttSummaryPanel);
 
     JComboBox colorBox = m_AttVisualizePanel.getColorBox();
-    colorBox.setToolTipText(Messages.getInstance().getString("PreprocessPanel_ColorBox_SetToolTipText_Text"));
+    colorBox.setToolTipText("The chosen attribute will also be used as the " +
+			    "class attribute when a filter is applied.");
     colorBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent ie) {
 	if (ie.getStateChange() == ItemEvent.SELECTED) {
@@ -403,7 +410,7 @@ public class PreprocessPanel
 	}
       }
     });
-    final JButton visAllBut = new JButton(Messages.getInstance().getString("PreprocessPanel_VisAllBut_JButton_Text"));
+    final JButton visAllBut = new JButton("Visualize All");
     visAllBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent ae) {
 	  if (m_Instances != null) {
@@ -418,6 +425,7 @@ public class PreprocessPanel
 	      
 	      jf.getContentPane().add(as, java.awt.BorderLayout.CENTER);
 	      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+		  @Override
 		  public void windowClosing(java.awt.event.WindowEvent e) {
 		    visAllBut.setEnabled(true);
 		    jf.dispose();
@@ -486,9 +494,26 @@ public class PreprocessPanel
     try {
       Runnable r = new Runnable() {
 	public void run() {
+	  boolean first = 
+	    (m_AttPanel.getTableModel() == null);
+	  
 	  m_InstSummaryPanel.setInstances(m_Instances);
 	  m_AttPanel.setInstances(m_Instances);
-	  m_RemoveButton.setEnabled(true);
+	  
+	  if (first) {
+	    TableModel model = m_AttPanel.getTableModel(); 
+	    model.addTableModelListener(new TableModelListener() {
+	      public void tableChanged(TableModelEvent e) {
+	        if (m_AttPanel.getSelectedAttributes() != null &&
+	            m_AttPanel.getSelectedAttributes().length > 0) {
+	          m_RemoveButton.setEnabled(true);
+	        } else {
+	          m_RemoveButton.setEnabled(false);
+	        }
+	      }
+	    });
+	  }
+//	  m_RemoveButton.setEnabled(true);
 	  m_AttSummaryPanel.setInstances(m_Instances);
 	  m_AttVisualizePanel.setInstances(m_Instances);
 
@@ -499,15 +524,13 @@ public class PreprocessPanel
 
 	  m_ApplyFilterBut.setEnabled(true);
 
-	  /**
-	  m_Log.logMessage(Messages.getInstance().getString("PreprocessPanel_SetInstances_Run_Log_LogMessage_Text_First")
+	  m_Log.logMessage("Base relation is now "
 			   + m_Instances.relationName()
-			   + Messages.getInstance().getString("PreprocessPanel_SetInstances_Run_Log_LogMessage_Text_Second") + m_Instances.numInstances()
-			   + Messages.getInstance().getString("PreprocessPanel_SetInstances_Run_Log_LogMessage_Text_Third"));
-	  **/
+			   + " (" + m_Instances.numInstances()
+			   + " instances)");
 	  m_SaveBut.setEnabled(true);
 	  m_EditBut.setEnabled(true);
-	  m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SetInstances_Run_Log_StatusMessage_Text_First"));
+	  m_Log.statusMessage("OK");
 	  // Fire a propertychange event
 	  m_Support.firePropertyChange("", null, null);
 	  
@@ -542,13 +565,11 @@ public class PreprocessPanel
       }
     } catch (Exception ex) {
       ex.printStackTrace();
-      /**
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SetInstances_Run_JOptionPaneShowMessageDialog_Text_First")
+				    "Problem setting base instances:\n"
 				    + ex,
-				    Messages.getInstance().getString("PreprocessPanel_SetInstances_Run_JOptionPaneShowMessageDialog_Text_Second"),
+				    "Instances",
 				    JOptionPane.ERROR_MESSAGE);
-	  **/
     }
   }
 
@@ -567,6 +588,7 @@ public class PreprocessPanel
    *
    * @param l a value of type 'PropertyChangeListener'
    */
+  @Override
   public void addPropertyChangeListener(PropertyChangeListener l) {
 
     m_Support.addPropertyChangeListener(l);
@@ -577,6 +599,7 @@ public class PreprocessPanel
    *
    * @param l a value of type 'PropertyChangeListener'
    */
+  @Override
   public void removePropertyChangeListener(PropertyChangeListener l) {
 
     m_Support.removePropertyChangeListener(l);
@@ -591,23 +614,27 @@ public class PreprocessPanel
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 	  try {
 
 	    if (filter != null) {
+	      m_FilterPanel.addToHistory();
 	    
 	      if (m_Log instanceof TaskLogger) {
 		((TaskLogger)m_Log).taskStarted();
 	      }
-	      m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_Log_StatusMessage_Text_First")
+	      m_Log.statusMessage("Passing dataset through filter "
 		  + filter.getClass().getName());
 	      String cmd = filter.getClass().getName();
 	      if (filter instanceof OptionHandler)
 		cmd += " " + Utils.joinOptions(((OptionHandler) filter).getOptions());
-	      m_Log.logMessage(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_Log_LogMessage_Text_First") + cmd);
+	      m_Log.logMessage("Command: " + cmd);
 	      int classIndex = m_AttVisualizePanel.getColoringIndex();
 	      if ((classIndex < 0) && (filter instanceof SupervisedFilter)) {
-		throw new IllegalArgumentException(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_IllegalArgumentException_Text"));
+		throw new IllegalArgumentException("Class (colour) needs to " +
+						   "be set for supervised " +
+						   "filter.");
 	      }
 	      Instances copy = new Instances(m_Instances);
 	      copy.setClassIndex(classIndex);
@@ -615,9 +642,9 @@ public class PreprocessPanel
 	      filterCopy.setInputFormat(copy);
 	      Instances newInstances = Filter.useFilter(copy, filterCopy);
 	      if (newInstances == null || newInstances.numAttributes() < 1) {
-		throw new Exception(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_Exception_Text"));
+		throw new Exception("Dataset is empty.");
 	      }
-	      m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_Log_StatusMessage_Text_Second"));
+	      m_Log.statusMessage("Saving undo information");
 	      addUndoPoint();
 	      m_AttVisualizePanel.setColoringIndex(copy.classIndex());
 	      // if class was not set before, reset it again after use of filter
@@ -637,12 +664,12 @@ public class PreprocessPanel
 	    }
 	    // Pop up an error optionpane
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
-	    		Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_JOptionPaneShowMessageDialog_Text_First")
+					  "Problem filtering instances:\n"
 					  + ex.getMessage(),
-					  Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_JOptionPaneShowMessageDialog_Text_Second"),
+					  "Apply Filter",
 					  JOptionPane.ERROR_MESSAGE);
-	    m_Log.logMessage(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_Log_LogMessage_Text_Second") + ex.getMessage());
-	    m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_Log_StatusMessage_Text_Third"));
+	    m_Log.logMessage("Problem filtering instances: " + ex.getMessage());
+	    m_Log.statusMessage("Problem filtering instances");
 	  }
 	  m_IOThread = null;
 	}
@@ -651,8 +678,9 @@ public class PreprocessPanel
       m_IOThread.start();
     } else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_JOptionPaneShowMessageDialog_Text_Third"),
-				    Messages.getInstance().getString("PreprocessPanel_ApplyFilter_Run_JOptionPaneShowMessageDialog_Text_Fourth"),
+				    "Can't apply filter at this time,\n"
+				    + "currently busy with other IO",
+				    "Apply Filter",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -679,8 +707,9 @@ public class PreprocessPanel
     }
     else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SaveWorkingInstancesToFileQ_JOptionPaneShowMessageDialog_Text_First"),
-				    Messages.getInstance().getString("PreprocessPanel_SaveWorkingInstancesToFileQ_JOptionPaneShowMessageDialog_Text_Second"),
+				    "Can't save at this time,\n"
+				    + "currently busy with other IO",
+				    "Save Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -694,14 +723,15 @@ public class PreprocessPanel
   public void saveInstancesToFile(final AbstractFileSaver saver, final Instances inst) {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	  @Override
 	  public void run() {
 	    try {
-	      m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SaveInstancesToFile_Run_Log_StatusMessage_Text_First"));
+	      m_Log.statusMessage("Saving to file...");
 
 	      saver.setInstances(inst);
 	      saver.writeBatch();
 	      
-	      m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SaveInstancesToFile_Run_Log_StatusMessage_Text_Second"));
+	      m_Log.statusMessage("OK");
 	    }
 	    catch (Exception ex) {
 	      ex.printStackTrace();
@@ -715,8 +745,9 @@ public class PreprocessPanel
     }
     else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SaveInstancesToFile_Run_JOptionPaneShowMessageDialog_Text_First"),
-				    Messages.getInstance().getString("PreprocessPanel_SaveInstancesToFile_Run_JOptionPaneShowMessageDialog_Text_Second"),
+				    "Can't save at this time,\n"
+				    + "currently busy with other IO",
+				    "Saving instances",
 				    JOptionPane.WARNING_MESSAGE);
     } 
   }
@@ -740,8 +771,8 @@ public class PreprocessPanel
 
 	if (m_FileChooser.getLoader() == null) {
 	  JOptionPane.showMessageDialog(this,
-			  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text_First"),
-			  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text_Second"),
+	      "Cannot determine file loader automatically, please choose one.",
+	      "Load Instances",
 	      JOptionPane.ERROR_MESSAGE);
 	  converterQuery(m_FileChooser.getSelectedFile());
 	}
@@ -752,17 +783,19 @@ public class PreprocessPanel
       }
     } else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text_Third"),
-				    Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFileQ_JOptionPaneShowMessageDialog_Text_Fourth"),
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
 
   /**
-   * Loads instances from an SQL query the user provided with the
+   * Loads (non-sparse) instances from an SQL query the user provided with the
    * SqlViewerDialog, then loads the instances in a background process. This is
    * done in the IO thread, and an error message is popped up if the IO thread
    * is busy.
+   * 
    * @param url           the database URL
    * @param user          the user to connect as
    * @param pw            the password of the user
@@ -770,6 +803,24 @@ public class PreprocessPanel
    */
   public void setInstancesFromDBQ(String url, String user, 
                                   String pw, String query) {
+    setInstancesFromDBQ(url, user, pw, query, false);
+  }
+
+  /**
+   * Loads instances from an SQL query the user provided with the
+   * SqlViewerDialog, then loads the instances in a background process. This is
+   * done in the IO thread, and an error message is popped up if the IO thread
+   * is busy.
+   * 
+   * @param url		the database URL
+   * @param user	the user to connect as
+   * @param pw		the password of the user
+   * @param query	the query for retrieving instances from
+   * @param sparse	whether to create sparse or non-sparse instances
+   */
+  public void setInstancesFromDBQ(String url, String user, 
+                                  String pw, String query,
+                                  boolean sparse) {
     if (m_IOThread == null) {
       try {
 	InstanceQuery InstQ = new InstanceQuery();
@@ -777,6 +828,7 @@ public class PreprocessPanel
         InstQ.setUsername(user);
         InstQ.setPassword(pw);
         InstQ.setQuery(query);
+        InstQ.setSparseData(sparse);
 	
         // we have to disconnect, otherwise we can't change the DB!
         if (InstQ.isConnected())
@@ -789,16 +841,17 @@ public class PreprocessPanel
 	setInstancesFromDB(InstQ);
       } catch (Exception ex) {
 	JOptionPane.showMessageDialog(this,
-			Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDBQ_JOptionPaneShowMessageDialog_Text_First")
+				      "Problem connecting to database:\n"
 				      + ex.getMessage(),
-				      Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDBQ_JOptionPaneShowMessageDialog_Text_Second"),
+				      "Load Instances",
 				      JOptionPane.ERROR_MESSAGE);
       }
       
     } else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDBQ_JOptionPaneShowMessageDialog_Text_Third"),
-				    Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDBQ_JOptionPaneShowMessageDialog_Text_Fourth"),
+				     "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -813,8 +866,8 @@ public class PreprocessPanel
     if (m_IOThread == null) {
       try {
 	String urlName = (String) JOptionPane.showInputDialog(this,
-			Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURLQ_JOptionPaneShowMessageDialog_Text_First"),
-			Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURLQ_JOptionPaneShowMessageDialog_Text_Second"),
+			"Enter the source URL",
+			"Load Instances",
 			JOptionPane.QUESTION_MESSAGE,
 			null,
 			null,
@@ -830,15 +883,16 @@ public class PreprocessPanel
       } catch (Exception ex) {
 	ex.printStackTrace();
 	JOptionPane.showMessageDialog(this,
-			Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURLQ_JOptionPaneShowMessageDialog_Text_Third")
+				      "Problem with URL:\n"
 				      + ex.getMessage(),
-				      Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURLQ_JOptionPaneShowMessageDialog_Text_Fourth"),
+				      "Load Instances",
 				      JOptionPane.ERROR_MESSAGE);
       }
     } else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURLQ_JOptionPaneShowMessageDialog_Text_Fifth"),
-				    Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURLQ_JOptionPaneShowMessageDialog_Text_Sixth"),
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -849,14 +903,15 @@ public class PreprocessPanel
   public void generateInstances() {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	  @Override
 	  public void run() {
 	    try {
               // create dialog
               final DataGeneratorPanel generatorPanel = new DataGeneratorPanel();
               final JDialog dialog = new JDialog();
-              final JButton generateButton = new JButton(Messages.getInstance().getString("PreprocessPanel_GenerateInstances_Run_GenerateButton_JButton_Text"));
+              final JButton generateButton = new JButton("Generate");
               final JCheckBox showOutputCheckBox = 
-                                  new JCheckBox(Messages.getInstance().getString("PreprocessPanel_GenerateInstances_Run_ShowOutputCheckBox_JCheckBox_Text"));
+                                  new JCheckBox("Show generated data as text, incl. comments");
 
               showOutputCheckBox.setMnemonic('S');
               generatorPanel.setLog(m_Log);
@@ -866,7 +921,7 @@ public class PreprocessPanel
                         300, 
                         (int) generatorPanel.getPreferredSize().getHeight()));
               generateButton.setMnemonic('G');
-              generateButton.setToolTipText(Messages.getInstance().getString("PreprocessPanel_GenerateInstances_Run_GenerateButton_SetToolTipText_Text"));
+              generateButton.setToolTipText("Generates the dataset according the settings.");
               generateButton.addActionListener(new ActionListener(){
                   public void actionPerformed(ActionEvent evt){
                     // generate
@@ -886,7 +941,7 @@ public class PreprocessPanel
                       showGeneratedInstances(generatorPanel.getOutput());
                 }
               });
-              dialog.setTitle(Messages.getInstance().getString("PreprocessPanel_GenerateInstances_Run_Dialog_Text"));
+              dialog.setTitle("DataGenerator");
               dialog.getContentPane().add(generatorPanel, BorderLayout.CENTER);
               dialog.getContentPane().add(generateButton, BorderLayout.EAST);
               dialog.getContentPane().add(showOutputCheckBox, BorderLayout.SOUTH);
@@ -907,8 +962,9 @@ public class PreprocessPanel
     } 
     else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_GenerateInstances_Run_JOptionPaneShowMessageDialog_Text_First"),
-				    Messages.getInstance().getString("PreprocessPanel_GenerateInstances_Run_JOptionPaneShowMessageDialog_Text_Second"),
+				    "Can't generate data at this time,\n"
+				    + "currently busy with other IO",
+				    "Generate Data",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -920,8 +976,8 @@ public class PreprocessPanel
    */
   protected void showGeneratedInstances(String data) {
     final JDialog dialog = new JDialog();
-    final JButton saveButton = new JButton(Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_SaveButton_JButton_Text"));
-    final JButton closeButton = new JButton(Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_CloseButton_JButton_Text"));
+    final JButton saveButton = new JButton("Save");
+    final JButton closeButton = new JButton("Close");
     final JTextArea textData = new JTextArea(data);
     final JPanel panel = new JPanel();
     panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -930,7 +986,7 @@ public class PreprocessPanel
         new Font("Monospaced", Font.PLAIN, textData.getFont().getSize()));
 
     saveButton.setMnemonic('S');
-    saveButton.setToolTipText(Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_SaveButton_SetToolTipText_Text"));
+    saveButton.setToolTipText("Saves the output to a file");
     saveButton.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         JFileChooser filechooser = new JFileChooser();
@@ -945,9 +1001,9 @@ public class PreprocessPanel
             writer.close();
             JOptionPane.showMessageDialog(
               dialog, 
-              Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_SaveButton_JOptionPaneShowMessageDialog_Text_First") 
-              + filechooser.getSelectedFile() + Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_SaveButton_JOptionPaneShowMessageDialog_Text_Second"),
-              Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_SaveButton_JOptionPaneShowMessageDialog_Text_Third"),
+              "Output successfully saved to file '" 
+              + filechooser.getSelectedFile() + "'!",
+              "Information",
               JOptionPane.INFORMATION_MESSAGE);
           }
           catch (Exception e) {
@@ -958,7 +1014,7 @@ public class PreprocessPanel
       }
     });
     closeButton.setMnemonic('C');
-    closeButton.setToolTipText(Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_CloseButton_SetToolTipText_Text"));
+    closeButton.setToolTipText("Closes the dialog");
     closeButton.addActionListener(new ActionListener(){
       public void actionPerformed(ActionEvent evt){
         dialog.dispose();
@@ -966,7 +1022,7 @@ public class PreprocessPanel
     });
     panel.add(saveButton);
     panel.add(closeButton);
-    dialog.setTitle(Messages.getInstance().getString("PreprocessPanel_ShowGeneratedInstances_Dialog_SetToolTipText_Text"));
+    dialog.setTitle("Generated Instances (incl. comments)");
     dialog.getContentPane().add(new JScrollPane(textData), BorderLayout.CENTER);
     dialog.getContentPane().add(panel, BorderLayout.SOUTH);
     dialog.pack();
@@ -1021,19 +1077,20 @@ public class PreprocessPanel
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	  @Override
 	  public void run() {
 	    try {
 	      cnv.setSource(f);
 	      Instances inst = cnv.getDataSet();
 	      setInstances(inst);
 	    } catch (Exception ex) {
-	      m_Log.statusMessage(cnv.getClass().getName()+Messages.getInstance().getString("PreprocessPanel_TryConverter_Log_StatusMessage_Text")
+	      m_Log.statusMessage(cnv.getClass().getName()+" failed to load "
 				 +f.getName());
 	      JOptionPane.showMessageDialog(PreprocessPanel.this,
-					    cnv.getClass().getName()+Messages.getInstance().getString("PreprocessPanel_TryConverter_JOptionPaneShowMessageDialog_Text_First")
-					    + f.getName() + Messages.getInstance().getString("PreprocessPanel_TryConverter_JOptionPaneShowMessageDialog_Text_Second")
-					    + Messages.getInstance().getString("PreprocessPanel_TryConverter_JOptionPaneShowMessageDialog_Text_Third") + ex.getMessage(),
-					    Messages.getInstance().getString("PreprocessPanel_TryConverter_JOptionPaneShowMessageDialog_Text_Fourth"),
+					    cnv.getClass().getName()+" failed to load '"
+					    + f.getName() + "'.\n"
+					    + "Reason:\n" + ex.getMessage(),
+					    "Convert File",
 					    JOptionPane.ERROR_MESSAGE);
 	      m_IOThread = null;
 	      converterQuery(f);
@@ -1057,28 +1114,29 @@ public class PreprocessPanel
       
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 	  try {
-	    m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_Log_StatusMessage_Text_First"));
+	    m_Log.statusMessage("Reading from file...");
 	    Instances inst = loader.getDataSet();
 	    setInstances(inst);
 	  }
 	  catch (Exception ex) {
 	    m_Log.statusMessage(
-	    		Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_Log_StatusMessage_Text_Second") + loader.retrieveFile() + Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_Log_StatusMessage_Text_Third")
-		+ loader.getFileDescription() + Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_Log_StatusMessage_Text_Fourth"));
+		"File '" + loader.retrieveFile() + "' not recognised as an '"
+		+ loader.getFileDescription() + "' file.");
 	    m_IOThread = null;
 	    if (JOptionPane.showOptionDialog(PreprocessPanel.this,
-	    		Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_First") + loader.retrieveFile()
-					     + Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Second")
+					     "File '" + loader.retrieveFile()
+					     + "' not recognised as an '"
 					     + loader.getFileDescription() 
-					     + Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Third")
-					     + Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Fourth") + ex.getMessage(),
-					     Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Fifth"),
+					     + "' file.\n"
+					     + "Reason:\n" + ex.getMessage(),
+					     "Load Instances",
 					     0,
 					     JOptionPane.ERROR_MESSAGE,
 					     null,
-					     new String[] {Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Sixth"), Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Seventh")},
+					     new String[] {"OK", "Use Converter"},
 					     null) == 1) {
 	    
 	      converterQuery(loader.retrieveFile());
@@ -1091,8 +1149,9 @@ public class PreprocessPanel
       m_IOThread.start();
     } else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Eigth"),
-				    Messages.getInstance().getString("PreprocessPanel_SetInstancesFromFile_Run_JOptionPaneShowOptionDialog_Text_Nineth"),
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -1106,10 +1165,11 @@ public class PreprocessPanel
   public void setInstancesFromDB(final InstanceQuery iq) {
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 	  
 	  try {
-	    m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_Log_StatusMessage_Text_First"));
+	    m_Log.statusMessage("Reading from database...");
 	    final Instances i = iq.retrieveInstances();
 	    SwingUtilities.invokeAndWait(new Runnable() {
 	      public void run() {
@@ -1118,11 +1178,11 @@ public class PreprocessPanel
 	    });
 	    iq.disconnectFromDatabase();
 	  } catch (Exception ex) {
-	    m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_Log_StatusMessage_Text_Second") + m_SQLQ);
+	    m_Log.statusMessage("Problem executing DB query "+m_SQLQ);
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
-	    		Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_First")
+					  "Couldn't read from database:\n"
 					  + ex.getMessage(),
-					  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Second"),
+					  "Load Instances",
 					  JOptionPane.ERROR_MESSAGE);
 	  }
 
@@ -1134,8 +1194,9 @@ public class PreprocessPanel
       m_IOThread.start();
     } else {
        JOptionPane.showMessageDialog(this,
-    		   Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Third"),
-				    Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Fourth"),
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -1149,23 +1210,24 @@ public class PreprocessPanel
 
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
+	@Override
 	public void run() {
 
 	  try {
-	    m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURL_Run_Log_StatusMessage_Text_First"));
+	    m_Log.statusMessage("Reading from URL...");
 	    AbstractFileLoader loader = ConverterUtils.getURLLoaderForFile(u.toString());
 	    if (loader == null)
-	      throw new Exception(Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURL_Run_Exception_Text_First") + u);
+	      throw new Exception("No suitable URLSourcedLoader found for URL!\n" + u);
 	    ((URLSourcedLoader) loader).setURL(u.toString());
 	    setInstances(loader.getDataSet());
 	  } catch (Exception ex) {
 	    ex.printStackTrace();
-	    m_Log.statusMessage(Messages.getInstance().getString("PreprocessPanel_SetInstancesFromURL_Run_Log_StatusMessage_Text_Second") + u);
+	    m_Log.statusMessage("Problem reading " + u);
 	    JOptionPane.showMessageDialog(PreprocessPanel.this,
-	    		Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Fifth")
-					  + u + Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Sixth")
+					  "Couldn't read from URL:\n"
+					  + u + "\n"
 					  + ex.getMessage(),
-					  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Seventh"),
+					  "Load Instances",
 					  JOptionPane.ERROR_MESSAGE);
 	  }
 
@@ -1176,8 +1238,9 @@ public class PreprocessPanel
       m_IOThread.start();
     } else {
       JOptionPane.showMessageDialog(this,
-    		  Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Eighth"),
-				    Messages.getInstance().getString("PreprocessPanel_SetInstancesFromDB_Run_JOptionPaneShowMessageDialog_Text_Nineth"),
+				    "Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
   }
@@ -1196,7 +1259,6 @@ public class PreprocessPanel
       // create temporary file
       File tempFile = File.createTempFile("weka", SerializedInstancesLoader.FILE_EXTENSION);
       tempFile.deleteOnExit();
-      
       if (!ExplorerDefaults.get("undoDirectory", "%t").equalsIgnoreCase("%t")) {
         String dir = ExplorerDefaults.get("undoDirectory", "%t");
         File undoDir = new File(dir);
@@ -1208,14 +1270,15 @@ public class PreprocessPanel
             tempFile = newFile;
           } else {
             System.err.println("Explorer: it doesn't look like we have permission" +
-                        " to write to the user-specified undo directory " +
-                        "'" + dir + "'");
+            		" to write to the user-specified undo directory " +
+            		"'" + dir + "'");
           }
         } else {
           System.err.println("Explorer: user-specified undo directory '" +
               dir + "' does not exist!");
         }
       }
+    
 
       ObjectOutputStream oos = 
 	new ObjectOutputStream(
@@ -1262,8 +1325,8 @@ public class PreprocessPanel
 	e.printStackTrace();
 	m_Log.logMessage(e.toString());
 	JOptionPane.showMessageDialog(PreprocessPanel.this,
-			Messages.getInstance().getString("PreprocessPanel_Undo_JOptionPaneShowMessageDialog_Text_First") + e.toString(),
-			Messages.getInstance().getString("PreprocessPanel_Undo_JOptionPaneShowMessageDialog_Text_Second"),
+	    "Cannot perform undo operation!\n" + e.toString(),
+	    "Undo",
 	    JOptionPane.ERROR_MESSAGE);
       }
 
@@ -1395,7 +1458,7 @@ public class PreprocessPanel
    * @return 		the title of this tab
    */
   public String getTabTitle() {
-    return Messages.getInstance().getString("PreprocessPanel_GetTitle_Text");
+    return "Preprocess";
   }
   
   /**
@@ -1404,7 +1467,7 @@ public class PreprocessPanel
    * @return 		the tooltip of this tab
    */
   public String getTabTitleToolTip() {
-    return Messages.getInstance().getString("PreprocessPanel_GetTabTitleToolTip_Text");
+    return "Open/Edit/Save instances";
   }
   
   /**
@@ -1415,7 +1478,7 @@ public class PreprocessPanel
   public static void main(String [] args) {
 
     try {
-      final JFrame jf = new JFrame(Messages.getInstance().getString("PreprocessPanel_Main_JFRame_Text"));
+      final JFrame jf = new JFrame("Weka Explorer: Preprocess");
       jf.getContentPane().setLayout(new BorderLayout());
       final PreprocessPanel sp = new PreprocessPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -1423,6 +1486,7 @@ public class PreprocessPanel
       sp.setLog(lp);
       jf.getContentPane().add(lp, BorderLayout.SOUTH);
       jf.addWindowListener(new WindowAdapter() {
+	@Override
 	public void windowClosing(WindowEvent e) {
 	  jf.dispose();
 	  System.exit(0);

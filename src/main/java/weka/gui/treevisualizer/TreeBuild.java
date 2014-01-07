@@ -34,7 +34,7 @@ import java.util.Vector;
  * with Edge's and Node's
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 9097 $
+ * @version $Revision: 8034 $
  */
 public class TreeBuild {
   //this class will parse the tree into relevant strings

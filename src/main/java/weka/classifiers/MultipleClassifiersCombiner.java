@@ -1,48 +1,47 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    MultipleClassifiersCombiner.java
- *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.classifiers;
 
-import weka.core.Capabilities;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Capabilities.Capability;
-
 import java.util.Enumeration;
 import java.util.Vector;
 
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
 /**
  * Abstract utility class for handling settings common to
- * meta classifiers that build an ensemble from multiple classifiers.  
+ * meta classifiers that build an ensemble from multiple classifiers.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 5905 $
+ * @version $Revision: 8034 $
  */
-public abstract class MultipleClassifiersCombiner extends Classifier {
+public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
 
   /** for serialization */
   private static final long serialVersionUID = 2776436621129422119L;
-  
+
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers = {
     new weka.classifiers.rules.ZeroR()
@@ -58,10 +57,10 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
     Vector newVector = new Vector(1);
 
     newVector.addElement(new Option(
-	      "\tFull class name of classifier to include, followed\n"
-	      + "\tby scheme options. May be specified multiple times.\n"
-	      + "\t(default: \"weka.classifiers.rules.ZeroR\")",
-	      "B", 1, "-B <classifier specification>"));
+          "\tFull class name of classifier to include, followed\n"
+          + "\tby scheme options. May be specified multiple times.\n"
+          + "\t(default: \"weka.classifiers.rules.ZeroR\")",
+          "B", 1, "-B <classifier specification>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -88,16 +87,16 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
     while (true) {
       String classifierString = Utils.getOption('B', options);
       if (classifierString.length() == 0) {
-	break;
+        break;
       }
       String [] classifierSpec = Utils.splitOptions(classifierString);
       if (classifierSpec.length == 0) {
-	throw new IllegalArgumentException("Invalid classifier specification string");
+        throw new IllegalArgumentException("Invalid classifier specification string");
       }
       String classifierName = classifierSpec[0];
       classifierSpec[0] = "";
-      classifiers.addElement(Classifier.forName(classifierName,
-						classifierSpec));
+      classifiers.addElement(AbstractClassifier.forName(classifierName,
+            classifierSpec));
     }
     if (classifiers.size() == 0) {
       classifiers.addElement(new weka.classifiers.rules.ZeroR());
@@ -107,7 +106,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
       classifiersArray[i] = (Classifier) classifiers.elementAt(i);
     }
     setClassifiers(classifiersArray);
-    
+
     super.setOptions(options);
   }
 
@@ -125,11 +124,11 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
       options[current++] = "-B";
       options[current++] = "" + getClassifierSpec(i);
     }
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
+    System.arraycopy(superOptions, 0, options, current,
+        superOptions.length);
     return options;
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -158,7 +157,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
 
     return m_Classifiers;
   }
-  
+
   /**
    * Gets a single classifier from the set of available classifiers.
    *
@@ -169,7 +168,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
 
     return m_Classifiers[index];
   }
-  
+
   /**
    * Gets the classifier specification string, which contains the class name of
    * the classifier and any options to the classifier
@@ -180,7 +179,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
    * has been assigned (or the index given is out of range).
    */
   protected String getClassifierSpec(int index) {
-    
+
     if (m_Classifiers.length < index) {
       return "";
     }
@@ -198,7 +197,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
   public Capabilities getCapabilities() {
     Capabilities      result;
     int               i;
-    
+
     if (getClassifiers().length == 0) {
       result = new Capabilities(this);
       result.disableAll();
@@ -208,7 +207,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
       for (i = 1; i < getClassifiers().length; i++)
         result.and(getClassifier(i).getCapabilities());
     }
-    
+
     // set dependencies
     for (Capability cap: Capability.values())
       result.enableDependency(cap);

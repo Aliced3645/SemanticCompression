@@ -1,34 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  * QueryPanel.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.sql;
-
-import weka.gui.ListSelectorDialog;
-import weka.gui.sql.event.ConnectionEvent;
-import weka.gui.sql.event.ConnectionListener;
-import weka.gui.sql.event.HistoryChangedEvent;
-import weka.gui.sql.event.HistoryChangedListener;
-import weka.gui.sql.event.QueryExecuteEvent;
-import weka.gui.sql.event.QueryExecuteListener;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -53,11 +44,19 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
+import weka.gui.ListSelectorDialog;
+import weka.gui.sql.event.ConnectionEvent;
+import weka.gui.sql.event.ConnectionListener;
+import weka.gui.sql.event.HistoryChangedEvent;
+import weka.gui.sql.event.HistoryChangedListener;
+import weka.gui.sql.event.QueryExecuteEvent;
+import weka.gui.sql.event.QueryExecuteListener;
+
 /**
  * Represents a panel for entering an SQL query.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 7059 $
+ * @version     $Revision: 8034 $
  */
 public class QueryPanel 
   extends JPanel 
@@ -79,13 +78,13 @@ public class QueryPanel
   protected JTextArea m_TextQuery;
 
   /** the execute button. */
-  protected JButton m_ButtonExecute = new JButton(Messages.getInstance().getString("QueryPanel_ButtonExecute_JButton_Text"));
+  protected JButton m_ButtonExecute = new JButton("Execute");
 
   /** the clear button. */
-  protected JButton m_ButtonClear = new JButton(Messages.getInstance().getString("QueryPanel_ButtonClear_JButton_Text"));
+  protected JButton m_ButtonClear = new JButton("Clear");
 
   /** the history button. */
-  protected JButton m_ButtonHistory = new JButton(Messages.getInstance().getString("QueryPanel_ButtonHistory_JButton_Text"));
+  protected JButton m_ButtonHistory = new JButton("History...");
 
   /** the spinner for the maximum number of rows. */
   protected JSpinner m_SpinnerMaxRows = new JSpinner();
@@ -170,7 +169,7 @@ public class QueryPanel
 
     // limit
     panel3 = new JPanel(new FlowLayout());
-    panel3.add(new JLabel(Messages.getInstance().getString("QueryPanel_CreatePanel_Panel3_JLabel_Text")));
+    panel3.add(new JLabel("max. rows"));
     panel3.add(m_SpinnerMaxRows);
     panel2.add(panel3, BorderLayout.SOUTH);
     model = (SpinnerNumberModel) m_SpinnerMaxRows.getModel();
@@ -180,7 +179,7 @@ public class QueryPanel
     model.setStepSize(new Integer(100));
     m_SpinnerMaxRows.setMinimumSize(
         new Dimension(50, m_SpinnerMaxRows.getHeight()));
-    m_SpinnerMaxRows.setToolTipText(Messages.getInstance().getString("QueryPanel_CreatePanel_SpinnerMaxRows_SetToolTipText_Text"));
+    m_SpinnerMaxRows.setToolTipText("with 0 all rows are retrieved");
       
     // set initial state
     setButtons();

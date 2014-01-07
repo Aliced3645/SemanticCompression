@@ -1,27 +1,34 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    PairedTTester.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.experiment;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -33,13 +40,6 @@ import weka.core.Range;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * Calculates T-Test statistics on data stored in a set of instances. <p/>
@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 6431 $
+ * @version $Revision: 8034 $
  */
 public class PairedTTester 
   implements OptionHandler, Tester, RevisionHandler {
@@ -158,8 +158,11 @@ public class PairedTTester
   
   /** A list of unique "dataset" specifiers that have been observed */
   protected class DatasetSpecifiers
-    implements RevisionHandler {
+    implements RevisionHandler, Serializable {
 
+    /** for serialization. */
+    private static final long serialVersionUID = -9020938059902723401L;
+    
     /** the specifiers that have been observed */
     FastVector m_Specifiers = new FastVector();
 
@@ -221,13 +224,16 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 6431 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
 
   /** Utility class to store the instances pertaining to a dataset */
   protected class Dataset
-    implements RevisionHandler {
+    implements RevisionHandler, Serializable {
+
+    /** for serialization. */
+    private static final long serialVersionUID = -2801397601839433282L;
 
     /** the template */
     Instance m_Template;
@@ -310,13 +316,16 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 6431 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   }
  
   /** Utility class to store the instances in a resultset */
   protected class Resultset
-    implements RevisionHandler {
+    implements RevisionHandler, Serializable {
+
+    /** for serialization. */
+    private static final long serialVersionUID = 1543786683821339978L;
 
     /** the template */
     Instance m_Template;
@@ -427,7 +436,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 6431 $");
+      return RevisionUtils.extract("$Revision: 8034 $");
     }
   } // Resultset
 
@@ -1445,7 +1454,7 @@ public class PairedTTester
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 6431 $");
+    return RevisionUtils.extract("$Revision: 8034 $");
   }
   
   /**

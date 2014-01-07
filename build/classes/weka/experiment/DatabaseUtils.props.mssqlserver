@@ -6,7 +6,7 @@
 # url:     http://www.microsoft.com/
 # jdbc:    http://www.microsoft.com/downloads/details.aspx?familyid=07287B11-0502-461A-B138-2AA54BFDC03A
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 5836 $
+# version: $Revision: 5837 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=com.microsoft.jdbc.sqlserver.SQLServerDriver

@@ -1,30 +1,25 @@
 /*
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /*
  *    Experimenter.java
- *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
-
-import weka.core.Memory;
-import weka.experiment.Experiment;
-import weka.gui.LookAndFeel;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
@@ -38,12 +33,16 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import weka.core.Memory;
+import weka.experiment.Experiment;
+import weka.gui.LookAndFeel;
+
 /** 
  * The main class for the experiment environment. Lets the user create,
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 9495 $
+ * @version $Revision: 9486 $
  */
 public class Experimenter
   extends JPanel {
@@ -72,8 +71,6 @@ public class Experimenter
    */
   public Experimenter(boolean classFirst) {
 
-	  System.out.println("[DEBUGGER] ---- " + Messages.getInstance().getString("Experimenter_TabbedPane_Setup_Key_Text"));
-	  
     m_SetupPanel = new SetupModePanel();
     m_ResultsPanel = new ResultsPanel();
     m_RunPanel = new RunPanel();
@@ -81,9 +78,10 @@ public class Experimenter
     
     m_ClassFirst = classFirst;
 
-    m_TabbedPane.addTab(Messages.getInstance().getString("Experimenter_TabbedPane_Setup_Key_Text"), null, m_SetupPanel, Messages.getInstance().getString("Experimenter_TabbedPane_Setup_Value_Text"));
-    m_TabbedPane.addTab(Messages.getInstance().getString("Experimenter_TabbedPane_Run_Key_Text"), null, m_RunPanel, Messages.getInstance().getString("Experimenter_TabbedPane_Run_Value_Text"));
-    m_TabbedPane.addTab(Messages.getInstance().getString("Experimenter_TabbedPane_Analyse_Key_Text"), null, m_ResultsPanel, Messages.getInstance().getString("Experimenter_TabbedPane_Analyse_Value_Text"));
+    m_TabbedPane.addTab("Setup", null, m_SetupPanel, "Set up the experiment");
+    m_TabbedPane.addTab("Run", null, m_RunPanel, "Run the experiment");
+    m_TabbedPane.addTab("Analyse", null, m_ResultsPanel,
+			"Analyse experiment results");
     m_TabbedPane.setSelectedIndex(0);
     m_TabbedPane.setEnabledAt(1, false);
     m_SetupPanel.addPropertyChangeListener(new PropertyChangeListener() {
@@ -115,7 +113,12 @@ public class Experimenter
    * @param args ignored.
    */
   public static void main(String [] args) {
-    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, Messages.getInstance().getString("Experimenter_Main_LoggingStarted_Text"));    
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    
+    // make sure that packages are loaded and the GenericPropertiesCreator
+    // executes to populate the lists correctly
+    weka.gui.GenericObjectEditor.determineClasses();
+    
     LookAndFeel.setLookAndFeel();
     
     try {
@@ -127,7 +130,7 @@ public class Experimenter
 	classFirst = args[0].equals("CLASS_FIRST");
       }
       m_experimenter = new Experimenter(classFirst);
-      final JFrame jf = new JFrame(Messages.getInstance().getString("Experimenter_Main_WekaExperimentEnvironment_JFrame_Text"));
+      final JFrame jf = new JFrame("Weka Experiment Environment");
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_experimenter, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
@@ -139,7 +142,7 @@ public class Experimenter
       jf.pack();
       jf.setSize(800, 600);
       jf.setVisible(true);
-      
+
       Image icon = Toolkit.getDefaultToolkit().
         getImage(m_experimenter.getClass().getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
@@ -148,9 +151,7 @@ public class Experimenter
         public void run() {
           while(true) {
             try {
-              this.sleep(4000);
-              
-              System.gc();
+              this.sleep(10);
 
               if (m_Memory.isOutOfMemory()) {
                 // clean up
@@ -159,9 +160,9 @@ public class Experimenter
                 System.gc();
 
                 // display error
-                System.err.println(Messages.getInstance().getString("Experimenter_Main_Error_Text_First"));
+                System.err.println("\ndisplayed message:");
                 m_Memory.showOutOfMemory();
-                System.err.println(Messages.getInstance().getString("Experimenter_Main_Error_Text_Second"));
+                System.err.println("\nexiting");
                 System.exit(-1);
               }
 
