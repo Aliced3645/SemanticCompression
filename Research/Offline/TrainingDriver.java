@@ -9,4 +9,14 @@ package Offline;
  */
 public class TrainingDriver {
 
+	/**
+	 * This function is re-written from WekaTraining's main function
+	 * We change the arff file to MySQL databse table name here.
+	 * @param args 
+	 * 	argument list - 
+	 * 		(1) 
+	 */
+	public static void main(String[] args){
+		
+	}
 }
