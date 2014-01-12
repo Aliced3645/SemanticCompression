@@ -169,28 +169,33 @@ public class IterativeCompression {
 		}
 		ColumnData[] compressedColumns = new ColumnData[columnData.size() + 1];
 
-		Instances instances = dbInterface.retriveInstances(trainingTable);
-		InstanceStream trainingStream = new CachedInstancesStream(instances);
-		trainingStream = new ReservoirSampler(new StripClassifiedStream(
-				trainingStream, classified), numSamples(trainingStream),
-				MAX_SAMPLE_POOL);
+		Instances trainingInstances = dbInterface.retriveInstances(trainingTable);
+		Instances testingInstances = dbInterface.retriveInstances(testingTable);
+		
 
-		instances = dbInterface.retriveInstances(testingTable);
-		InstanceStream testingStream = new CachedInstancesStream(instances);
-		testingStream = new StripClassifiedStream(trainingStream, classified);
 
 		while (columnData.peek() != null) {
 			System.out.println("----------");
 			// get next column to attempt to compress
 			ColumnData currColumn = columnData.poll();
 			System.out.println("Classifying " + currColumn);
-
+			// System.out.println(currColumn._classIndex);
 			// primary columns should not be compressed
 			if (currColumn._priority == ColumnData.PRIMARY) {
 				System.out.println("Skipping primary column.");
 				continue;
 			}
-
+			
+			trainingInstances.setClassIndex(currColumn._classIndex -1 );
+			InstanceStream trainingStream = new CachedInstancesStream(trainingInstances);
+			trainingStream = new ReservoirSampler(new StripClassifiedStream(
+					trainingStream, classified), numSamples(trainingStream),
+					MAX_SAMPLE_POOL);
+			
+			testingInstances.setClassIndex(currColumn._classIndex - 1);
+			InstanceStream testingStream = new CachedInstancesStream(testingInstances);
+			testingStream = new StripClassifiedStream(testingStream, classified);
+			
 			// this does most of the work
 			ColumnData column = ClassifyColumn
 					.classify(currColumn._classIndex, trainingStream,
@@ -209,6 +214,10 @@ public class IterativeCompression {
 
 		System.out.println("Writing compressed output to folder '"
 				+ outputFolder + "'...");
+		
+		trainingInstances.setClassIndex(0);
+		InstanceStream trainingStream = new CachedInstancesStream(trainingInstances);
+		
 		try {
 			outputStream.createCompressed(classified, 
 					trainingStream, compressedColumns, errorThreshold);
