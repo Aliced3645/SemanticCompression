@@ -34,7 +34,9 @@ public class ClassifyColumn {
     public static ColumnData classify(int column, InstanceStream training, InstanceStream testing, double errorThreshold, CompressedOutputStream outputStream) {
         boolean sampling = (outputStream == null);
         boolean numeric = Utilities.useNumericRetrieval(testing.getHeader());
-
+        //Tempo modification by shu - Let's assume we always use numeric
+        //boolean numeric = true;
+        
         // create and train the model
         WEKAClassifier model = new CustomWEKAClassifier();
         if (numeric && testing.getHeader().numAttributes() < MAX_M5P_ATTRIBUTES)

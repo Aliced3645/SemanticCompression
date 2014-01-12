@@ -22,4 +22,7 @@ public interface DBInterface {
 	 */
 	public Instances retriveInstances(String tableName, String url) throws Exception;
 	
+	public void setURL(String url);
+	
+	public String getURL();
 }

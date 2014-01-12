@@ -69,6 +69,6 @@ public class DataGenerator {
 	}
 
 	public static void main(String[] args) throws SQLException {
-		randomGeneration(10000);
+		randomGeneration(100);
 	}
 }
