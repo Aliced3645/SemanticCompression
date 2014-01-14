@@ -5,8 +5,10 @@ import java.sql.SQLException;
 
 import java.sql.Connection;
 
+import moa.core.SerializeUtils;
 import moa.streams.InstanceStream;
 import WekaTraining.ColumnData;
+import WekaTraining.Utilities;
 
 /**
  * Metadata manager, a java class managing matadata storage / database information.
@@ -31,7 +33,15 @@ public class MySQLMetadataManager implements MetadataManager{
 	public void storeModels(String trainingTable, String originalDb,
 			int[] classified, InstanceStream inputStream,
 			ColumnData[] compressedColumns, double errorThreshold) {
-		
+		//It was in CSV format in Ashvin's code
+		String compressedTableName = trainingTable + "_compressed";
+        
+		//Write models in binary format to database.
+		for (int i = 1; i <= classified.length; i++) {
+            ColumnData c = compressedColumns[i];
+            //SerializeUtils.writeToFile(Utilities.getModelFile(_outputFolder, c._classIndex), c._classifier);
+            
+        }
 	}
 	
 }
