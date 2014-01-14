@@ -137,6 +137,7 @@ public class IterativeCompression {
 			String trainingTable, DBInterface dbInterface) throws Exception {
 		Instances instances = dbInterface.retriveInstances(trainingTable);
 		InstanceStream stream = new CachedInstancesStream(instances);
+
 		int attributes = stream.getHeader().numAttributes();
 		PriorityQueue<ColumnData> priorityQueue = new PriorityQueue<ColumnData>();
 		// System.out.println(attributes);
@@ -157,7 +158,8 @@ public class IterativeCompression {
 	 */
 	public static void runForTable(String trainingTable, String testingTable,
 			PriorityQueue<ColumnData> columnData, String outputFolder,
-			double errorThreshold, DBInterface dbInterface, MetadataManager metadataManager) throws Exception {
+			double errorThreshold, DBInterface dbInterface, MetadataManager metadataManager, 
+			String originalDb) throws Exception {
 		int[] classified = new int[columnData.size()];
 		int classifiedSoFar = 0;
 		CompressedOutputStream outputStream = null;
@@ -172,8 +174,6 @@ public class IterativeCompression {
 
 		Instances trainingInstances = dbInterface.retriveInstances(trainingTable);
 		Instances testingInstances = dbInterface.retriveInstances(testingTable);
-		
-
 
 		while (columnData.peek() != null) {
 			System.out.println("----------");
@@ -222,7 +222,8 @@ public class IterativeCompression {
 		//To replace - with store these stuff in DB.
 		//To change: compressed csv -> compressed table in db
 		//model stored in binary chunks inside db.
-		
+		metadataManager.storeModels(
+				trainingTable, originalDb, classified, trainingInstances, compressedColumns, errorThreshold);
 		
 		try {
 			//writes the compressed csv file and model to output dir

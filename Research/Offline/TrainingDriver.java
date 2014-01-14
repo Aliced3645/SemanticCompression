@@ -88,10 +88,11 @@ public class TrainingDriver {
 		 * IterativeCompression ic = new IterativeCompression( trainingTable,
 		 * testingTable, columnData, outputFolder, errorThreshold); ic.run();
 		 */
+		/*
 		MetadataManager metadataManager = new MySQLMetadataManager();
 		IterativeCompression.runForTable(trainingTable, testingTable,
-				columnData, outputFolder, errorThreshold, dbInterface, metadataManager);
-		
+				columnData, outputFolder, errorThreshold, dbInterface, metadataManager, "testdb");
+		*/
 		
 	}
 }

@@ -33,7 +33,7 @@ public class WekaIntegrationTest {
 		              + "user=shu&password=shu");
 			String query = Utils.getOption('Q', args);
 			if (query.length() == 0) {
-				iq.setQuery("show tables");
+				iq.setQuery("select * from table2");
 			} else {
 				iq.setQuery(query);
 			}
@@ -60,9 +60,11 @@ public class WekaIntegrationTest {
 			// output an instance at a time (rather than having to convert
 			// the entire dataset to one large string)
 			
-			System.out.println(new Instances(instances, 0));
+//			System.out.println(new Instances(instances, 0));
+			System.out.println(instances.attribute(0).name());
+
 			for (int i = 0; i < instances.numInstances(); i++) {
-				System.out.println(instances.instance(i));
+				//System.out.println(instances.instance(i));
 			}
 			
 			/*

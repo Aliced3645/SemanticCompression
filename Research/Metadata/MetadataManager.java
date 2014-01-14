@@ -1,5 +1,6 @@
 package Metadata;
 
+import weka.core.Instances;
 import moa.streams.InstanceStream;
 import WekaTraining.ColumnData;
 
@@ -11,12 +12,12 @@ public interface MetadataManager {
 	 * @param trainingTable
 	 * @param originalDb
 	 * @param classified
-	 * @param inputStream
+	 * @param trainingInstances
 	 * @param compressedColumns
 	 * @param errorThreshold
 	 */
 	public void storeModels(String trainingTable, String originalDb, 
-			int[] classified, InstanceStream inputStream, ColumnData[] 
-					compressedColumns, double errorThreshold);
+			int[] classified, Instances trainingInstances, ColumnData[] 
+					compressedColumns, double errorThreshold) throws Exception;
 
 }
