@@ -3,6 +3,8 @@ package Offline;
 import java.io.IOException;
 import java.util.PriorityQueue;
 
+import Metadata.MetadataManager;
+import Metadata.MySQLMetadataManager;
 import WekaTraining.ColumnData;
 import WekaTraining.IterativeCompression;
 import WekaTraining.Utilities;
@@ -33,9 +35,11 @@ public class TrainingDriver {
 		System.exit(1);
 	}
 
+	
 	/**
 	 * This function is re-written from WekaTraining's main function We change
-	 * the arff file to MySQL databse table name here.
+	 * the arff file to MySQL databse table name here. Also it detects all tables
+	 * existing in the db and train them.
 	 * 
 	 * @param args
 	 *            argument list - (1) Name of table to be trained. (2) Name of
@@ -84,7 +88,10 @@ public class TrainingDriver {
 		 * IterativeCompression ic = new IterativeCompression( trainingTable,
 		 * testingTable, columnData, outputFolder, errorThreshold); ic.run();
 		 */
+		MetadataManager metadataManager = new MySQLMetadataManager();
 		IterativeCompression.runForTable(trainingTable, testingTable,
-				columnData, outputFolder, errorThreshold, dbInterface);
+				columnData, outputFolder, errorThreshold, dbInterface, metadataManager);
+		
+		
 	}
 }

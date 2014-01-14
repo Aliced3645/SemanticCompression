@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 
 import weka.core.Instances;
 
+import Metadata.MetadataManager;
 import Offline.DBInterface;
 
 /**
@@ -156,7 +157,7 @@ public class IterativeCompression {
 	 */
 	public static void runForTable(String trainingTable, String testingTable,
 			PriorityQueue<ColumnData> columnData, String outputFolder,
-			double errorThreshold, DBInterface dbInterface) throws Exception {
+			double errorThreshold, DBInterface dbInterface, MetadataManager metadataManager) throws Exception {
 		int[] classified = new int[columnData.size()];
 		int classifiedSoFar = 0;
 		CompressedOutputStream outputStream = null;
@@ -218,12 +219,22 @@ public class IterativeCompression {
 		trainingInstances.setClassIndex(0);
 		InstanceStream trainingStream = new CachedInstancesStream(trainingInstances);
 		
+		//To replace - with store these stuff in DB.
+		//To change: compressed csv -> compressed table in db
+		//model stored in binary chunks inside db.
+		
+		
 		try {
+			//writes the compressed csv file and model to output dir
+			//so here we just replace the use of outputStream, 
+			//we use MetadataManager to write them to db.
 			outputStream.createCompressed(classified, 
 					trainingStream, compressedColumns, errorThreshold);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		
 
 		return;
 	}

@@ -15,6 +15,16 @@ import java.util.Random;
  * @author shu
  */
 
+/**
+ * To create a table in MySQL and give privilege to a user called "shu":
+ *  - mysql -u root -p
+ *  mysql> create database testdb;
+ *  mysql> grant usage on *.* to shu@localhost identified by 'shu';
+ *  mysql> grant all privileges on testdb.* to shu@localhost;
+ *  - mysql -u shu -p'shu' testdb;
+ * @author shu
+ */
+
 public class DataGenerator {
 
 	private static Connection connection = null;
@@ -30,6 +40,12 @@ public class DataGenerator {
 			connection = DriverManager
 					.getConnection("jdbc:mysql://localhost/testdb?"
 							+ "user=shu&password=shu");
+			
+			/*
+			connection = DriverManager
+					.getConnection("jdbc:mysql://localhost/metadata?"
+							+ "user=shu&password=shu");
+			*/
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

@@ -56,6 +56,7 @@ public class CompressedOutputStream {
         }
         fos.close();
     }
+    
 
     private boolean recursivelyDelete(String path) {
         File f = new File(path);
@@ -71,4 +72,5 @@ public class CompressedOutputStream {
             return f.delete();
         }
     }
+    
 }
