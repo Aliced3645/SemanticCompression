@@ -39,9 +39,12 @@ public class CompressedOutputStream {
 
         InstancesHeader header = inputStream.getHeader();
         StringBuilder sb = new StringBuilder();
+        
+        //by rows..
         while (inputStream.hasMoreInstances()) {
             Instance inst = inputStream.nextInstance();
             sb.setLength(0);
+            //by columns
             for (int i = 1; i < compressedColumns.length; i++) {
                 ColumnData c = compressedColumns[i];
                 header.setClassIndex(i-1);

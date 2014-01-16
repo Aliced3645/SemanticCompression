@@ -12,7 +12,7 @@ public class ColumnData implements Comparable<ColumnData> {
     final int _classIndex;
     final double _error; // used for numeric attributes
     final double _percentCompressed;
-    Classifier _classifier;
+    public Classifier _classifier;
     final int _priority;
 
     final static int PRIMARY = -1;
