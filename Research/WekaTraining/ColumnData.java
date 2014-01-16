@@ -9,7 +9,7 @@ import moa.classifiers.Classifier;
  */
 public class ColumnData implements Comparable<ColumnData> {
 
-    final int _classIndex;
+    public final int _classIndex;
     final double _error; // used for numeric attributes
     final double _percentCompressed;
     public Classifier _classifier;

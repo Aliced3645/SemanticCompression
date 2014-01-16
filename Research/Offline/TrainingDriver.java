@@ -84,6 +84,7 @@ public class TrainingDriver {
 		}
 
 		System.out.println("Classifying and compressing the data:");
+		
 		/*
 		 * IterativeCompression ic = new IterativeCompression( trainingTable,
 		 * testingTable, columnData, outputFolder, errorThreshold); ic.run();

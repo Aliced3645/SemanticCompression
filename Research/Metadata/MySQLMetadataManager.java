@@ -3,6 +3,7 @@ package Metadata;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.DriverManager;
@@ -50,46 +51,51 @@ public class MySQLMetadataManager implements MetadataManager {
 			int[] classified, Instances trainingInstances,
 			ColumnData[] compressedColumns, double errorThreshold)
 			throws SQLException, IOException {
-		
-		
+
+		/*
+		 * Create a table for storing compressed table. (originally in csv model).
+		 * SO we store the csv content in binary blob. 
+		 */
 		trainingInstances.setClassIndex(0);
 		InstanceStream trainingStream = new CachedInstancesStream(trainingInstances);
-		
-		/**
-		// It was in CSV format in Ashvin's code
-		String compressedTableName = trainingTable + "_compressed";
-		// create original db connection
-		Connection originalConnection = DriverManager
-				.getConnection("jdbc:mysql://localhost/" + originalDb + "?"
-						+ "user=shu&password=shu");
-		Statement statement = originalConnection.createStatement();
+        InstancesHeader header = trainingStream.getHeader();
+        StringBuilder sb = new StringBuilder();
+		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement.executeQuery(
-				"show tables like '" + compressedTableName + "'");
-		if(resultSet.first()){
-			//drop the previously stored table and start again.
-			statement = originalConnection.createStatement();
-			statement.executeUpdate("drop table " + compressedTableName);
+				"show tables like 'compressed_tables'");
+		if(!resultSet.first()){
+			statement = connection.createStatement();
+			statement.executeUpdate(
+					"create table compresed_tables (name CHAR(50), csv LONGBLOB);");
 		}
-		
-		//create the table in the original table format.
-		statement = originalConnection.createStatement();
-		statement.executeQuery("create table " + compressedTableName + " like " + trainingTable);
-		StringBuilder sqlBuilder = new StringBuilder("Insert into " + compressedTableName + " values (");
-		for(int i = 0;  i < trainingInstances.numAttributes(); i ++){
-			sqlBuilder.append("?,");
-		}
-		sqlBuilder.replace(sqlBuilder.length() -1 , sqlBuilder.length(), ")");
-		String sql = sqlBuilder.toString();
-		
-		//write the instances to original database.
-		InstancesHeader header = trainingStream.getHeader();
-		while(trainingStream.hasMoreInstances()){
-			Instance inst = trainingStream.nextInstance();
-            for(int i = 1; i <= trainingInstances.numAttributes(); i ++){
-            	//int value = inst.
+		String sql = "Insert into metadata.compressed_tables (name, csv) values (?, ?)";
+		PreparedStatement ps = connection.prepareStatement(sql);
+		FileOutputStream fos = new FileOutputStream(new File("temp"));
+		while (trainingStream.hasMoreInstances()) {
+            Instance inst = trainingStream.nextInstance();
+            sb.setLength(0);
+            //by columns
+            for (int i = 1; i < compressedColumns.length; i++) {
+                ColumnData c = compressedColumns[i];
+                header.setClassIndex(i-1);
+                inst.setDataset(header);
+                if (c._classifier == null || !Utilities.compressable(c._classifier, inst, i, errorThreshold))
+                    sb.append(Utilities.stringValue(inst, c._classIndex));
+                sb.append(",");
             }
-		}
-		*/
+            // replace the last comma with a newline
+            sb.replace(sb.length() - 1, sb.length(), "\n");
+            fos.write(sb.toString().getBytes());
+        }
+        fos.close();
+        File csvFile = new File("temp");
+        InputStream in = new BufferedInputStream(new FileInputStream(csvFile));
+        ps.setString(1, trainingTable);
+        ps.setBlob(2, in);
+        ps.executeUpdate();
+        ps.close();
+        in.close();
+		
 		
 		/*
 		 * Create table for storing model files if necessary.
@@ -100,8 +106,9 @@ public class MySQLMetadataManager implements MetadataManager {
 		 *  - The column name of this model to be compressed.
 		 *  - The binary content of the model.
 		 */
-		Statement statement = connection.createStatement();
-		ResultSet resultSet = statement.executeQuery(
+		
+		statement = connection.createStatement();
+		resultSet = statement.executeQuery(
 				"show tables like '" + trainingTable + "'");
 		if(!resultSet.first()){
 			//create this table
@@ -111,19 +118,20 @@ public class MySQLMetadataManager implements MetadataManager {
 		
 		for (int i = 0; i < classified.length; i++) {
 			//Get the binary model content and write it to metadata table.
-			String sql = "Insert into metadata." + trainingTable + "(column, model) values (?, ?)";
-			PreparedStatement ps = connection.prepareStatement(sql);
+			sql = "Insert into metadata." + trainingTable + "(column, model) values (?, ?)";
+			ps = connection.prepareStatement(sql);
 			ColumnData c = compressedColumns[i];
 			String columnName = trainingInstances.attribute(i).name();
 			ps.setString(1, columnName);
 			File modelFile = new File("model.moa." + columnName);
 			SerializeUtils.writeToFile(modelFile,  c._classifier);
-			InputStream in = new BufferedInputStream(new FileInputStream(modelFile)); 
+			in = new BufferedInputStream(new FileInputStream(modelFile)); 
 			ps.setBinaryStream(2, in, (int) modelFile.length()); 
 			ps.executeUpdate();
 			/*SerializeUtils.writeToFile(Utilities.getModelFile(_outputFolder,
 					c._classIndex), c._classifier);
 			*/
+			in.close();
 		}
 		connection.close();
 		

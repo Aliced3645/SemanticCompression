@@ -46,6 +46,7 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
     }
 
     public Instance nextInstance() {
+    	//start from an empty instance.
         Instance oldInstance = _nextInstance;
         _nextInstance = new DenseInstance(_header.numAttributes());
         _nextInstance.setDataset(_header);
@@ -60,6 +61,7 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
                 // something went wrong
                 _nextInstance = null;
             } else {
+            	//recover instnaces.
                 String[] cols = line.split(",", -1);
                 if (cols.length != _nextInstance.numAttributes()) {
                     _nextInstance = null;
@@ -89,7 +91,7 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
             _nextInstance = null;
         }
 
-        // predict compressed attributes
+        // !!!!predict compressed attributes
         for (int i = 0; _nextInstance != null && i < _classified.length && _classified[i] != 0; i++) {
             int col = _classified[i];
             if (_nextInstance.isMissing(col-1)) {
