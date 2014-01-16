@@ -100,8 +100,8 @@ public class MySQLMetadataManager implements MetadataManager {
 		 *  - The column name of this model to be compressed.
 		 *  - The binary content of the model.
 		 */
-		statement = connection.createStatement();
-		resultSet = statement.executeQuery(
+		Statement statement = connection.createStatement();
+		ResultSet resultSet = statement.executeQuery(
 				"show tables like '" + trainingTable + "'");
 		if(!resultSet.first()){
 			//create this table
@@ -111,7 +111,7 @@ public class MySQLMetadataManager implements MetadataManager {
 		
 		for (int i = 0; i < classified.length; i++) {
 			//Get the binary model content and write it to metadata table.
-			sql = "Insert into metadata." + trainingTable + "(column, model) values (?, ?)";
+			String sql = "Insert into metadata." + trainingTable + "(column, model) values (?, ?)";
 			PreparedStatement ps = connection.prepareStatement(sql);
 			ColumnData c = compressedColumns[i];
 			String columnName = trainingInstances.attribute(i).name();
