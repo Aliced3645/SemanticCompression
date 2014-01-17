@@ -3,8 +3,8 @@ package Offline;
 import java.io.IOException;
 import java.util.PriorityQueue;
 
-import Metadata.MetadataManager;
-import Metadata.MySQLMetadataManager;
+import ModelManager.ModelManager;
+import ModelManager.MySQLModelManager;
 import WekaTraining.ColumnData;
 import WekaTraining.IterativeCompression;
 import WekaTraining.Utilities;
@@ -56,7 +56,6 @@ public class TrainingDriver {
 
 		String trainingTable = args[1];
 		String testingTable = args[2];
-		String outputFolder = args[3]; // this might be changed.
 		double errorThreshold = Double.parseDouble(args[4]);
 
 		if (testingTable.equals("-"))
@@ -83,17 +82,12 @@ public class TrainingDriver {
 					new PriorityQueue<ColumnData>(columnData));
 		}
 
+		
 		System.out.println("Classifying and compressing the data:");
 		
-		/*
-		 * IterativeCompression ic = new IterativeCompression( trainingTable,
-		 * testingTable, columnData, outputFolder, errorThreshold); ic.run();
-		 */
-		/*
-		MetadataManager metadataManager = new MySQLMetadataManager();
+		ModelManager metadataManager = new MySQLModelManager();
 		IterativeCompression.runForTable(trainingTable, testingTable,
-				columnData, outputFolder, errorThreshold, dbInterface, metadataManager, "testdb");
-		*/
+				columnData, null, errorThreshold, dbInterface, metadataManager, "testdb");
 		
 	}
 }

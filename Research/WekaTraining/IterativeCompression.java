@@ -9,7 +9,7 @@ import java.util.PriorityQueue;
 
 import weka.core.Instances;
 
-import Metadata.MetadataManager;
+import ModelManager.ModelManager;
 import Offline.DBInterface;
 
 /**
@@ -158,11 +158,12 @@ public class IterativeCompression {
 	 */
 	public static void runForTable(String trainingTable, String testingTable,
 			PriorityQueue<ColumnData> columnData, String outputFolder,
-			double errorThreshold, DBInterface dbInterface, MetadataManager metadataManager, 
+			double errorThreshold, DBInterface dbInterface, ModelManager metadataManager, 
 			String originalDb) throws Exception {
 		int[] classified = new int[columnData.size()];
 		int classifiedSoFar = 0;
 		CompressedOutputStream outputStream = null;
+		/*
 		try {
 			// Use output folder temply.
 			outputStream = new CompressedOutputStream(outputFolder);
@@ -170,6 +171,7 @@ public class IterativeCompression {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		*/
 		ColumnData[] compressedColumns = new ColumnData[columnData.size() + 1];
 
 		Instances trainingInstances = dbInterface.retriveInstances(trainingTable);
@@ -217,7 +219,7 @@ public class IterativeCompression {
 				+ outputFolder + "'...");
 		
 		trainingInstances.setClassIndex(0);
-		InstanceStream trainingStream = new CachedInstancesStream(trainingInstances);
+//		InstanceStream trainingStream = new CachedInstancesStream(trainingInstances);
 		
 		//To replace - with store these stuff in DB.
 		//To change: compressed csv -> compressed table in db
@@ -225,18 +227,6 @@ public class IterativeCompression {
 		metadataManager.storeModels(
 				trainingTable, originalDb, classified, trainingInstances, compressedColumns, errorThreshold);
 		
-		try {
-			//writes the compressed csv file and model to output dir
-			//so here we just replace the use of outputStream, 
-			//we use MetadataManager to write them to db.
-			outputStream.createCompressed(classified, 
-					trainingStream, compressedColumns, errorThreshold);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
-
 		return;
 	}
 }
