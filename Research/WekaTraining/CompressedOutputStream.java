@@ -28,7 +28,8 @@ public class CompressedOutputStream {
 
     // writes the compressed csv file
     public void createCompressed(int[] classified, InstanceStream inputStream, ColumnData[] compressedColumns, double errorThreshold) throws IOException {
-        SerializeUtils.writeToFile(Utilities.getHeaderFile(_outputFolder), inputStream.getHeader());
+        
+    	SerializeUtils.writeToFile(Utilities.getHeaderFile(_outputFolder), inputStream.getHeader());
         SerializeUtils.writeToFile(Utilities.getClassifiedFile(_outputFolder), classified);
         FileOutputStream fos = new FileOutputStream(Utilities.getCompressedFile(_outputFolder));
 

@@ -28,9 +28,15 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
     public DecompressionStream(String inputFolder) {
         _inputFolder = new File(inputFolder);
         clearFields();
+        //Call restart() in constructor!
+        //Translate folder into header, input stream, etc..
         restart();
         if (_header == null || _classified == null || _inputStream == null || _classifiers == null)
             throw new IllegalArgumentException("Could not read input");
+    }
+    
+    public DecompressionStream(String tableName, String columnName){
+    	
     }
 
     public InstancesHeader getHeader() {

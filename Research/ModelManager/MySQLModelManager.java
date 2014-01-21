@@ -50,14 +50,14 @@ public class MySQLModelManager implements ModelManager {
 			ColumnData[] compressedColumns, double errorThreshold)
 			throws SQLException, IOException {
 
+		InstanceStream trainingStream = new CachedInstancesStream(
+				trainingInstances);
+		InstancesHeader header = trainingStream.getHeader();
 		/*
 		 * Create a table for storing compressed table. (originally in csv
 		 * model). SO we store the csv content in binary blob.
 		 */
 		trainingInstances.setClassIndex(0);
-		InstanceStream trainingStream = new CachedInstancesStream(
-				trainingInstances);
-		InstancesHeader header = trainingStream.getHeader();
 		StringBuilder sb = new StringBuilder();
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement
@@ -109,6 +109,70 @@ public class MySQLModelManager implements ModelManager {
 		in.close();
 
 		/*
+		 * Create a table for storing header content...
+		 */
+		statement = connection.createStatement();
+		resultSet = statement
+				.executeQuery("show tables like 'headers'");
+		if(!resultSet.first()){
+			statement = connection.createStatement();
+			statement.executeUpdate("create table headers (name CHAR(50), header LONGBLOB);");
+			statement = connection.createStatement();
+			statement
+			.executeUpdate("alter table headers add constraint pk_t unique key (name);");
+		}
+		sql = "Insert into headers (name, header) values (?, ?)";
+		ps = connection.prepareStatement(sql);
+		File headerFile = new File("temp");
+		SerializeUtils.writeToFile(headerFile, trainingStream.getHeader());
+		in = new BufferedInputStream(new FileInputStream(headerFile));
+		ps.setString(1, trainingTable);
+		ps.setBlob(2, in);
+		try {
+			ps.executeUpdate();
+		} catch (MySQLIntegrityConstraintViolationException e){
+			statement = connection.createStatement();
+			statement
+			.executeUpdate("delete from headers where name = '"
+					+ trainingTable + "';");
+			ps.executeUpdate();
+		}
+		ps.close();
+		in.close();
+		
+		/*
+		 * Create a table for storing classified[]..
+		 */
+		statement = connection.createStatement();
+		resultSet = statement
+				.executeQuery("show tables like 'classifieds'");
+		if(!resultSet.first()){
+			statement = connection.createStatement();
+			statement.executeUpdate("create table classifieds (name CHAR(50), classified LONGBLOB);");
+			statement = connection.createStatement();
+			statement
+			.executeUpdate("alter table classifieds add constraint pk_t unique key (name);");
+		}
+		sql = "Insert into classifieds (name, classified) values (?, ?)";
+		ps = connection.prepareStatement(sql);
+		File classifiedFile = new File("temp");
+		SerializeUtils.writeToFile(classifiedFile, classified);
+		in = new BufferedInputStream(new FileInputStream(classifiedFile));
+		ps.setString(1, trainingTable);
+		ps.setBlob(2, in);
+		try {
+			ps.executeUpdate();
+		} catch (MySQLIntegrityConstraintViolationException e){
+			statement = connection.createStatement();
+			statement
+			.executeUpdate("delete from classifieds where name = '"
+					+ trainingTable + "';");
+			ps.executeUpdate();
+		}
+		ps.close();
+		in.close();
+		
+		/*
 		 * Create table for storing model files if necessary. For each table to
 		 * be compressed, there is a metadata table storing its models. There
 		 * should be a table called "models" in metadata db. It has three
@@ -136,7 +200,7 @@ public class MySQLModelManager implements ModelManager {
 			ps = connection.prepareStatement(sql);
 			ColumnData c = compressedColumns[i];
 			String columnName = trainingInstances.attribute(i - 1).name();
-			System.out.println(columnName);
+			//System.out.println(columnName);
 			ps.setString(1, columnName);
 			File modelFile = new File("model.moa." + columnName);
 			SerializeUtils.writeToFile(modelFile, c._classifier);
