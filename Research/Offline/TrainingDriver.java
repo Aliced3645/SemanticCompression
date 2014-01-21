@@ -89,5 +89,6 @@ public class TrainingDriver {
 		IterativeCompression.runForTable(trainingTable, testingTable,
 				columnData, null, errorThreshold, dbInterface, metadataManager, "testdb");
 		
+		
 	}
 }

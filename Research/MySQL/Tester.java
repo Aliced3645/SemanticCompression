@@ -24,12 +24,18 @@ public class Tester {
 			connection = DriverManager.getConnection("jdbc:mysql://localhost/testdb?"
               + "user=shu&password=shu");
 			statement = connection.createStatement();
+			/*
 			resultSet = statement.executeQuery(
 					"select * from testdb.table1");
 			while(resultSet.next()){
 				System.out.println(resultSet.getInt("id"));
 			}
-			
+			*/
+			try{
+				statement.executeUpdate(" insert into table3 (a) values (1);");
+			} catch (Exception e){
+				//delete table..
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
