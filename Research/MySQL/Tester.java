@@ -21,7 +21,7 @@ public class Tester {
 
 	public static void main(String[] args) {
 		try {
-			connection = DriverManager.getConnection("jdbc:mysql://localhost/testdb?"
+			connection = DriverManager.getConnection("jdbc:mysql://localhost/metadata?"
               + "user=shu&password=shu");
 			statement = connection.createStatement();
 			/*
@@ -31,8 +31,13 @@ public class Tester {
 				System.out.println(resultSet.getInt("id"));
 			}
 			*/
+			/*
+			 * statement.executeUpdate(" insert into table3 (a) values (1);");
+			 */
 			try{
-				statement.executeUpdate(" insert into table3 (a) values (1);");
+				//Test loading binary content from database and recover to weka objects.
+				//ResultSet resultSet = statement.executeQuery("select ")
+				//statement.executeQuery()
 			} catch (Exception e){
 				//delete table..
 			}

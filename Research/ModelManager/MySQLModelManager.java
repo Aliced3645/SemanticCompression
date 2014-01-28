@@ -44,6 +44,23 @@ public class MySQLModelManager implements ModelManager {
 		this.connection = connection;
 	}
 
+	/**
+	 * Helper function for code reuse.
+	 * @param sql
+	 * @param name
+	 * @param blob
+	 * @return
+	 * @throws SQLException 
+	 */
+	void makeInsertStatementAndExecute(
+			String sql, String name, InputStream in) throws SQLException{
+		PreparedStatement ps = connection.prepareStatement(sql);
+		ps.setString(1, name);
+		ps.setBlob(2, in);
+		ps.execute();
+		ps.close();
+	}
+	
 	@Override
 	public void storeModels(String trainingTable, String originalDb,
 			int[] classified, Instances trainingInstances,
@@ -71,7 +88,6 @@ public class MySQLModelManager implements ModelManager {
 					.executeUpdate("alter table compressed_tables add constraint pk_t unique key (name);");
 		}
 		String sql = "Insert into compressed_tables (name, csv) values (?, ?)";
-		PreparedStatement ps = connection.prepareStatement(sql);
 		FileOutputStream fos = new FileOutputStream(new File("temp"));
 		while (trainingStream.hasMoreInstances()) {
 			Instance inst = trainingStream.nextInstance();
@@ -94,18 +110,17 @@ public class MySQLModelManager implements ModelManager {
 		fos.close();
 		File csvFile = new File("temp");
 		InputStream in = new BufferedInputStream(new FileInputStream(csvFile));
-		ps.setString(1, trainingTable);
-		ps.setBlob(2, in);
+		
 		try {
-			ps.executeUpdate();
+			makeInsertStatementAndExecute(sql, trainingTable, in);
 		} catch (MySQLIntegrityConstraintViolationException e) {
 			statement = connection.createStatement();
 			statement
 					.executeUpdate("delete from compressed_tables where name = '"
 							+ trainingTable + "';");
-			ps.executeUpdate();
+			in = new BufferedInputStream(new FileInputStream(csvFile));
+			makeInsertStatementAndExecute(sql, trainingTable, in);
 		}
-		ps.close();
 		in.close();
 
 		/*
@@ -122,22 +137,19 @@ public class MySQLModelManager implements ModelManager {
 			.executeUpdate("alter table headers add constraint pk_t unique key (name);");
 		}
 		sql = "Insert into headers (name, header) values (?, ?)";
-		ps = connection.prepareStatement(sql);
 		File headerFile = new File("temp");
 		SerializeUtils.writeToFile(headerFile, trainingStream.getHeader());
 		in = new BufferedInputStream(new FileInputStream(headerFile));
-		ps.setString(1, trainingTable);
-		ps.setBlob(2, in);
 		try {
-			ps.executeUpdate();
+			makeInsertStatementAndExecute(sql, trainingTable, in);
 		} catch (MySQLIntegrityConstraintViolationException e){
 			statement = connection.createStatement();
 			statement
 			.executeUpdate("delete from headers where name = '"
 					+ trainingTable + "';");
-			ps.executeUpdate();
+			in = new BufferedInputStream(new FileInputStream(headerFile));
+			makeInsertStatementAndExecute(sql, trainingTable, in);
 		}
-		ps.close();
 		in.close();
 		
 		/*
@@ -154,22 +166,19 @@ public class MySQLModelManager implements ModelManager {
 			.executeUpdate("alter table classifieds add constraint pk_t unique key (name);");
 		}
 		sql = "Insert into classifieds (name, classified) values (?, ?)";
-		ps = connection.prepareStatement(sql);
 		File classifiedFile = new File("temp");
 		SerializeUtils.writeToFile(classifiedFile, classified);
 		in = new BufferedInputStream(new FileInputStream(classifiedFile));
-		ps.setString(1, trainingTable);
-		ps.setBlob(2, in);
 		try {
-			ps.executeUpdate();
+			makeInsertStatementAndExecute(sql, trainingTable, in);
 		} catch (MySQLIntegrityConstraintViolationException e){
 			statement = connection.createStatement();
 			statement
 			.executeUpdate("delete from classifieds where name = '"
 					+ trainingTable + "';");
-			ps.executeUpdate();
+			in = new BufferedInputStream(new FileInputStream(classifiedFile));
+			makeInsertStatementAndExecute(sql, trainingTable, in);
 		}
-		ps.close();
 		in.close();
 		
 		/*
@@ -197,19 +206,16 @@ public class MySQLModelManager implements ModelManager {
 			// Get the binary model content and write it to metadata table.
 			sql = "Insert into metadata." + trainingTable
 					+ " (attribute, model) values (?, ?)";
-			ps = connection.prepareStatement(sql);
 			ColumnData c = compressedColumns[i];
 			String columnName = trainingInstances.attribute(i - 1).name();
 			//System.out.println(columnName);
-			ps.setString(1, columnName);
 			File modelFile = new File("model.moa." + columnName);
 			SerializeUtils.writeToFile(modelFile, c._classifier);
 			in = new BufferedInputStream(new FileInputStream(modelFile));
-			ps.setBlob(2, in);
-			ps.executeUpdate();
-			ps.close();
+			makeInsertStatementAndExecute(sql, columnName, in);
 			in.close();
 		}
+
 		connection.close();
 
 	}
