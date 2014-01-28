@@ -1,2 +1,7 @@
 1	-3	Infinity
+7	-3	Infinity
+6	-3	Infinity
+5	-3	Infinity
+4	-3	Infinity
+3	-3	Infinity
 2	-3	Infinity
