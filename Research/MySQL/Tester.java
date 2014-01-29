@@ -45,7 +45,7 @@ public class Tester {
 				// Test loading binary content from database and recover to weka
 				// objects.
 				ResultSet resultSet = statement
-						.executeQuery("select header from headers where name =  'table2';");
+						.executeQuery("select classified from classifieds where name =  'table2';");
 				if (resultSet.first()) {
 					InputStream in = resultSet.getBinaryStream(1);
 					// Store to a temp file...
@@ -54,14 +54,10 @@ public class Tester {
 					byte[] data = new byte[4096];
 					int count = -1;
 					while ((count = in.read(data, 0, 4096)) != -1) {
-						System.out.println(count);
 						fos.write(data, 0, count);
 					}
 					fos.close();
-					InstancesHeader header = (InstancesHeader) SerializeUtils
-							.readFromFile(file);
-					System.out.println(header.numAttributes());
-					System.out.println(header.toString());
+					int[] classified = (int[]) SerializeUtils.readFromFile(file);
 				}
 			} catch (Exception e) {
 				// delete table..

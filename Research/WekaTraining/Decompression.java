@@ -18,6 +18,7 @@ public class Decompression {
     File _graphFile;
 
     public Decompression(String inputFolder, String outputFile, String graphFile) {
+    	//Inside the constructor.... there is a bunch of stuff..
         _inStream = new DecompressionStream(inputFolder);
         _outputFile = new File(outputFile);
         _graphFile = new File(graphFile);

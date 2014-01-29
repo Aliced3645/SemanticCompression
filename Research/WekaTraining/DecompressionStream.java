@@ -67,7 +67,7 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
                 // something went wrong
                 _nextInstance = null;
             } else {
-            	//recover instnaces.
+            	//recover instances.
                 String[] cols = line.split(",", -1);
                 if (cols.length != _nextInstance.numAttributes()) {
                     _nextInstance = null;
