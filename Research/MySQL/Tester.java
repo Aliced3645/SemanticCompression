@@ -1,8 +1,11 @@
 package MySQL;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import moa.classifiers.Classifier;
 import moa.core.InstancesHeader;
 import moa.core.SerializeUtils;
 import WekaTraining.Utilities;
@@ -45,7 +49,8 @@ public class Tester {
 				// Test loading binary content from database and recover to weka
 				// objects.
 				ResultSet resultSet = statement
-						.executeQuery("select classified from classifieds where name =  'table2';");
+						.executeQuery("select model from " + "table2" + " where attribute =  '"
+								+ "A" + "';");
 				if (resultSet.first()) {
 					InputStream in = resultSet.getBinaryStream(1);
 					// Store to a temp file...
@@ -57,7 +62,10 @@ public class Tester {
 						fos.write(data, 0, count);
 					}
 					fos.close();
-					int[] classified = (int[]) SerializeUtils.readFromFile(file);
+					Classifier classifier = 
+							(Classifier) SerializeUtils.readFromFile(file);
+					if(classifier == null)
+						System.out.println("huaca");
 				}
 			} catch (Exception e) {
 				// delete table..

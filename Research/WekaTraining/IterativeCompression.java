@@ -92,8 +92,10 @@ public class IterativeCompression {
 			} else {
 				column._classifier = null;
 			}
+			System.out.println("///////////////////////////");
+			System.out.println(column._classifier);
+			System.out.println("///////////////////////////");
 		}
-
 		System.out.println("Writing compressed output to folder '"
 				+ _outputFolder + "'...");
 		try {

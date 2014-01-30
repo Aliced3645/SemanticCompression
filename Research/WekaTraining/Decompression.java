@@ -32,6 +32,7 @@ public class Decompression {
             saver.setStructure(_inStream.getHeader());
             System.out.println("Writing output to output file...");
             // the DecompressionStream does all the work
+            // hasMoreInstances()
             while (_inStream.hasMoreInstances()) {
                 saver.writeIncremental(_inStream.nextInstance());
             }
@@ -40,7 +41,7 @@ public class Decompression {
             e.printStackTrace();
             System.exit(1);
         }
-
+        //Watch out!!
         _inStream.restart();
         CustomWEKAClassifier.printConnectionGraph(_inStream, _graphFile);
     }
