@@ -33,6 +33,7 @@ public class Decompression {
             System.out.println("Writing output to output file...");
             // the DecompressionStream does all the work
             // hasMoreInstances()
+            // Call repeatedly!!
             while (_inStream.hasMoreInstances()) {
                 saver.writeIncremental(_inStream.nextInstance());
             }

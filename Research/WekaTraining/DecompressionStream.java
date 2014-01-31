@@ -51,6 +51,8 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
         return _nextInstance != null;
     }
 
+    //Go by ROWS!!!..
+    //Means get next row.
     public Instance nextInstance() {
     	//start from an empty instance.
         Instance oldInstance = _nextInstance;
@@ -133,6 +135,7 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
                     //System.out.println(_header.attribute(i - 1).name());
                     //System.out.println(_classifiers[i]);
                 } catch (IOException e) {
+                	//WE here can allow classifier to be a null value.
                     _classifiers[i] = null;
                 }
             }

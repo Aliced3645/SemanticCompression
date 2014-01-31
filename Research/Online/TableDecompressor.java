@@ -13,10 +13,15 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import moa.classifiers.Classifier;
 import moa.core.InstancesHeader;
 import moa.core.SerializeUtils;
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 import weka.core.Instances;
 
 /**
@@ -28,6 +33,10 @@ public class TableDecompressor {
 
 	// Has a jdbc driver connecting to database;
 	private Connection connection;
+
+	InstancesHeader header;
+	int[] classfied;
+	BufferedReader inputStream;
 
 	public TableDecompressor() throws SQLException {
 		// by default : initialize connection
@@ -66,7 +75,8 @@ public class TableDecompressor {
 		return header;
 	}
 
-	int[] readClassified(String tableName) throws SQLException, IOException, ClassNotFoundException {
+	int[] readClassified(String tableName) throws SQLException, IOException,
+			ClassNotFoundException {
 		int[] classfied = null;
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement
@@ -88,8 +98,8 @@ public class TableDecompressor {
 		return classfied;
 	}
 
-	
-	BufferedReader readCompressedTable(String tableName) throws SQLException, IOException{
+	BufferedReader readCompressedTable(String tableName) throws SQLException,
+			IOException {
 		BufferedReader inputStream = null;
 		Statement statement = connection.createStatement();
 		ResultSet resultSet = statement
@@ -106,19 +116,18 @@ public class TableDecompressor {
 				fos.write(data, 0, count);
 			}
 			fos.close();
-			inputStream = 
-					new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			inputStream = new BufferedReader(new InputStreamReader(
+					new FileInputStream(file)));
 		}
 		return inputStream;
 	}
-	
-	
-	Classifier readClassifier(String tableName, String columnName) throws SQLException, IOException, ClassNotFoundException{
+
+	Classifier readClassifier(String tableName, String columnName)
+			throws SQLException, IOException, ClassNotFoundException {
 		Classifier classifier = null;
 		Statement statement = connection.createStatement();
-		ResultSet resultSet = statement
-				.executeQuery("select model from '" + tableName + "' where attribute =  '"
-						+ columnName + "';");
+		ResultSet resultSet = statement.executeQuery("select model from '"
+				+ tableName + "' where attribute =  '" + columnName + "';");
 		if (resultSet.first()) {
 			InputStream in = resultSet.getBinaryStream(1);
 			// Store to a temp file...
@@ -134,7 +143,72 @@ public class TableDecompressor {
 		}
 		return classifier;
 	}
-	
+
+	/**
+	 * Return values directly. Now we just assume the array is not that "large".
+	 * 
+	 * @param classifier
+	 * @return
+	 */
+	private Double[] iterativeDecompressColumn(Classifier classifier, String columnName) {
+		List<Double> answers = new ArrayList<Double>();
+		Instance instance = new DenseInstance(header.numAttributes());
+		Attribute attribute = header.attribute(columnName);
+		int index = attribute.index(); //not sure where index starts.
+		while (true) {
+			try {
+				String line = inputStream.readLine();
+				if (line == null || line.equals("")) {
+					break;
+				} else {
+					String[] cols = line.split(",", -1);
+					if (cols.length != header.numAttributes()) {
+						break;
+					} else {
+						for (int i = 0; i < cols.length; i++) {
+							if (cols[i].equals("")) {
+								instance.setMissing(i);
+							} else if (header.attribute(i).isNumeric()) {
+								
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return (Double[]) (answers.toArray());
+	}
+
+	private Double[] getValuesDirectly(String columnName){
+		List<Double> answers = new ArrayList<Double>();
+		Attribute attribute = header.attribute(columnName);
+		int index = attribute.index(); //not sure where index starts.
+		while(true){
+			try{
+				String line = inputStream.readLine();
+				if(line == null || line.equals("")){
+					break;
+				} else {
+					String[] cols = line.split(",", -1);
+					String value = cols[index];
+					if(attribute.isNumeric()){
+						try{
+							Double val = Double.parseDouble(value);
+							answers.add(val);
+						} catch (NumberFormatException e) {
+							e.printStackTrace();
+							break;
+						}
+					}
+				}
+			} catch(IOException e){
+				e.printStackTrace();
+			}
+		}
+		return (Double[])(answers.toArray());
+	}
 	/**
 	 * Decompress a column value using
 	 * 
@@ -145,17 +219,19 @@ public class TableDecompressor {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	Instances decompressColumn(String tableName, String columnName)
+	Double[] decompressColumn(String tableName, String columnName)
 			throws SQLException, IOException, ClassNotFoundException {
 		// try to read the header
-		InstancesHeader header = readHeader(tableName);
-		int[] classfied = readClassified(tableName);
-		BufferedReader inputStream = readCompressedTable(tableName);
-		//Get the classifier of that column.
-		//!!! It is possible that classifier is a null object..
+		header = readHeader(tableName);
+		classfied = readClassified(tableName);
+		inputStream = readCompressedTable(tableName);
+		// Get the classifier of that column.
+		// !!! It is possible that classifier is a null object..
 		Classifier classifier = readClassifier(tableName, columnName);
-		
-		
-		return null;
+		if(classifier == null){
+			//read the value directly.
+			return getValuesDirectly(columnName);
+		}
+		return iterativeDecompressColumn(classifier, columnName);
 	}
 }
