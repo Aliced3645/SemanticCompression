@@ -16,6 +16,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import WekaTraining.Utilities;
+
 import moa.classifiers.Classifier;
 import moa.core.InstancesHeader;
 import moa.core.SerializeUtils;
@@ -146,16 +148,18 @@ public class TableDecompressor {
 
 	/**
 	 * Return values directly. Now we just assume the array is not that "large".
+	 * **** Core function ****
 	 * 
 	 * @param classifier
 	 * @return
 	 */
-	private Double[] iterativeDecompressColumn(Classifier classifier, String columnName) {
+	private Double[] iterativeDecompressColumn(Classifier classifier,
+			String columnName) {
 		List<Double> answers = new ArrayList<Double>();
-		Instance instance = new DenseInstance(header.numAttributes());
 		Attribute attribute = header.attribute(columnName);
-		int index = attribute.index(); //not sure where index starts.
+		int index = attribute.index(); // not sure where index starts.
 		while (true) {
+			Instance instance = new DenseInstance(header.numAttributes());
 			try {
 				String line = inputStream.readLine();
 				if (line == null || line.equals("")) {
@@ -169,8 +173,60 @@ public class TableDecompressor {
 							if (cols[i].equals("")) {
 								instance.setMissing(i);
 							} else if (header.attribute(i).isNumeric()) {
-								
+								try {
+									Double val = Double.parseDouble(cols[i]);
+									instance.setValue(i, val);
+								} catch (NumberFormatException e) {
+									e.printStackTrace();
+									break;
+								}
+							} else {
+								//non-numeric value
+								instance.setValue(i, cols[i]);
 							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			//now we can predict value at index indicated by the column name in this instance
+			if(instance.isMissing(index - 1)){
+                header.setClassIndex(index-1);
+                instance.setDataset(header);
+                if (Utilities.useNumericRetrieval(header, index - 1)){
+                	double predicted = Utilities.numericValue(classifier, instance);
+                	answers.add(predicted);
+                } else {
+                	System.out.println("Now only supporting double type");
+                	break;
+                }
+			} else {
+				answers.add(instance.value(index - 1));
+			}
+		}
+		return (Double[]) (answers.toArray());
+	}
+
+	private Double[] getValuesDirectly(String columnName) {
+		List<Double> answers = new ArrayList<Double>();
+		Attribute attribute = header.attribute(columnName);
+		int index = attribute.index(); // not sure where index starts.
+		while (true) {
+			try {
+				String line = inputStream.readLine();
+				if (line == null || line.equals("")) {
+					break;
+				} else {
+					String[] cols = line.split(",", -1);
+					String value = cols[index];
+					if (attribute.isNumeric()) {
+						try {
+							Double val = Double.parseDouble(value);
+							answers.add(val);
+						} catch (NumberFormatException e) {
+							e.printStackTrace();
+							break;
 						}
 					}
 				}
@@ -181,34 +237,6 @@ public class TableDecompressor {
 		return (Double[]) (answers.toArray());
 	}
 
-	private Double[] getValuesDirectly(String columnName){
-		List<Double> answers = new ArrayList<Double>();
-		Attribute attribute = header.attribute(columnName);
-		int index = attribute.index(); //not sure where index starts.
-		while(true){
-			try{
-				String line = inputStream.readLine();
-				if(line == null || line.equals("")){
-					break;
-				} else {
-					String[] cols = line.split(",", -1);
-					String value = cols[index];
-					if(attribute.isNumeric()){
-						try{
-							Double val = Double.parseDouble(value);
-							answers.add(val);
-						} catch (NumberFormatException e) {
-							e.printStackTrace();
-							break;
-						}
-					}
-				}
-			} catch(IOException e){
-				e.printStackTrace();
-			}
-		}
-		return (Double[])(answers.toArray());
-	}
 	/**
 	 * Decompress a column value using
 	 * 
@@ -228,8 +256,8 @@ public class TableDecompressor {
 		// Get the classifier of that column.
 		// !!! It is possible that classifier is a null object..
 		Classifier classifier = readClassifier(tableName, columnName);
-		if(classifier == null){
-			//read the value directly.
+		if (classifier == null) {
+			// read the value directly.
 			return getValuesDirectly(columnName);
 		}
 		return iterativeDecompressColumn(classifier, columnName);

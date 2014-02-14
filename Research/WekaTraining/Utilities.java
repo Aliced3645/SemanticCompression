@@ -28,6 +28,7 @@ public class Utilities {
     }
 
     public static double numericValue(Classifier c, Instance i) {
+    	//This is important for prediction.
         return c.getVotesForInstance(i)[0];
     }
 
