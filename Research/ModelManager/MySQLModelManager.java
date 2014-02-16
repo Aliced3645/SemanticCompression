@@ -214,6 +214,9 @@ public class MySQLModelManager implements ModelManager {
 			in = new BufferedInputStream(new FileInputStream(modelFile));
 			makeInsertStatementAndExecute(sql, columnName, in);
 			in.close();
+			if(modelFile.exists()) {
+				modelFile.delete();
+			}
 		}
 
 		connection.close();
