@@ -39,7 +39,11 @@ public class TrainingDriver {
 	/**
 	 * This function is re-written from WekaTraining's main function We change
 	 * the arff file to MySQL databse table name here. Also it detects all tables
-	 * existing in the db and train them.
+	 * existing in the db and train them.\
+	 * 
+	 * Be sure to change 'max_allowed_packet = 512M' in 'my.cnf' and restart mysql server before running this program.
+	 * Run this with VM arguments '-Xmx1g'.
+	 * 
 	 * 
 	 * @param args
 	 *            argument list - (1) Name of table to be trained. (2) Name of

@@ -10,8 +10,8 @@
 	<classpathentry kind="lib" path="lib/JFlex.jar"/>
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/home/shu/git/Research/jars/moa.jar"/>
-	<classpathentry kind="lib" path="/home/shu/git/SemanticCompression/jars/packageManager.jar"/>
-	<classpathentry kind="lib" path="/home/shu/git/SemanticCompression/jars/pentaho.jar"/>
+	<classpathentry kind="lib" path="jars/moa.jar"/>
+	<classpathentry kind="lib" path="jars/packageManager.jar"/>
+	<classpathentry kind="lib" path="jars/pentaho.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

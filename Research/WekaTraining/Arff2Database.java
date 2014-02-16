@@ -23,6 +23,8 @@ import java.io.*;
       save.setRelationForTableName(false);
       save.setTableName(args[0]);
       save.connectToDatabase();
+      System.out.println("Begin transfering " + args[0] + " into mysql database...");
       save.writeBatch();
+      System.out.println("Finished!");
     }
   }
