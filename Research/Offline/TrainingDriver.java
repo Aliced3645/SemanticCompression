@@ -48,8 +48,7 @@ public class TrainingDriver {
 	 * @param args
 	 *            argument list - (1) Name of table to be trained. (2) Name of
 	 *            testing table. ( If the name is '-', then training table would
-	 *            be the testing table. (3) Name of output FOLDER (to be changed
-	 *            to database.) (4) Trails file.
+	 *            be the testing table. (3) Error threshold.
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
@@ -60,7 +59,7 @@ public class TrainingDriver {
 
 		String trainingTable = args[1];
 		String testingTable = args[2];
-		double errorThreshold = Double.parseDouble(args[4]);
+		double errorThreshold = Double.parseDouble(args[3]);
 
 		if (testingTable.equals("-"))
 			testingTable = trainingTable;
@@ -91,7 +90,7 @@ public class TrainingDriver {
 		
 		ModelManager metadataManager = new MySQLModelManager();
 		IterativeCompression.runForTable(trainingTable, testingTable,
-				columnData, null, errorThreshold, dbInterface, metadataManager, "testdb");
+				columnData, errorThreshold, dbInterface, metadataManager, "testdb");
 		
 		
 	}

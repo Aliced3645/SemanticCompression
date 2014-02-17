@@ -159,7 +159,7 @@ public class IterativeCompression {
 	 * @throws Exception 
 	 */
 	public static void runForTable(String trainingTable, String testingTable,
-			PriorityQueue<ColumnData> columnData, String outputFolder,
+			PriorityQueue<ColumnData> columnData,
 			double errorThreshold, DBInterface dbInterface, ModelManager metadataManager, 
 			String originalDb) throws Exception {
 		int[] classified = new int[columnData.size()];
@@ -217,8 +217,7 @@ public class IterativeCompression {
 			}
 		}
 
-		System.out.println("Writing compressed output to folder '"
-				+ outputFolder + "'...");
+		System.out.println("Writing compressed output to database...");
 		
 		trainingInstances.setClassIndex(0);
 //		InstanceStream trainingStream = new CachedInstancesStream(trainingInstances);

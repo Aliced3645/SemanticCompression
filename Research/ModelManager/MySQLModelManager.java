@@ -215,7 +215,9 @@ public class MySQLModelManager implements ModelManager {
 			makeInsertStatementAndExecute(sql, columnName, in);
 			in.close();
 
-				modelFile.delete();
+			modelFile = modelFile.getCanonicalFile();
+			modelFile.delete();
+				
 
 		}
 
