@@ -247,7 +247,7 @@ public class TableDecompressor {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	Double[] decompressColumn(String tableName, String columnName)
+	public Double[] decompressColumn(String tableName, String columnName)
 			throws SQLException, IOException, ClassNotFoundException {
 		// try to read the header
 		header = readHeader(tableName);

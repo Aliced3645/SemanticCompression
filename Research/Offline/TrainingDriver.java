@@ -5,6 +5,7 @@ import java.util.PriorityQueue;
 
 import ModelManager.ModelManager;
 import ModelManager.MySQLModelManager;
+import Online.TableDecompressor;
 import WekaTraining.ColumnData;
 import WekaTraining.IterativeCompression;
 import WekaTraining.Utilities;
@@ -35,14 +36,14 @@ public class TrainingDriver {
 		System.exit(1);
 	}
 
-	
 	/**
 	 * This function is re-written from WekaTraining's main function We change
-	 * the arff file to MySQL databse table name here. Also it detects all tables
-	 * existing in the db and train them.\
+	 * the arff file to MySQL databse table name here. Also it detects all
+	 * tables existing in the db and train them.\
 	 * 
-	 * Be sure to change 'max_allowed_packet = 512M' in 'my.cnf' and restart mysql server before running this program.
-	 * Run this with VM arguments '-Xmx1g'.
+	 * Be sure to change 'max_allowed_packet = 512M' in 'my.cnf' and restart
+	 * mysql server before running this program. Run this with VM arguments
+	 * '-Xmx1g'.
 	 * 
 	 * 
 	 * @param args
@@ -51,47 +52,65 @@ public class TrainingDriver {
 	 *            be the testing table. (3) Error threshold.
 	 * @throws Exception
 	 */
+	
+	/*
+	 * Compress example command:
+	 * 	compress table2 table2 0.5
+	 * Decomress example command:
+	 * 	decompress table2 A
+	 */
 	public static void main(String[] args) throws Exception {
 		if (args.length < 1
 				|| !(args[0].equals("compress") || args[0].equals("decompress"))) {
 			printUsageAndExit();
 		}
+		
+		String command = args[0];
+		if (command.equals("compress")) {
+			String trainingTable = args[1];
+			String testingTable = args[2];
+			double errorThreshold = Double.parseDouble(args[3]);
 
-		String trainingTable = args[1];
-		String testingTable = args[2];
-		double errorThreshold = Double.parseDouble(args[3]);
+			if (testingTable.equals("-"))
+				testingTable = trainingTable;
 
-		if (testingTable.equals("-"))
-			testingTable = trainingTable;
+			DBInterface dbInterface = new MySQLDBInterface();
+			dbInterface.setURL("jdbc:mysql://localhost/testdb?"
+					+ "user=shu&password=shu");
 
-		DBInterface dbInterface = new MySQLDBInterface();
-		dbInterface.setURL("jdbc:mysql://localhost/testdb?"
-				+ "user=shu&password=shu");
-
-		PriorityQueue<ColumnData> columnData;
-		if (args.length == 6) {
-			System.out.println("Reading sampled trials file:");
-			columnData = Utilities.readColumnData(args[5]);
-			if (columnData == null) {
-				System.out.println("Error when reading sampled trials file");
-				System.exit(1);
+			PriorityQueue<ColumnData> columnData;
+			if (args.length == 6) {
+				System.out.println("Reading sampled trials file:");
+				columnData = Utilities.readColumnData(args[5]);
+				if (columnData == null) {
+					System.out
+							.println("Error when reading sampled trials file");
+					System.exit(1);
+				}
+			} else {
+				System.out.println("Creating sampled trials file:");
+				columnData = IterativeCompression.calculateColumnDataFromTable(
+						trainingTable, dbInterface);
+				// write to sampled trails file..
+				Utilities.writeColumnData(DEFAULT_SAMPLED_TRIALS_FILE,
+						new PriorityQueue<ColumnData>(columnData));
 			}
-		} else {
-			System.out.println("Creating sampled trials file:");
-			columnData = IterativeCompression.calculateColumnDataFromTable(
-					trainingTable, dbInterface);
-			// write to sampled trails file..
-			Utilities.writeColumnData(DEFAULT_SAMPLED_TRIALS_FILE,
-					new PriorityQueue<ColumnData>(columnData));
+
+			System.out.println("Classifying and compressing the data:");
+
+			ModelManager metadataManager = new MySQLModelManager();
+			IterativeCompression.runForTable(trainingTable, testingTable,
+					columnData, errorThreshold, dbInterface, metadataManager,
+					"testdb");
+		} else if(command.equals("decompress")){
+			String tableName = args[1];
+			String columnName = args[2];
+			TableDecompressor decompressor = new TableDecompressor();
+			Double[] decompressedValues = decompressor.decompressColumn(tableName, columnName);
+			for(int i = 0; i < decompressedValues.length; i ++){
+				System.out.println(decompressedValues[i]);
+			}
 		}
 
-		
-		System.out.println("Classifying and compressing the data:");
-		
-		ModelManager metadataManager = new MySQLModelManager();
-		IterativeCompression.runForTable(trainingTable, testingTable,
-				columnData, errorThreshold, dbInterface, metadataManager, "testdb");
-		
-		
 	}
 }
