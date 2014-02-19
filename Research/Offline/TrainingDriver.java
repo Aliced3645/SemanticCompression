@@ -108,7 +108,7 @@ public class TrainingDriver {
 			String columnName = args[2];
 			TableDecompressor decompressor = new TableDecompressor();
 			List<Double> decompressedValues = decompressor.decompressColumn(tableName, columnName);
-			System.out.println(decompressedValues);
+			System.out.println(decompressedValues.size());
 		}
 
 	}
