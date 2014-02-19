@@ -1,6 +1,7 @@
 package Offline;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.PriorityQueue;
 
 import ModelManager.ModelManager;
@@ -106,10 +107,8 @@ public class TrainingDriver {
 			String tableName = args[1];
 			String columnName = args[2];
 			TableDecompressor decompressor = new TableDecompressor();
-			Double[] decompressedValues = decompressor.decompressColumn(tableName, columnName);
-			for(int i = 0; i < decompressedValues.length; i ++){
-				System.out.println(decompressedValues[i]);
-			}
+			List<Double> decompressedValues = decompressor.decompressColumn(tableName, columnName);
+			System.out.println(decompressedValues);
 		}
 
 	}

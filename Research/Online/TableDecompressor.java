@@ -66,12 +66,10 @@ public class TableDecompressor {
 			byte[] data = new byte[4096];
 			int count = -1;
 			while ((count = in.read(data, 0, 4096)) != -1) {
-				System.out.println(count);
 				fos.write(data, 0, count);
 			}
 			fos.close();
 			header = (InstancesHeader) SerializeUtils.readFromFile(file);
-			System.out.println(header.numAttributes());
 			System.out.println(header.toString());
 		}
 		return header;
@@ -110,7 +108,7 @@ public class TableDecompressor {
 		if (resultSet.first()) {
 			InputStream in = resultSet.getBinaryStream(1);
 			// Store to a temp file...
-			File file = new File("Temp");
+			File file = new File("gotcha");
 			FileOutputStream fos = new FileOutputStream(file);
 			byte[] data = new byte[4096];
 			int count = -1;
@@ -128,8 +126,8 @@ public class TableDecompressor {
 			throws SQLException, IOException, ClassNotFoundException {
 		Classifier classifier = null;
 		Statement statement = connection.createStatement();
-		ResultSet resultSet = statement.executeQuery("select model from '"
-				+ tableName + "' where attribute =  '" + columnName + "';");
+		ResultSet resultSet = statement.executeQuery("select model from "
+				+ tableName + " where attribute =  '" + columnName + "';");
 		if (resultSet.first()) {
 			InputStream in = resultSet.getBinaryStream(1);
 			// Store to a temp file...
@@ -153,7 +151,7 @@ public class TableDecompressor {
 	 * @param classifier
 	 * @return
 	 */
-	private Double[] iterativeDecompressColumn(Classifier classifier,
+	private List<Double> iterativeDecompressColumn(Classifier classifier,
 			String columnName) {
 		List<Double> answers = new ArrayList<Double>();
 		Attribute attribute = header.attribute(columnName);
@@ -205,10 +203,10 @@ public class TableDecompressor {
 				answers.add(instance.value(index - 1));
 			}
 		}
-		return (Double[]) (answers.toArray());
+		return answers;
 	}
 
-	private Double[] getValuesDirectly(String columnName) {
+	private List<Double> getValuesDirectly(String columnName) {
 		List<Double> answers = new ArrayList<Double>();
 		Attribute attribute = header.attribute(columnName);
 		int index = attribute.index(); // not sure where index starts.
@@ -234,7 +232,7 @@ public class TableDecompressor {
 				e.printStackTrace();
 			}
 		}
-		return (Double[]) (answers.toArray());
+		return answers;
 	}
 
 	/**
@@ -247,7 +245,7 @@ public class TableDecompressor {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public Double[] decompressColumn(String tableName, String columnName)
+	public List<Double> decompressColumn(String tableName, String columnName)
 			throws SQLException, IOException, ClassNotFoundException {
 		// try to read the header
 		header = readHeader(tableName);
