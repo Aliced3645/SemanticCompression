@@ -20,6 +20,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+
+import moa.core.InstancesHeader;
 import moa.core.SerializeUtils;
 
 import ModelManager.ModelManager;
@@ -74,6 +77,31 @@ public class Main {
 		ps.close();
 	}
 
+	/**
+	 * Helper function to copy header into database;
+	 * @param connection
+	 * @param sql
+	 * @param name
+	 * @param in
+	 * @param depends
+	 * @throws SQLException
+	 */
+	static void makeInsertStatementAndExecuteForHeader(Connection connection,
+			String sql, String name, InputStream in)
+			throws SQLException {
+		PreparedStatement ps = connection.prepareStatement(sql);
+		ps.setString(1, name);
+		ps.setBlob(2, in);
+		ps.execute();
+		ps.close();
+	}
+	
+	/**
+	 * 
+	 * @param args
+	 * @throws IOException
+	 * @throws SQLException
+	 */
 	public static void main(String[] args) throws IOException, SQLException {
 		/*
 		 * if (args.length < 1 || !(args[0].equals("compress") ||
@@ -137,7 +165,6 @@ public class Main {
 			// the model table should be: <column name, blob of the model,
 			// string of dependencies>
 			DecompressionStream inStream = new DecompressionStream(inputFolder);
-			inStream.restart();
 			moa.classifiers.Classifier[] classifiers = inStream
 					.getClassifiers();
 			// The hashmap of name and classifier
@@ -226,6 +253,35 @@ public class Main {
 				in.close();
 			}
 
+			// store the header inside metadata database;
+			InstancesHeader header = inStream.getHeader();
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery("show tables like 'headers'");
+			if (!resultSet.first()) {
+				statement = connection.createStatement();
+				statement
+						.executeUpdate("create table headers (name CHAR(50), header LONGBLOB);");
+				statement = connection.createStatement();
+				statement
+						.executeUpdate("alter table headers add constraint pk_t unique key (name);");
+			}
+			sql = "Insert into headers (name, header) values (?, ?)";
+			File headerFile = new File("temp");
+			SerializeUtils.writeToFile(headerFile, header);
+			InputStream in = new BufferedInputStream(new FileInputStream(
+					headerFile));
+			try {
+				makeInsertStatementAndExecuteForHeader(connection, sql, tableName, in);
+			} catch (MySQLIntegrityConstraintViolationException e) {
+				statement = connection.createStatement();
+				statement
+				.executeUpdate("delete from headers where name = '"
+						+ tableName + "';");
+				in = new BufferedInputStream(new FileInputStream(headerFile));
+				makeInsertStatementAndExecuteForHeader(connection, sql, tableName, in);
+			}
+			in.close();
+			
 		}
 	}
 }
