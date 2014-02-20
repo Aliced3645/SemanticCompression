@@ -56,9 +56,9 @@ public class TrainingDriver {
 	
 	/*
 	 * Compress example command:
-	 * 	compress table2 table2 0.5
+	 * 	compress cps_arff cps_arff 0.5
 	 * Decomress example command:
-	 * 	decompress table2 A
+	 * 	decompress cps_arff HRHHID
 	 */
 	public static void main(String[] args) throws Exception {
 		if (args.length < 1

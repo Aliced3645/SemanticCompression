@@ -94,6 +94,7 @@ public class CustomWEKAClassifier extends WEKAClassifier {
                     if (!(classifiers[i] instanceof CustomWEKAClassifier))
                         continue;
                     String description = ((CustomWEKAClassifier) classifiers[i]).getWEKAClassifier().toString();
+                    //System.out.println(description);
                     String[] lines = description.split("\n", -1);
                     for (String line : lines) {
                         if (!line.contains(":") || !(line.contains("<") || line.contains(">") || line.contains("=")))

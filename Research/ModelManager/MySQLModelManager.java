@@ -216,8 +216,7 @@ public class MySQLModelManager implements ModelManager {
 			in.close();
 
 			modelFile = modelFile.getCanonicalFile();
-			modelFile.delete();
-				
+			modelFile.delete();	
 
 		}
 

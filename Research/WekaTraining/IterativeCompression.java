@@ -165,15 +165,6 @@ public class IterativeCompression {
 		int[] classified = new int[columnData.size()];
 		int classifiedSoFar = 0;
 		CompressedOutputStream outputStream = null;
-		/*
-		try {
-			// Use output folder temply.
-			outputStream = new CompressedOutputStream(outputFolder);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-		*/
 		ColumnData[] compressedColumns = new ColumnData[columnData.size() + 1];
 
 		Instances trainingInstances = dbInterface.retriveInstances(trainingTable);
@@ -212,6 +203,7 @@ public class IterativeCompression {
 			if (column._classifier != null
 					&& column._percentCompressed > COMPRESSION_THRESHOLD) {
 				classified[classifiedSoFar++] = column._classIndex;
+				System.out.println("GOOD CLASSIFIER");
 			} else {
 				column._classifier = null;
 			}
@@ -227,7 +219,7 @@ public class IterativeCompression {
 		//model stored in binary chunks inside db.
 		metadataManager.storeModels(
 				trainingTable, originalDb, classified, trainingInstances, compressedColumns, errorThreshold);
-		
+		System.out.println("Compression done");
 		return;
 	}
 }
