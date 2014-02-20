@@ -61,7 +61,7 @@ public class DecompressionStream extends AbstractMOAObject implements InstanceSt
         _linesLeftInFile--;
         String line;
         double val;
-
+        
         // retrieve stored attributes
         try {
             line = _inputStream.readLine();
