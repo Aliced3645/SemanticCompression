@@ -190,7 +190,6 @@ public class Main {
 						sb.append(",");
 					}
 					if (sb.length() != 0) {
-						System.out.println(this_col);
 						sb.deleteCharAt(sb.length() - 1);
 						dependencyMap.put(this_col, sb.toString());
 					}
