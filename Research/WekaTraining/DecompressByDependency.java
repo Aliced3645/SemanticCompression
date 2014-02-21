@@ -66,7 +66,7 @@ public class DecompressByDependency {
 
 	}
 	
-	public void decompress(String tableName, String columnName, String columnsFileFolder, String predictFileFolder) throws SQLException, IOException, ClassNotFoundException {
+	public void decompress(String tableName, String columnName, String columnsFileFolder, String predictFilesFolder) throws SQLException, IOException, ClassNotFoundException {
 		Classifier classifier = null;
 		
 		Statement statement = connection.createStatement();
@@ -161,7 +161,7 @@ public class DecompressByDependency {
 			resultInstances.add(instanceToAdd);
 		}
 		
-		StringBuilder sb = new StringBuilder(predictFileFolder);
+		StringBuilder sb = new StringBuilder(predictFilesFolder);
 		sb.append('/');
 		sb.append(columnName);
 		sb.append(".arff");
@@ -171,17 +171,17 @@ public class DecompressByDependency {
 		saver.setDestination(new File(sb.toString()));
 		saver.writeBatch();
 
-		System.out.println("Decompression done! The predicted column is saved at '" + predictFileFolder + "' folder.");
+		System.out.println("Decompression done! The predicted column is saved at '" + predictFilesFolder + "' folder.");
 	}
 	
 	public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
 		String tableName = args[0];
 		String columnName = args[1];
 		String columnFilesFolder = args[2];
-		String predictFileFolder = args[3];
+		String predictFilesFolder = args[3];
 		DecompressByDependency dbd = new DecompressByDependency();
 		dbd.readHeader(tableName);
-		dbd.decompress(tableName, columnName, columnFilesFolder, predictFileFolder);
+		dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder);
 		
 	}
 	
