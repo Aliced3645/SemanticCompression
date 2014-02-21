@@ -84,6 +84,10 @@ public class DecompressByDependency {
 			fos.close();
 			classifier = (Classifier) SerializeUtils.readFromFile(file);
 		}
+		else {
+			System.out.println("SQL exception: No such table/colunmn.");
+			return;
+		}
 
 		Instance predInstance = null;
 		Instances resultInstances = null;
@@ -91,9 +95,17 @@ public class DecompressByDependency {
 		
 		resultSet = statement.executeQuery("select dependencies from "
 				+ tableName + " where attribute =  '" + columnName + "';");
-		resultSet.next();
+		
+		
+		String dependencies;
+		if(resultSet.next()) {
 
-		String dependencies = resultSet.getString(1);
+			dependencies = resultSet.getString(1);
+		}
+		else {
+			System.out.println("SQL exception: No such table/colunmn.");
+			return;
+		}
 		
 		String[] dependArray = dependencies.split(",");
 		
@@ -159,6 +171,7 @@ public class DecompressByDependency {
 		saver.setDestination(new File(sb.toString()));
 		saver.writeBatch();
 
+		System.out.println("Decompression done! The predicted column is saved at '" + predictFileFolder + "' folder.");
 	}
 	
 	public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
@@ -169,7 +182,7 @@ public class DecompressByDependency {
 		DecompressByDependency dbd = new DecompressByDependency();
 		dbd.readHeader(tableName);
 		dbd.decompress(tableName, columnName, columnFilesFolder, predictFileFolder);
-		System.out.println("Decompression done! The predicted column is saved at '" + predictFileFolder + "' folder.");
+		
 	}
 	
 }
