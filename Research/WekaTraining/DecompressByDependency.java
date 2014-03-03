@@ -157,7 +157,15 @@ public class DecompressByDependency {
 			}
 
 			Instance instanceToAdd = new DenseInstance(1);
-			instanceToAdd.setValue(0, Utilities.numericValue(classifier, predInstance));
+			
+			instanceToAdd.setDataset(resultInstances);
+			if(header.attribute(columnName).isNumeric()) {
+				instanceToAdd.setValue(0, Utilities.numericValue(classifier, predInstance));
+			}
+			else {
+				instanceToAdd.setValue(0, Utilities.nominalValue(classifier, predInstance));
+			}
+			
 			resultInstances.add(instanceToAdd);
 		}
 		
