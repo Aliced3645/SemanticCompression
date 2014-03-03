@@ -1,13 +1,14 @@
 package WekaTraining;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 
-
 import weka.core.Instances;
 
-public class CorrectPercent {
+public class ErrorPercent {
 	//Numeric only for now.
 	
 	public static void main(String[] args) throws IOException {
@@ -28,14 +29,25 @@ public class CorrectPercent {
 		readerPred.close();
 		
 		int rowNum = instancesSrc.size();
-		double errorSum = 0.0;
+
+		
+		File file = new File(columnName + ".ErrorPercent");
+		FileOutputStream fos = new FileOutputStream(file);
 		
 		for(int i = 0; i < rowNum; i++) {
-			errorSum += Math.abs((instancesSrc.get(i).value(0) - instancesPred.get(i).value(0)) / instancesSrc.get(i).value(0));
+			double srcValue = instancesSrc.get(i).value(0);
+			double predValue = instancesPred.get(i).value(0);
+			double diff = srcValue - predValue;
+			
+			double result = srcValue == 0 ? Math.abs(diff) : Math.abs(diff / srcValue);
+			
+			fos.write(String.valueOf((i+1) + ": " + result + "\n").getBytes());
+			
 		}
 		
-		double correctPercent = 1 - errorSum / (double)rowNum;
+		fos.close();
 		
-		System.out.println(correctPercent);
+		System.out.println("Output Error Percent by row finished. File stored as " + file.getName());
+
 	}
 }

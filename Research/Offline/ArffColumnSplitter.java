@@ -2,7 +2,7 @@ package Offline;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,8 +13,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
-import moa.streams.ArffFileStream;
-import moa.streams.InstanceStream;
+
 
 /**
  * Splits columns out of an arff file.

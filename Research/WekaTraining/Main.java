@@ -9,12 +9,12 @@ import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
+
 import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.sql.Connection;
-import java.sql.DriverManager;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,8 +25,6 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationExceptio
 import moa.core.InstancesHeader;
 import moa.core.SerializeUtils;
 
-import ModelManager.ModelManager;
-import ModelManager.MySQLModelManager;
 
 /**
  * Package: semanticcompression Class: Main Description: CLI interface for the
@@ -161,6 +159,7 @@ public class Main {
 			Connection connection = DriverManager
 					.getConnection("jdbc:mysql://localhost/metadata?"
 							+ "user=shu&password=shu");
+
 			// the model table should be: <column name, blob of the model,
 			// string of dependencies>
 			DecompressionStream inStream = new DecompressionStream(inputFolder);
