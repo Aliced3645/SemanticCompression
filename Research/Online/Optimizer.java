@@ -6,5 +6,5 @@ package Online;
  *
  */
 public class Optimizer {
-
+	
 }
