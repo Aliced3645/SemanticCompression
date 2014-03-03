@@ -161,7 +161,6 @@ public class Main {
 			Connection connection = DriverManager
 					.getConnection("jdbc:mysql://localhost/metadata?"
 							+ "user=shu&password=shu");
-			ModelManager modelManager = new MySQLModelManager();
 			// the model table should be: <column name, blob of the model,
 			// string of dependencies>
 			DecompressionStream inStream = new DecompressionStream(inputFolder);

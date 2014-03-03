@@ -24,11 +24,8 @@ import Zql.ZqlParser;
  */
 public class SQLParser {
 	
-	Connection conn;
-	
 	public SQLParser(){
 		//a sql parser...
-		
 	}
 	
 	/**
