@@ -21,6 +21,7 @@ import WekaTraining.Utilities;
 import moa.classifiers.Classifier;
 import moa.core.InstancesHeader;
 import moa.core.SerializeUtils;
+import weka.classifiers.trees.M5P;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -66,7 +67,7 @@ public class DecompressByDependency {
 
 	}
 	
-	public void decompress(String tableName, String columnName, String columnsFileFolder, String predictFilesFolder) throws SQLException, IOException, ClassNotFoundException {
+	public void decompress(String tableName, String columnName, String columnsFileFolder, String predictFilesFolder) throws Exception {
 		Classifier classifier = null;
 		
 		Statement statement = connection.createStatement();
@@ -158,13 +159,17 @@ public class DecompressByDependency {
 					predInstance.setValue(dependIndex[j], val);
 				}
 			}
-
+			CustomWEKAClassifier classifier2 = (CustomWEKAClassifier)classifier;
+			
+			M5P m5p = (M5P)(classifier2.getWEKAClassifier());
+		
 			Instance instanceToAdd = new DenseInstance(1);
 
 			instanceToAdd.setDataset(resultInstances);
 
 			if(header.attribute(columnName).isNumeric()) {
-				instanceToAdd.setValue(0, Utilities.numericValue(classifier, predInstance));
+				//instanceToAdd.setValue(0, Utilities.numericValue(classifier, predInstance));
+				instanceToAdd.setValue(0, m5p.classifyInstance(predInstance));
 			}
 			else {
 				instanceToAdd.setValue(0, Utilities.nominalValue(classifier, predInstance));
@@ -186,7 +191,7 @@ public class DecompressByDependency {
 		System.out.println("Decompression done! The predicted column is saved at '" + predictFilesFolder + "' folder.");
 	}
 	
-	public static void main(String[] args) throws SQLException, IOException, ClassNotFoundException {
+	public static void main(String[] args) throws Exception {
 		String tableName = args[0];
 		String columnName = args[1];
 		String columnFilesFolder = args[2];
