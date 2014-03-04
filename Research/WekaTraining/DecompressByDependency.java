@@ -90,7 +90,6 @@ public class DecompressByDependency {
 			return;
 		}
 
-		System.out.println(classifier);
 		
 		Instance predInstance = null;
 		Instances resultInstances = null;
@@ -161,18 +160,32 @@ public class DecompressByDependency {
 			}
 			CustomWEKAClassifier classifier2 = (CustomWEKAClassifier)classifier;
 			
-			M5P m5p = (M5P)(classifier2.getWEKAClassifier());
-		
 			Instance instanceToAdd = new DenseInstance(1);
 
 			instanceToAdd.setDataset(resultInstances);
+			
+			if(Specification.ALGORITHM.equals("M5P")) {
+			
+				M5P m5p = (M5P)(classifier2.getWEKAClassifier());
+				
+				if(header.attribute(columnName).isNumeric()) {
 
-			if(header.attribute(columnName).isNumeric()) {
-				//instanceToAdd.setValue(0, Utilities.numericValue(classifier, predInstance));
-				instanceToAdd.setValue(0, m5p.classifyInstance(predInstance));
+					instanceToAdd.setValue(0, m5p.classifyInstance(predInstance));
+				}
+				else {
+					System.out.println("M5P can only predict numeric value.");
+					return;
+				}
+				
 			}
-			else {
-				instanceToAdd.setValue(0, Utilities.nominalValue(classifier, predInstance));
+			
+			else if(Specification.ALGORITHM.equals("REPTree")) {
+				if(header.attribute(columnName).isNumeric()) {
+					instanceToAdd.setValue(0, Utilities.numericValue(classifier, predInstance));
+				}
+				else {
+					instanceToAdd.setValue(0, Utilities.nominalValue(classifier, predInstance));
+				}
 			}
 			
 			resultInstances.add(instanceToAdd);

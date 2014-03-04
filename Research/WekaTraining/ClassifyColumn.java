@@ -19,16 +19,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class ClassifyColumn {
 
-    // max number of attributes in dataset before M5P is not used
-    private static final int MAX_M5P_ATTRIBUTES = 60;
-    // the error for a misclassified nominal attribute
-    private static final double MISCLASSIFICATION_ERROR = 1.0;
-    // time limit for sampling
-    private static final long SAMPLE_TIME_LIMIT_SECS = 60;
-    // the max number of instances to use to train the model
-    private static final int MAX_INSTANCES = 10000000;
 
-    private static StandardTaskMonitor _taskMonitor = null;
+    private static final String ALGORITHM = Specification.ALGORITHM;
+
+    private static final double MISCLASSIFICATION_ERROR = Specification.MISCLASSIFICATION_ERROR;
+
+    private static final long SAMPLE_TIME_LIMIT_SECS = Specification.SAMPLE_TIME_LIMIT_SECS;
+
+    private static final int MAX_INSTANCES = Specification.MAX_INSTANCES;
+
+    private static StandardTaskMonitor _taskMonitor = Specification._taskMonitor;
 
     // classifies a single column, either sampling (outputStream == null) or outputting the classified values (outputStream != null)
     public static ColumnData classify(int column, InstanceStream training, InstanceStream testing, double errorThreshold, CompressedOutputStream outputStream) {
@@ -39,9 +39,9 @@ public class ClassifyColumn {
         
         // create and train the model
         WEKAClassifier model = new CustomWEKAClassifier();
-        if (numeric && testing.getHeader().numAttributes() < MAX_M5P_ATTRIBUTES) {
-        	model.baseLearnerOption.setValueViaCLIString("weka.classifiers.trees.M5P");
-        	System.out.println("M5P");
+        if (numeric) {
+        	model.baseLearnerOption.setValueViaCLIString("weka.classifiers.trees." + ALGORITHM);
+        	System.out.println(ALGORITHM);
         }
             
         else {
