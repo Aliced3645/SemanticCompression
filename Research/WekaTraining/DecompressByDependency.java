@@ -89,6 +89,8 @@ public class DecompressByDependency {
 			return;
 		}
 
+		System.out.println(classifier);
+		
 		Instance predInstance = null;
 		Instances resultInstances = null;
 
@@ -137,6 +139,7 @@ public class DecompressByDependency {
 		resultInstances = new Instances(resultAttribute.name(), resultAttrinfo, instances[0].size());
 		
 		for(int i = 0; i < instances[0].size(); i ++) {
+
 			predInstance = new DenseInstance(header.numAttributes());
 			predInstance.setDataset(header);
 			for(int j = 0; j < dependArray.length; j++) {
@@ -157,8 +160,9 @@ public class DecompressByDependency {
 			}
 
 			Instance instanceToAdd = new DenseInstance(1);
-			
+
 			instanceToAdd.setDataset(resultInstances);
+
 			if(header.attribute(columnName).isNumeric()) {
 				instanceToAdd.setValue(0, Utilities.numericValue(classifier, predInstance));
 			}

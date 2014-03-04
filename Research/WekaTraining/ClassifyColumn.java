@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class ClassifyColumn {
 
     // max number of attributes in dataset before M5P is not used
-    private static final int MAX_M5P_ATTRIBUTES = 50;
+    private static final int MAX_M5P_ATTRIBUTES = 60;
     // the error for a misclassified nominal attribute
     private static final double MISCLASSIFICATION_ERROR = 1.0;
     // time limit for sampling
@@ -39,10 +39,15 @@ public class ClassifyColumn {
         
         // create and train the model
         WEKAClassifier model = new CustomWEKAClassifier();
-        if (numeric && testing.getHeader().numAttributes() < MAX_M5P_ATTRIBUTES)
-            model.baseLearnerOption.setValueViaCLIString("weka.classifiers.trees.M5P");
-        else
-            model.baseLearnerOption.setValueViaCLIString("weka.classifiers.trees.REPTree");
+        if (numeric && testing.getHeader().numAttributes() < MAX_M5P_ATTRIBUTES) {
+        	model.baseLearnerOption.setValueViaCLIString("weka.classifiers.trees.M5P");
+        	System.out.println("M5P");
+        }
+            
+        else {
+        	model.baseLearnerOption.setValueViaCLIString("weka.classifiers.trees.REPTree");
+        	System.out.println("REPTree");
+        }
         model.prepareForUse(getTaskMonitor(), null);
 
         // setup the LearnModel object
