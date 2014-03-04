@@ -20,6 +20,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import Offline.MetadataStore;
+
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import moa.core.InstancesHeader;
@@ -99,8 +101,9 @@ public class Main {
 	 * @param args
 	 * @throws IOException
 	 * @throws SQLException
+	 * @throws ClassNotFoundException 
 	 */
-	public static void main(String[] args) throws IOException, SQLException {
+	public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
 		/*
 		 * if (args.length < 1 || !(args[0].equals("compress") ||
 		 * args[0].equals("decompress"))) { printUsageAndExit(); }
@@ -151,15 +154,22 @@ public class Main {
 
 		} else if (args[0].equals("store")) {
 
+			
 			String inputFolder = args[1];
 			String tableName = args[2];
+			
 			// adding the model manager stuff here...
 			// so now we have models, just push them into ModelManager inside
 			// MySQL.
 			Connection connection = DriverManager
 					.getConnection("jdbc:mysql://localhost/metadata?"
 							+ "user=shu&password=shu");
-
+			
+			MetadataStore metadataStore = new MetadataStore(connection);
+			metadataStore.store(inputFolder, tableName);
+			
+			
+			/*
 			// the model table should be: <column name, blob of the model,
 			// string of dependencies>
 			DecompressionStream inStream = new DecompressionStream(inputFolder);
@@ -279,6 +289,7 @@ public class Main {
 				makeInsertStatementAndExecuteForHeader(connection, sql, tableName, in);
 			}
 			in.close();
+			*/
 			
 		}
 	}

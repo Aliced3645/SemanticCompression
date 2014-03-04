@@ -51,7 +51,6 @@ public class ArffColumnSplitter {
 			attrinfo.add(attribute);
 			Instances columnInstances = new Instances(attribute.name(), attrinfo, instances.size());
 			columns.add(columns.size(), columnInstances);
-			
 		}
 		
 		//Store and split the values;
