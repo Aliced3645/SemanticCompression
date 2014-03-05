@@ -1,5 +1,7 @@
 package WekaTraining;
 
+import Utilities.Specification;
+
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import moa.classifiers.Classifier;
 import moa.classifiers.meta.WEKAClassifier;

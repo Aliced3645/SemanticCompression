@@ -1,4 +1,4 @@
-package WekaTraining;
+package Online;
 
 
 import java.io.BufferedReader;
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 
 import Utilities.Specification;
+import WekaTraining.CustomWEKAClassifier;
 import WekaTraining.Utilities;
 import moa.classifiers.Classifier;
 import moa.core.InstancesHeader;

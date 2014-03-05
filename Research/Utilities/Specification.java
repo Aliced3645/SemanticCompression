@@ -1,4 +1,4 @@
-package WekaTraining;
+package Utilities;
 
 import moa.tasks.StandardTaskMonitor;
 
