@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -20,10 +22,14 @@ public class Optimizer {
 	private Connection connection;
 	SQLParser parser = new SQLParser();
 	String columnsFolderPath;
+	DecompressByDependency decompressor; 
 	
-	public Optimizer(Connection connection, String columnsFolder){
+	
+	public Optimizer(Connection connection, String columnsFolder) throws SQLException{
 		this.connection = connection;
 		this.columnsFolderPath = columnsFolder;
+		decompressor = new DecompressByDependency();
+		decompressor.setConnection(connection);
 	}
 	
 	
@@ -80,15 +86,32 @@ public class Optimizer {
 	
 	
 	/**
-	 * 
+	 * Initial version of getting all possible results basing on columns permutations;
 	 * @param sql
 	 * @throws ParseException 
+	 * @throws SQLException 
 	 */
-	public void produceAllPossibleResults(String sql) throws ParseException{
+	public void produceAllPossibleResults(String sql) throws ParseException, SQLException{
 		List<List<String>> permutations = getColumnsPermutations(sql);
+		// for now, only support one table in SQL.
+		String table = parser.parseTables(sql).get(0);
+		
+		if(permutations.size() == 0) {
+			System.out.println("Error getting permutations");
+			return;
+		}
+		
+		decompressor.setConnection(connection);
+		HashMap<String, Boolean> queryColumnsSet = new HashMap<String, Boolean>();
+		
+		for(String column : permutations.get(0)){
+			queryColumnsSet.put(column, false);
+		}
+		
 		//for each possible permutations
 		for(List<String> possibility : permutations){
 			String[] columns = (String[]) possibility.toArray();
+			
 			//Make the name of output dir
 			StringBuilder sb = new StringBuilder();
 			for (String column : columns){
@@ -96,7 +119,21 @@ public class Optimizer {
 				sb.append("_");
 			}
 			sb.deleteCharAt(sb.length() - 1);
+			String outputDir = sb.toString();
 			
+			//go for each column from the first to the last one.
+			for(int i = 0; i < columns.length; i ++){
+				String column = columns[i];
+				
+				List<String> dependencies
+				 	= decompressor.getDependencies(table, column);
+				for(String dependency : dependencies) {
+					if(queryColumnsSet.containsKey(dependency)){
+						
+					}
+				}
+				
+			}
 			
 		}
 		

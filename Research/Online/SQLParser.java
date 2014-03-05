@@ -72,6 +72,16 @@ public class SQLParser {
 		return columns;
 	}
 	
+	//Helper function
+	public List<String> parseTables(String sql) throws ParseException {
+		Hashtable<String, List<String>> results = new Hashtable<String, List<String>>();
+		InputStream is = new ByteArrayInputStream(sql.getBytes());
+		ZqlParser parser = new ZqlParser(is);
+		ZQuery statement = (ZQuery) parser.readStatement();
+		return parseTables(statement);
+	}
+	
+	
 	/**
 	 * Testing
 	 * More test casees could be found from
