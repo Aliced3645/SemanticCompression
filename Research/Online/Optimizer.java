@@ -1,6 +1,8 @@
 package Online;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -17,9 +19,11 @@ public class Optimizer {
 	
 	private Connection connection;
 	SQLParser parser = new SQLParser();
+	String columnsFolderPath;
 	
-	public Optimizer(Connection connection){
+	public Optimizer(Connection connection, String columnsFolder){
 		this.connection = connection;
+		this.columnsFolderPath = columnsFolder;
 	}
 	
 	
@@ -64,22 +68,53 @@ public class Optimizer {
 	 * @param sql
 	 * @return
 	 * @throws ParseException 
+	 * 
+	 * For now, not dealing with "*" case.
 	 */
-	public List<List<String>> getColumnsPermutations(String sql) throws ParseException{
+	private List<List<String>> getColumnsPermutations(String sql) throws ParseException{
 		List<List<String>> permutations = new ArrayList<List<String>>();
 		Hashtable<String, List<String>> parts = parser.parseSQL(sql);
 		List<String> columns = parts.get("columns");
 		return getPermutations(columns);
 	}
 	
+	
+	/**
+	 * 
+	 * @param sql
+	 * @throws ParseException 
+	 */
+	public void produceAllPossibleResults(String sql) throws ParseException{
+		List<List<String>> permutations = getColumnsPermutations(sql);
+		//for each possible permutations
+		for(List<String> possibility : permutations){
+			String[] columns = (String[]) possibility.toArray();
+			//Make the name of output dir
+			StringBuilder sb = new StringBuilder();
+			for (String column : columns){
+				sb.append(column);
+				sb.append("_");
+			}
+			sb.deleteCharAt(sb.length() - 1);
+			
+			
+		}
+		
+	}
+	
 	/**
 	 * Running simple tests
 	 * @param args
 	 * @throws ParseException 
+	 * @throws SQLException 
 	 */
-	public static void main(String[] args) throws ParseException{
-		Optimizer optimizer = new Optimizer(null);
-		String sql = "SELECT FirstName, LastName, Address, City, State FROM EmployeeAddressTable;";
-		System.out.println(optimizer.getColumnsPermutations(sql));
+	public static void main(String[] args) throws ParseException, SQLException{
+		Connection connection = DriverManager
+				.getConnection("jdbc:mysql://localhost/metadata?"
+						+ "user=shu&password=shu");
+		Optimizer optimizer = new Optimizer(connection, "columns");
+		//String sql = "SELECT FirstName, LastName, Address, City, State FROM EmployeeAddressTable;";
+		String sql2 = "SELECT * FROM EmployeeAddressTable;";
+		System.out.println(optimizer.getColumnsPermutations(sql2));
 	}
 }
