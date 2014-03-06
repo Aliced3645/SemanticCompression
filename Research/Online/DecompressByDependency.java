@@ -110,6 +110,7 @@ public class DecompressByDependency {
 	public void decompress(String tableName, String columnName,
 			String columnsFileFolder, String predictFilesFolder)
 			throws Exception {
+		
 		Classifier classifier = null;
 
 		Statement statement = connection.createStatement();
@@ -194,6 +195,7 @@ public class DecompressByDependency {
 					predInstance.setValue(dependIndex[j], val);
 				}
 			}
+			
 			CustomWEKAClassifier classifier2 = (CustomWEKAClassifier) classifier;
 
 			Instance instanceToAdd = new DenseInstance(1);
