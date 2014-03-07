@@ -4,12 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.io.Files;
@@ -109,38 +112,58 @@ public class Optimizer {
 	 */
 	public void produceAllPossibleResults(String sql) throws Exception {
 		List<List<String>> permutations = getColumnsPermutations(sql);
-		// for now, only support one table in SQL.
-		String table = parser.parseTables(sql).get(0);
 
 		if (permutations.size() == 0) {
 			System.out.println("Error getting permutations");
 			return;
 		}
+		
+		// for now, only support one table in SQL.
+		String table = parser.parseTables(sql).get(0);
+		
+		// the "*" case
+		if (permutations.size() == 0 && permutations.get(0).get(0) == "*"){
+			//read all columns of this table;
+			Statement statement = connection.createStatement();
+			String sqlGetCoumns = "select attribute from " + table + ";";
+			ResultSet resultSet = statement
+					.executeQuery(sqlGetCoumns);
+			List<String> allColumns = new LinkedList<String>();
+			while(resultSet.next()){
+				allColumns.add(resultSet.getString(1));
+			}
+			permutations = this.getPermutations(allColumns);
+		}
 
 		decompressor.setConnection(connection);
 
+		String baseDir = "OptimizerOutput";
 		// for each possible permutations
 		for (List<String> possibility : permutations) {
+			
 			HashMap<String, Boolean> queryColumnsSet = new HashMap<String, Boolean>();
 
 			for (String column : permutations.get(0)) {
 				queryColumnsSet.put(column, false);
 			}
 
-			String[] columns = (String[]) possibility.toArray();
-
 			// Make the name of output dir
 			StringBuilder sb = new StringBuilder();
-			for (String column : columns) {
+			sb.append(baseDir);
+			sb.append("/");
+			
+			for (String column : possibility) {
 				sb.append(column);
 				sb.append("_");
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			String outputDir = sb.toString();
-
+			
+			(new File(outputDir)).mkdirs();
+			
 			// go for each column from the first to the last one.
-			for (int i = 0; i < columns.length; i++) {
-				String column = columns[i];
+			for (int i = 0; i < possibility.size(); i++) {
+				String column = possibility.get(i);
 
 				if (queryColumnsSet.containsKey(column)) {
 					if (queryColumnsSet.get(column) == true)
@@ -185,21 +208,23 @@ public class Optimizer {
 	 * Running simple tests
 	 * 
 	 * @param args
-	 * @throws ParseException
-	 * @throws SQLException
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	public static void main(String[] args) throws ParseException, SQLException,
-			IOException {
+	public static void main(String[] args) throws Exception {
 
 		Connection connection = DriverManager
 				.getConnection("jdbc:mysql://localhost/metadata?"
 						+ "user=shu&password=shu");
+		
 		Optimizer optimizer = new Optimizer(connection, "columns");
-		// String sql =
-		// "SELECT FirstName, LastName, Address, City, State FROM EmployeeAddressTable;";
-		String sql2 = "SELECT * FROM EmployeeAddressTable;";
-		System.out.println(optimizer.getColumnsPermutations(sql2));
-
+		String sql = "SELECT GEREG, GESTCEN FROM cps;";
+		optimizer.produceAllPossibleResults(sql);
+		
+		/*
+		File input = new File( "columns/GEREG.arff");
+		new File("GEREG_GESTCEN").mkdir();
+		File output = new File("GEREG_GESTCEN/GEREG.arff");
+		Files.copy(input, output);
+		*/
 	}
 }
