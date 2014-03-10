@@ -2,21 +2,19 @@ package Online;
 
 import java.io.BufferedReader;
 import java.io.File;
-
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import Utilities.Specification;
 import WekaTraining.CustomWEKAClassifier;
 import WekaTraining.Utilities;
 import moa.classifiers.Classifier;
@@ -72,7 +70,7 @@ public class DecompressByDependency {
 
 	
 	/**
-	 * Helper function to get relevent columns.
+	 * Helper function to get relevant columns.
 	 * 
 	 * @param tableName
 	 * @param columnName
@@ -109,8 +107,129 @@ public class DecompressByDependency {
 	}
 
 	public void decompress(String tableName, String columnName,
-			String columnsFileFolder, String predictFilesFolder)
+			String predictFilesFolder, HashMap<String, Object> dependencies, String modelName)
 			throws Exception {
+		
+		readHeader(tableName);
+		
+		Classifier classifier = null;
+
+		Statement statement = connection.createStatement();
+		ResultSet resultSet = statement.executeQuery("select model from "
+				+ tableName + " where attribute =  '" + columnName + "';");
+		if (resultSet.first()) {
+			InputStream in = resultSet.getBinaryStream(1);
+			File file = new File("Temp");
+			FileOutputStream fos = new FileOutputStream(file);
+			byte[] data = new byte[4096];
+			int count = -1;
+			while ((count = in.read(data, 0, 4096)) != -1) {
+				fos.write(data, 0, count);
+			}
+			fos.close();
+			classifier = (Classifier) SerializeUtils.readFromFile(file);
+		} else {
+			System.out.println("SQL exception: No such table/colunmn.");
+			return;
+		}
+
+		Instance predInstance = null;
+		Instances resultInstances = null;
+
+
+		if (dependencies.isEmpty()) {
+			System.out.println("Cannot predict this column: " + columnName);
+			return;
+		}
+
+		HashMap<String, Integer> dependIndex = new HashMap<String, Integer>();
+		
+		for (String column : dependencies.keySet()) {
+			dependIndex.put(column, header.attribute(column).index());
+		}
+
+
+
+		Attribute resultAttribute = header.attribute(columnName);
+		ArrayList<Attribute> resultAttrinfo = new ArrayList<Attribute>();
+		resultAttrinfo.add(resultAttribute);
+		resultInstances = new Instances(resultAttribute.name(), resultAttrinfo,
+				1);
+
+
+
+		predInstance = new DenseInstance(header.numAttributes());
+		predInstance.setDataset(header);
+		for (String column : dependencies.keySet()) {
+			if (header.attribute(dependIndex.get(column)).isNumeric()) {
+				double val;
+				try {
+					val = (Double)dependencies.get(column);
+				} catch (NumberFormatException e) {
+					e.printStackTrace();
+					break;
+				}
+				predInstance.setValue(dependIndex.get(column), val);
+			} else {
+				String val = (String)dependencies.get(column);
+				predInstance.setValue(dependIndex.get(column), val);
+			}
+		}
+			
+		CustomWEKAClassifier classifier2 = (CustomWEKAClassifier) classifier;
+
+		Instance instanceToAdd = new DenseInstance(1);
+
+		instanceToAdd.setDataset(resultInstances);
+
+		if (modelName.equals("M5P")) {
+
+			M5P m5p = (M5P) (classifier2.getWEKAClassifier());
+
+			if (header.attribute(columnName).isNumeric()) {
+
+				instanceToAdd.setValue(0,
+						m5p.classifyInstance(predInstance));
+			} else {
+				System.out.println("M5P can only predict numeric value.");
+				return;
+			}
+
+		}
+
+		else if (modelName.equals("REPTree")) {
+			if (header.attribute(columnName).isNumeric()) {
+				instanceToAdd.setValue(0,
+						Utilities.numericValue(classifier, predInstance));
+			} else {
+				instanceToAdd.setValue(0,
+						Utilities.nominalValue(classifier, predInstance));
+			}
+		}
+
+		resultInstances.add(instanceToAdd);
+
+
+		StringBuilder sb = new StringBuilder(predictFilesFolder);
+		sb.append('/');
+		sb.append(columnName);
+		sb.append(".arff");
+		ArffSaver saver = new ArffSaver();
+		saver.setInstances(resultInstances);
+		saver.setFile(new File(sb.toString()));
+		saver.setDestination(new File(sb.toString()));
+		saver.writeBatch();
+
+		System.out
+				.println("Decompression done! The predicted column is saved at '"
+						+ predictFilesFolder + "' folder.");
+	}
+	
+	public void decompress(String tableName, String columnName,
+			String columnsFileFolder, String predictFilesFolder, String modelName)
+			throws Exception {
+		
+		readHeader(tableName);
 		
 		Classifier classifier = null;
 
@@ -203,7 +322,7 @@ public class DecompressByDependency {
 
 			instanceToAdd.setDataset(resultInstances);
 
-			if (Specification.ALGORITHM.equals("M5P")) {
+			if (modelName.equals("M5P")) {
 
 				M5P m5p = (M5P) (classifier2.getWEKAClassifier());
 
@@ -218,7 +337,7 @@ public class DecompressByDependency {
 
 			}
 
-			else if (Specification.ALGORITHM.equals("REPTree")) {
+			else if (modelName.equals("REPTree")) {
 				if (header.attribute(columnName).isNumeric()) {
 					instanceToAdd.setValue(0,
 							Utilities.numericValue(classifier, predInstance));
@@ -252,9 +371,11 @@ public class DecompressByDependency {
 		String columnFilesFolder = args[2];
 		String predictFilesFolder = args[3];
 		DecompressByDependency dbd = new DecompressByDependency();
-		dbd.readHeader(tableName);
-		dbd.decompress(tableName, columnName, columnFilesFolder,
-				predictFilesFolder);
+		//dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder, "REPTree");
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("GEREG", 3.0);
+		map.put("PTERN", -0.01);
+		dbd.decompress(tableName, columnName, predictFilesFolder, map, "REPTree");
 
 	}
 
