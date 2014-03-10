@@ -79,9 +79,12 @@ public class SQLParser {
 		return columns;
 	}
 	
-	//Helper function
 	public List<String> parseTables(String sql) throws ParseException {
 		return parseTables(convertSqlToZQuery(sql));
+	}
+	
+	public List<String> parseColumns(String sql) throws ParseException {
+		return parseColumns(convertSqlToZQuery(sql));
 	}
 	
 	public boolean hasWhere(String sql) throws ParseException {

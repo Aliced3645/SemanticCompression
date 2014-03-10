@@ -102,7 +102,7 @@ public class Optimizer {
 		File to = new File(outputPath);
 		Files.copy(from, to);
 	}
-
+	
 	/**
 	 * Initial version of getting all possible results basing on columns
 	 * permutations;
@@ -110,7 +110,7 @@ public class Optimizer {
 	 * @param sql
 	 * @throws Exception
 	 */
-	public void produceAllPossibleResults(String sql) throws Exception {
+	private void produceAllPossibleResults(String sql) throws Exception {
 		List<List<String>> permutations = getColumnsPermutations(sql);
 
 		if (permutations.size() == 0) {
@@ -204,6 +204,59 @@ public class Optimizer {
 
 	}
 
+	/**
+	 * Validating the where part meets our condition.
+	 * @throws ParseException 
+	 * @throws SQLException 
+	 * 
+	 */
+	private boolean validateWhere(String sql) throws ParseException, SQLException{
+		if (!parser.hasWhere(sql))
+			return false;
+		HashMap<String, Double> where = parser.parseWhere(sql);
+		//only for the first column
+		String column = parser.parseColumns(sql).get(0);
+		String table = parser.parseTables(sql).get(0);
+		//Get dependency
+		List<String> dependencies = decompressor.getDependencies(table, column);
+		//validate
+		for(String attribute : where.keySet()) {
+			if(!dependencies.contains(attribute))
+				return false;
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Having WHERE and meet out requirement.
+	 * @param sql
+	 */
+	private void processQueryWithWhere(String sql) {
+		
+	}
+	
+	/**
+	 * 
+	 * *****************************************
+	 * The general function for processing SQL query.
+	 * Two branches:
+	 * 1. Having WHERE and meet our requirements
+	 * 2. Permute all possible 
+	 * *****************************************
+	 * 
+	 * @param sql
+	 * @throws Exception 
+	 */
+	public void processQuery(String sql) throws Exception{
+		if(validateWhere(sql)){
+			processQueryWithWhere(sql);
+		} else {
+			produceAllPossibleResults(sql);
+		}
+	}
+	
+	
 	/**
 	 * Running simple tests
 	 * 
