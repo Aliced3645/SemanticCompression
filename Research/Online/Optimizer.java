@@ -31,6 +31,8 @@ public class Optimizer {
 	String columnsFolderPath;
 	DecompressByDependency decompressor;
 
+	String[] modelTypes = { "REPTree", "M5P" };
+
 	public Optimizer(Connection connection, String columnsFolder)
 			throws SQLException {
 		this.connection = connection;
@@ -102,7 +104,7 @@ public class Optimizer {
 		File to = new File(outputPath);
 		Files.copy(from, to);
 	}
-	
+
 	/**
 	 * Initial version of getting all possible results basing on columns
 	 * permutations;
@@ -117,19 +119,18 @@ public class Optimizer {
 			System.out.println("Error getting permutations");
 			return;
 		}
-		
+
 		// for now, only support one table in SQL.
 		String table = parser.parseTables(sql).get(0);
-		
+
 		// the "*" case
-		if (permutations.size() == 0 && permutations.get(0).get(0) == "*"){
-			//read all columns of this table;
+		if (permutations.size() == 0 && permutations.get(0).get(0) == "*") {
+			// read all columns of this table;
 			Statement statement = connection.createStatement();
 			String sqlGetCoumns = "select attribute from " + table + ";";
-			ResultSet resultSet = statement
-					.executeQuery(sqlGetCoumns);
+			ResultSet resultSet = statement.executeQuery(sqlGetCoumns);
 			List<String> allColumns = new LinkedList<String>();
-			while(resultSet.next()){
+			while (resultSet.next()) {
 				allColumns.add(resultSet.getString(1));
 			}
 			permutations = this.getPermutations(allColumns);
@@ -138,66 +139,70 @@ public class Optimizer {
 		decompressor.setConnection(connection);
 
 		String baseDir = "OptimizerOutput";
-		// for each possible permutations
-		for (List<String> possibility : permutations) {
-			
-			HashMap<String, Boolean> queryColumnsSet = new HashMap<String, Boolean>();
+		// for each possible permutations, and each model.
 
-			for (String column : permutations.get(0)) {
-				queryColumnsSet.put(column, false);
-			}
+		for (String modelType : modelTypes) {
+			for (List<String> possibility : permutations) {
 
-			// Make the name of output dir
-			StringBuilder sb = new StringBuilder();
-			sb.append(baseDir);
-			sb.append("/");
-			
-			for (String column : possibility) {
-				sb.append(column);
-				sb.append("_");
-			}
-			sb.deleteCharAt(sb.length() - 1);
-			String outputDir = sb.toString();
-			
-			(new File(outputDir)).mkdirs();
-			
-			// go for each column from the first to the last one.
-			for (int i = 0; i < possibility.size(); i++) {
-				String column = possibility.get(i);
+				HashMap<String, Boolean> queryColumnsSet = new HashMap<String, Boolean>();
 
-				if (queryColumnsSet.containsKey(column)) {
-					if (queryColumnsSet.get(column) == true)
-						continue;
+				for (String column : permutations.get(0)) {
+					queryColumnsSet.put(column, false);
 				}
 
-				List<String> dependencies = decompressor.getDependencies(table,
-						column);
-				// see if all dependencies are in the columns array.
-				boolean readDirectly = false;
-				if (dependencies == null || dependencies.size() == 0) {
-					readDirectly = true;
-				} else {
-					for (String dependency : dependencies) {
-						if (!queryColumnsSet.containsKey(dependency)) {
-							readDirectly = true;
-						}
+				// Make the name of output dir
+				StringBuilder sb = new StringBuilder();
+				sb.append(baseDir);
+				sb.append("/");
+
+				for (String column : possibility) {
+					sb.append(column);
+					sb.append("_");
+				}
+				sb.append(modelType);
+
+				String outputDir = sb.toString();
+
+				(new File(outputDir)).mkdirs();
+
+				// go for each column from the first to the last one.
+				for (int i = 0; i < possibility.size(); i++) {
+					String column = possibility.get(i);
+
+					if (queryColumnsSet.containsKey(column)) {
+						if (queryColumnsSet.get(column) == true)
+							continue;
 					}
-				}
-				if (readDirectly) {
-					this.readColumnDirectly(column, outputDir);
-				} else {
-					// TODO: TO BE IMPROVED. Still not making sense though.
-					// read other dependent columns first.
-					for (String dependency : dependencies) {
-						if (queryColumnsSet.containsKey(dependency)) {
-							if (queryColumnsSet.get(dependency) == false) {
-								readColumnDirectly(dependency, outputDir);
-								queryColumnsSet.put(dependency, true);
+
+					List<String> dependencies = decompressor.getDependencies(
+							table, column);
+					// see if all dependencies are in the columns array.
+					boolean readDirectly = false;
+					if (dependencies == null || dependencies.size() == 0) {
+						readDirectly = true;
+					} else {
+						for (String dependency : dependencies) {
+							if (!queryColumnsSet.containsKey(dependency)) {
+								readDirectly = true;
 							}
 						}
 					}
-					decompressor.decompress(table, column, columnsFolderPath,
-							outputDir);
+					if (readDirectly) {
+						this.readColumnDirectly(column, outputDir);
+					} else {
+						// TODO: TO BE IMPROVED. Still not making sense though.
+						// read other dependent columns first.
+						for (String dependency : dependencies) {
+							if (queryColumnsSet.containsKey(dependency)) {
+								if (queryColumnsSet.get(dependency) == false) {
+									readColumnDirectly(dependency, outputDir);
+									queryColumnsSet.put(dependency, true);
+								}
+							}
+						}
+						decompressor.decompress(table, column,
+								columnsFolderPath, outputDir, modelType);
+					}
 				}
 			}
 		}
@@ -206,78 +211,88 @@ public class Optimizer {
 
 	/**
 	 * Validating the where part meets our condition.
-	 * @throws ParseException 
-	 * @throws SQLException 
+	 * 
+	 * @throws ParseException
+	 * @throws SQLException
 	 * 
 	 */
-	private boolean validateWhere(String sql) throws ParseException, SQLException{
+	private boolean validateWhere(String sql) throws ParseException,
+			SQLException {
 		if (!parser.hasWhere(sql))
 			return false;
-		HashMap<String, Double> where = parser.parseWhere(sql);
-		//only for the first column
+		HashMap<String, Object> where = parser.parseWhere(sql);
+		// only for the first column
 		String column = parser.parseColumns(sql).get(0);
 		String table = parser.parseTables(sql).get(0);
-		//Get dependency
+		// Get dependency
 		List<String> dependencies = decompressor.getDependencies(table, column);
-		//validate
-		for(String attribute : where.keySet()) {
-			if(!dependencies.contains(attribute))
+		// validate
+		for (String attribute : where.keySet()) {
+			if (!dependencies.contains(attribute))
 				return false;
 		}
 		return true;
 	}
-	
-	
+
 	/**
 	 * Having WHERE and meet out requirement.
-	 * @param sql
-	 */
-	private void processQueryWithWhere(String sql) {
-		
-	}
-	
-	/**
-	 * 
-	 * *****************************************
-	 * The general function for processing SQL query.
-	 * Two branches:
-	 * 1. Having WHERE and meet our requirements
-	 * 2. Permute all possible 
-	 * *****************************************
 	 * 
 	 * @param sql
 	 * @throws Exception 
 	 */
-	public void processQuery(String sql) throws Exception{
-		if(validateWhere(sql)){
+	private void processQueryWithWhere(String sql) throws Exception {
+		HashMap<String, Object> wheres = parser.parseWhere(sql);
+		// for now, only support one table in SQL.
+		String table = parser.parseTables(sql).get(0);
+		String column = parser.parseColumns(sql).get(0);
+		String baseDir = "OptimizerOutput/WherePredict/";
+		for(String modelType : modelTypes) {
+			baseDir += modelType;
+			decompressor.decompress(table, column, baseDir, wheres, modelType);
+		}
+	}
+
+	/**
+	 * 
+	 * ***************************************** 
+	 * The general function for
+	 * processing SQL query. 
+	 * 
+	 * Two branches: 1. Having WHERE and meet our
+	 * requirements 2. Permute all possible
+	 * *****************************************
+	 * 
+	 * @param sql
+	 * @throws Exception
+	 */
+	public void processQuery(String sql) throws Exception {
+		if (validateWhere(sql)) {
 			processQueryWithWhere(sql);
 		} else {
 			produceAllPossibleResults(sql);
 		}
 	}
-	
-	
+
 	/**
 	 * Running simple tests
 	 * 
 	 * @param args
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
 
 		Connection connection = DriverManager
 				.getConnection("jdbc:mysql://localhost/metadata?"
 						+ "user=shu&password=shu");
-		
+
 		Optimizer optimizer = new Optimizer(connection, "columns");
 		String sql = "SELECT GEREG, GESTCEN FROM cps;";
 		optimizer.produceAllPossibleResults(sql);
-		
+
 		/*
-		File input = new File( "columns/GEREG.arff");
-		new File("GEREG_GESTCEN").mkdir();
-		File output = new File("GEREG_GESTCEN/GEREG.arff");
-		Files.copy(input, output);
-		*/
+		 * File input = new File( "columns/GEREG.arff"); new
+		 * File("GEREG_GESTCEN").mkdir(); File output = new
+		 * File("GEREG_GESTCEN/GEREG.arff"); Files.copy(input, output);
+		 */
 	}
 }
