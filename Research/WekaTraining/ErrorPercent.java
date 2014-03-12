@@ -34,6 +34,11 @@ public class ErrorPercent {
 		File file = new File(columnName + ".ErrorPercent");
 		FileOutputStream fos = new FileOutputStream(file);
 		
+		int e_10 = 0;
+		int e_50 = 0;
+		int e_100 = 0;
+		int e_inf = 0;
+		
 		for(int i = 0; i < rowNum; i++) {
 			double srcValue = instancesSrc.get(i).value(0);
 			double predValue = instancesPred.get(i).value(0);
@@ -41,13 +46,49 @@ public class ErrorPercent {
 			
 			double result = srcValue == 0 ? Math.abs(diff) : Math.abs(diff / srcValue);
 			
+			if(result < 0.1) {
+				e_10++;				
+			}
+			
+			else if(result >= 0.1 && result < 0.5) {
+				e_50++;
+			}
+			
+			else if(result >= 0.5 && result < 1) {
+				e_100++;
+			}
+			
+			else {
+				e_inf++;
+			}
+			
 			fos.write(String.valueOf((i+1) + ": " + result + "\n").getBytes());
 			
 		}
 		
+		fos.write(String.valueOf("\n").getBytes());
+		fos.write(String.valueOf("---------------------------------------------" + "\n").getBytes());
+		fos.write(String.valueOf("Statistics:" + "\n").getBytes());
+		fos.write(String.valueOf("\n").getBytes());
+		
+		double e_10_p = (double) e_10 / rowNum;
+		double e_50_p = (double) e_50 / rowNum;
+		double e_100_p = (double) e_100 / rowNum;
+		double e_inf_p = (double) e_inf / rowNum;
+		
+		fos.write(String.valueOf(e_10_p + " [0% - 10%]" + "\n").getBytes());
+		fos.write(String.valueOf(e_50_p + " [10% - 50%]" + "\n").getBytes());
+		fos.write(String.valueOf(e_100_p + " [50% - 100%]" + "\n").getBytes());
+		fos.write(String.valueOf(e_inf_p + " [100% - infinity]" + "\n").getBytes());
+		
 		fos.close();
 		
 		System.out.println("Output Error Percent by row finished. File stored as " + file.getName());
+		
+		System.out.println(e_10_p + " [0% - 10%]");
+		System.out.println(e_50_p + " [10% - 50%]");
+		System.out.println(e_100_p + " [50% - 100%]");
+		System.out.println(e_inf_p + " [100% - infinity]");
 
 	}
 }
