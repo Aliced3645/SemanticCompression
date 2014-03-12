@@ -259,7 +259,7 @@ public class Optimizer {
 	 * processing SQL query. 
 	 * 
 	 * Two branches: 1. Having WHERE and meet our
-	 * requirements 2. Permute all possible
+	 * requirements  2. Permute all possible
 	 * *****************************************
 	 * 
 	 * @param sql
@@ -286,13 +286,11 @@ public class Optimizer {
 						+ "user=shu&password=shu");
 
 		Optimizer optimizer = new Optimizer(connection, "columns");
-		String sql = "SELECT GEREG, GESTCEN FROM cps;";
-		optimizer.produceAllPossibleResults(sql);
-
-		/*
-		 * File input = new File( "columns/GEREG.arff"); new
-		 * File("GEREG_GESTCEN").mkdir(); File output = new
-		 * File("GEREG_GESTCEN/GEREG.arff"); Files.copy(input, output);
-		 */
+		optimizer.decompressor.getDependencies("cps", "GEREG");
+		//String sql = "SELECT GEREG, GESTCEN FROM cps;";
+		//String sql = "SELECT GEREG FROM FROM cps WHERE "
+		//optimizer.produceAllPossibleResults(sql);
+		
+		
 	}
 }
