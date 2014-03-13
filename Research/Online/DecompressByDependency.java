@@ -371,11 +371,11 @@ public class DecompressByDependency {
 		String columnFilesFolder = args[2];
 		String predictFilesFolder = args[3];
 		DecompressByDependency dbd = new DecompressByDependency();
-		//dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder, "REPTree");
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("GEREG", 3.0);
-		map.put("PTERN", -0.01);
-		dbd.decompress(tableName, columnName, predictFilesFolder, map, "REPTree");
+		dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder, "REPTree");
+		//HashMap<String, Object> map = new HashMap<String, Object>();
+		//map.put("PRERELG", 0.0);
+		//map.put("PTERN", -0.01);
+		//dbd.decompress(tableName, columnName, predictFilesFolder, map, "REPTree");
 
 	}
 
