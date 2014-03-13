@@ -5,7 +5,7 @@ import moa.tasks.StandardTaskMonitor;
 public class Specification {
 	
 	// the classify algorithm(classifiers) for compression and decompression
-	public static final String ALGORITHM = "M5P";
+	public static final String ALGORITHM = "REPTree";
 	
 	// the error for a misclassified nominal attribute
     public static final double MISCLASSIFICATION_ERROR = 1.0;

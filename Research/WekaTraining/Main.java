@@ -153,7 +153,6 @@ public class Main {
 			dc.run();
 
 		} else if (args[0].equals("store")) {
-
 			
 			String inputFolder = args[1];
 			String tableName = args[2];

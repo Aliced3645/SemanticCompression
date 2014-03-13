@@ -28,15 +28,15 @@ public class Optimizer {
 
 	private Connection connection;
 	SQLParser parser = new SQLParser();
-	String columnsFolderPath;
+	//String columnsFolderPath;
 	DecompressByDependency decompressor;
 
 	String[] modelTypes = { "REPTree", "M5P" };
 
-	public Optimizer(Connection connection, String columnsFolder)
+	public Optimizer(Connection connection)
 			throws SQLException {
 		this.connection = connection;
-		this.columnsFolderPath = columnsFolder;
+		//this.columnsFolderPath = columnsFolder;
 		decompressor = new DecompressByDependency();
 		decompressor.setConnection(connection);
 	}
@@ -96,9 +96,9 @@ public class Optimizer {
 	 * @param columnName
 	 * @throws IOException
 	 */
-	private void readColumnDirectly(String columnName, String outputDir)
+	private void readColumnDirectly(String tableName, String columnName, String outputDir)
 			throws IOException {
-		String path = columnsFolderPath + "/" + columnName + ".arff";
+		String path = tableName + "/" + columnName + ".arff";
 		String outputPath = outputDir + "/" + columnName + ".arff";
 		File from = new File(path);
 		File to = new File(outputPath);
@@ -112,7 +112,7 @@ public class Optimizer {
 	 * @param sql
 	 * @throws Exception
 	 */
-	private void produceAllPossibleResults(String sql) throws Exception {
+	private void produceAllPossibleResults(String sql, String modelType) throws Exception {
 		List<List<String>> permutations = getColumnsPermutations(sql);
 
 		if (permutations.size() == 0) {
@@ -122,12 +122,13 @@ public class Optimizer {
 
 		// for now, only support one table in SQL.
 		String table = parser.parseTables(sql).get(0);
+		String metadataTable = table + '_' + modelType;
 
 		// the "*" case
-		if (permutations.size() == 0 && permutations.get(0).get(0) == "*") {
+		if (permutations.size() == 1 && permutations.get(0).get(0) == "*") {
 			// read all columns of this table;
 			Statement statement = connection.createStatement();
-			String sqlGetCoumns = "select attribute from " + table + ";";
+			String sqlGetCoumns = "select attribute from " + metadataTable + ";";
 			ResultSet resultSet = statement.executeQuery(sqlGetCoumns);
 			List<String> allColumns = new LinkedList<String>();
 			while (resultSet.next()) {
@@ -141,7 +142,6 @@ public class Optimizer {
 		String baseDir = "OptimizerOutput";
 		// for each possible permutations, and each model.
 
-		for (String modelType : modelTypes) {
 			for (List<String> possibility : permutations) {
 
 				HashMap<String, Boolean> queryColumnsSet = new HashMap<String, Boolean>();
@@ -175,7 +175,7 @@ public class Optimizer {
 					}
 
 					List<String> dependencies = decompressor.getDependencies(
-							table, column);
+							metadataTable, column);
 					// see if all dependencies are in the columns array.
 					boolean readDirectly = false;
 					if (dependencies == null || dependencies.size() == 0) {
@@ -188,24 +188,24 @@ public class Optimizer {
 						}
 					}
 					if (readDirectly) {
-						this.readColumnDirectly(column, outputDir);
+						this.readColumnDirectly(table, column, outputDir);
 					} else {
 						// TODO: TO BE IMPROVED. Still not making sense though.
 						// read other dependent columns first.
 						for (String dependency : dependencies) {
 							if (queryColumnsSet.containsKey(dependency)) {
 								if (queryColumnsSet.get(dependency) == false) {
-									readColumnDirectly(dependency, outputDir);
+									readColumnDirectly(table, dependency, outputDir);
 									queryColumnsSet.put(dependency, true);
 								}
 							}
 						}
-						decompressor.decompress(table, column,
-								columnsFolderPath, outputDir, modelType);
+						decompressor.decompress(metadataTable, column,
+								table, outputDir, modelType);
 					}
 				}
 			}
-		}
+		
 
 	}
 
@@ -240,16 +240,14 @@ public class Optimizer {
 	 * @param sql
 	 * @throws Exception 
 	 */
-	private void processQueryWithWhere(String sql) throws Exception {
+	private void processQueryWithWhere(String sql, String modelType) throws Exception {
 		HashMap<String, Object> wheres = parser.parseWhere(sql);
 		// for now, only support one table in SQL.
-		String table = parser.parseTables(sql).get(0);
+		String table = parser.parseTables(sql).get(0) + '_' + modelType;
 		String column = parser.parseColumns(sql).get(0);
 		String baseDir = "OptimizerOutput/WherePredict/";
-		for(String modelType : modelTypes) {
-			baseDir += modelType;
-			decompressor.decompress(table, column, baseDir, wheres, modelType);
-		}
+		baseDir += modelType;
+		decompressor.decompress(table, column, baseDir, wheres, modelType);
 	}
 
 	/**
@@ -267,12 +265,27 @@ public class Optimizer {
 	 */
 	public void processQuery(String sql) throws Exception {
 		if (validateWhere(sql)) {
-			processQueryWithWhere(sql);
+			for(String model : modelTypes)
+				processQueryWithWhere(sql, model);
 		} else {
-			produceAllPossibleResults(sql);
+			for(String model : modelTypes)
+				produceAllPossibleResults(sql, model);
 		}
 	}
 
+	
+	/**
+	 * Another version of processing query, process using a specified model.
+	 */
+	public void processQuery(String sql, String model) throws Exception {
+		if(validateWhere(sql)){
+			processQueryWithWhere(sql, model);
+		} else {
+			produceAllPossibleResults(sql, model);
+		}
+	}
+	
+	
 	/**
 	 * Running simple tests
 	 * 
@@ -284,13 +297,11 @@ public class Optimizer {
 		Connection connection = DriverManager
 				.getConnection("jdbc:mysql://localhost/metadata?"
 						+ "user=shu&password=shu");
-
-		Optimizer optimizer = new Optimizer(connection, "columns");
+		
+		Optimizer optimizer = new Optimizer(connection);
 		optimizer.decompressor.getDependencies("cps", "GEREG");
-		//String sql = "SELECT GEREG, GESTCEN FROM cps;";
+		String sql = "SELECT GEREG, GESTCEN FROM cps;";
 		//String sql = "SELECT GEREG FROM FROM cps WHERE "
-		//optimizer.produceAllPossibleResults(sql);
-		
-		
+		optimizer.processQuery(sql);
 	}
 }
