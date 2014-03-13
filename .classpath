@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="jars/moa.jar"/>
 	<classpathentry kind="lib" path="jars/packageManager.jar"/>
 	<classpathentry kind="lib" path="jars/pentaho.jar"/>
+	<classpathentry kind="lib" path="/home/shu/git/SemanticCompression/jars/commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
