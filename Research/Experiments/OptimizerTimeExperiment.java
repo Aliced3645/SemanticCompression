@@ -14,6 +14,7 @@ public class OptimizerTimeExperiment {
 
 	static String query1 = "SELECT GEREG, GESTCEN FROM cps;";
 	static String columnDir = "columns";
+	static String optimizerOutputDir = "OptimizerOutput";
 	
 	static long measureOptimizerTime(Optimizer optimizer, String query) throws Exception{
 		long startTime = System.nanoTime();    
@@ -33,13 +34,12 @@ public class OptimizerTimeExperiment {
 		Connection connection = DriverManager
 				.getConnection("jdbc:mysql://localhost/metadata?"
 						+ "user=shu&password=shu");
-		FileUtils.deleteDirectory(new File(columnDir));
-		
-		/*
+		FileUtils.deleteDirectory(new File(optimizerOutputDir));
 		Optimizer optimizer = new Optimizer(connection, columnDir);
 		long time1 = measureOptimizerTime(optimizer, query1);
 		long time2 = measureNormalSQLTime(connection, query1);
-		*/
+		System.out.println("Optimizer time: " + time1);
+		System.out.println("Regular Query time: " + time2);
 		return;
 	}
 }
