@@ -148,7 +148,6 @@ public class SQLParser {
 				return null;
 			result.put(wp.attribute, wp.value);
 		}
-		System.out.println(result);
 		return result;
 	}
 
