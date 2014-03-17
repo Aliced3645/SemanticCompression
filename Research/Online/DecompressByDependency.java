@@ -404,8 +404,7 @@ public class DecompressByDependency {
 
 		String[] dependArray = new String[dependencies.size()];
 		dependArray = dependencies.toArray(dependArray);
-		
-		for(String s : dependArray) System.out.println(s);
+
 
 		if (dependArray[0].equals("null")) {
 			System.out.println("Cannot predict this column: " + columnName);
