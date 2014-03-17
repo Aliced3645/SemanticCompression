@@ -66,6 +66,15 @@ public class OptimizerTimeExperiment {
 		}
 		return total / count;
 	}
+	
+	static long measureOptimizerTimeInSpecificOrder(Optimizer optimizer, List<String> permutation, String sql, 
+			String model) throws Exception{
+		long startTime = System.nanoTime();
+		optimizer.queryOnePossibleResult(sql, permutation,
+				"OptimizerOutput", model);
+		long period = System.nanoTime() - startTime;
+		return period;
+	}
 
 	/**
 	 * Read directly from the disk and store the result to the destination.
@@ -219,6 +228,7 @@ public class OptimizerTimeExperiment {
 
 		// For normal queries.
 		long time1 = measureOptimizerTime(optimizer, query3, "REPTree");
+		LinkedList<String> permutation = new LinkedList<String>();
 		System.out.println("REPTree" + " : " + time1);
 		
 		long time2 = measureNormalReadTime(connection, query3);
