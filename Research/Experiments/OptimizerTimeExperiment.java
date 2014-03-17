@@ -88,70 +88,79 @@ public class OptimizerTimeExperiment {
 	}
 
 	/**
-	 * Now only for numeric contents, brute-force query on where.
-	 * Method:
-	 * For columns after WHERE, read their column files and find satisfying row index.
-	 * Then do a intersection of these indices so we can get the indice of satisfying rows of the 
-	 * SELECT row.
+	 * Now only for numeric contents, brute-force query on where. Method: For
+	 * columns after WHERE, read their column files and find satisfying row
+	 * index. Then do a intersection of these indices so we can get the indice
+	 * of satisfying rows of the SELECT row.
+	 * 
 	 * @param connection
 	 * @param query
 	 * @return
-	 * @throws ParseException 
-	 * @throws IOException 
+	 * @throws ParseException
+	 * @throws IOException
 	 */
 	static long measureNormalReadTimeForWhere(Connection connection,
 			String query) throws ParseException, IOException {
-		
+
 		long startTime = System.nanoTime();
 		HashMap<String, Object> wheres = parser.parseWhere(query);
 		String columnDir = parser.parseTables(query).get(0);
 		List<Set<Integer>> sets = new LinkedList<Set<Integer>>();
-		for(String column : wheres.keySet()) {
+		for (String column : wheres.keySet()) {
 			String columnFile = columnDir + "/" + column + ".arff";
 			Set<Integer> set = new HashSet<Integer>();
-			BufferedReader reader = new BufferedReader(
-	                new FileReader(columnFile));
+			BufferedReader reader = new BufferedReader(new FileReader(
+					columnFile));
 			Instances instances = new Instances(reader);
 			reader.close();
-			for(int i = 0; i < instances.size(); i ++) {
+			for (int i = 0; i < instances.size(); i++) {
 				Instance instance = instances.get(i);
-				if(instance.value(0) == (Double)wheres.get(column)) {
+				if (instance.value(0) == (Double) wheres.get(column)) {
 					set.add(i);
 				}
 			}
 			sets.add(set);
 		}
 		Set<Integer> firstSet = sets.get(0);
-		for(int i = 1; i < sets.size(); i ++){
+		for (int i = 1; i < sets.size(); i++) {
 			firstSet.retainAll(sets.get(i));
 		}
-		
-		//The firstSet only contains the intersection of all sets of row indices.
-		//Now get satisfying answers.
+
+		// The firstSet only contains the intersection of all sets of row
+		// indices.
+		// Now get satisfying answers.
 		List<Double> answers = new LinkedList<Double>();
 		String selectColumn = parser.parseColumns(query).get(0);
 		String columnFile = columnDir + "/" + selectColumn + ".arff";
-		BufferedReader reader = new BufferedReader(
-                new FileReader(columnFile));
+		BufferedReader reader = new BufferedReader(new FileReader(columnFile));
 		Instances instances = new Instances(reader);
 		reader.close();
-		for(int i = 0; i < instances.size(); i ++) {
-			if(firstSet.contains(i)){
+		for (int i = 0; i < instances.size(); i++) {
+			if (firstSet.contains(i)) {
 				Instance instance = instances.get(i);
 				answers.add(instance.value(0));
 			}
-			
+
 		}
 		return System.nanoTime() - startTime;
 	}
 
-	static long measureOptimizerTimeForWhere(Optimizer optimizer, String query, String model) throws Exception{
+	static long measureOptimizerTimeForWhere(Optimizer optimizer, String query,
+			String model) throws Exception {
 		long startTime = System.nanoTime();
 		optimizer.processQuery(query, model);
 		return System.nanoTime() - startTime;
 	}
-	
-	
+
+	static void testWhere(Connection connection, Optimizer optimizer)
+			throws Exception {
+		double time1 = measureOptimizerTimeForWhere(optimizer, query2, "M5P");
+		System.out.println("Optimizer Query time: " + time1);
+		double time2 = measureNormalReadTimeForWhere(connection, query2);
+		System.out.println("Regular Query time: " + time2);
+		System.out.println("Optimizer is " + (time2 / time1) + " times faster");
+	}
+
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
 	public static void main(String[] args) throws Exception {
 		Connection connection = DriverManager
@@ -162,21 +171,17 @@ public class OptimizerTimeExperiment {
 		FileUtils.deleteDirectory(new File(normalOutputDir));
 		(new File(normalOutputDir)).mkdirs();
 		Optimizer optimizer = new Optimizer(connection);
-		
-		
-		long time1 = measureOptimizerTimeForWhere(optimizer, query2, "M5P");
-		System.out.println("Optimizer Query time: " + time1);
-		long time2 = measureNormalReadTimeForWhere (connection, query2);
+		// testWhere(connection, optimizer);
+
+		// For normal queries.
+		for (String model : modelTypes) {
+			long time1 = measureOptimizerTime(optimizer, query1, model);
+			System.out.println(model + " : " + time1);
+		}
+
+		long time2 = measureNormalReadTime(connection, query1);
 		System.out.println("Regular Query time: " + time2);
-		
-		/*
-		 * // For normal queries. for(String model : modelTypes){ long time1 =
-		 * measureOptimizerTime(optimizer, query1, model);
-		 * System.out.println(model + " : " + time1); }
-		 * 
-		 * long time2 = measureNormalReadTime(connection, query1);
-		 * System.out.println("Regular Query time: " + time2);
-		 */
+
 		return;
 	}
 }
