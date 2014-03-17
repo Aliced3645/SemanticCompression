@@ -40,11 +40,26 @@ public class OptimizerTimeExperiment {
 
 	static String[] modelTypes = { "M5P", "REPTree" };
 
-	static long measureOptimizerTime(Optimizer optimizer, String query,
+	static long measureOptimizerTime(Optimizer optimizer, String sql,
 			String model) throws Exception {
-		long startTime = System.nanoTime();
-		optimizer.processQuery(query, model);
-		return System.nanoTime() - startTime;
+		List<Long> times = new LinkedList<Long>();
+		for(String modelType : modelTypes){
+			List<List<String>> permutations = optimizer.getColumnsPermutations(sql, modelType);
+			for(List<String> permutation : permutations) {
+				//timing here
+				long startTime = System.nanoTime();
+				optimizer.queryOnePossibleResult(sql, permutation, "OptimizerOutput", modelType);
+				long period = System.nanoTime() - startTime;
+				times.add(period);
+			}
+		}
+		//finally return the average
+		int count = times.size();
+		long total = 0;
+		for(Long time : times) {
+			total += time;
+		}
+		return total / count;
 	}
 
 	/**

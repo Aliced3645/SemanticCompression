@@ -82,7 +82,7 @@ public class Optimizer {
 	 *             For now, not dealing with "*" case.
 	 * @throws SQLException
 	 */
-	private List<List<String>> getColumnsPermutations(String sql,
+	public List<List<String>> getColumnsPermutations(String sql,
 			String modelType) throws ParseException, SQLException {
 		Hashtable<String, List<String>> parts = parser.parseSQL(sql);
 		List<String> columns = parts.get("columns");
