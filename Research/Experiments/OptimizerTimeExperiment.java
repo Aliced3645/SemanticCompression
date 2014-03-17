@@ -35,7 +35,7 @@ public class OptimizerTimeExperiment {
 	static String query1 = "SELECT GESTCEN, GEREG FROM cps;";
 	static String query2 = "SELECT GESTCEN FROM cps where "
 			+ "GEREG = 3 AND GTCSA = 0 AND GTMETSTA = 2 AND HRHHID2 = 90001;";
-	static String query3 = "SELECT GESTCEN,GEREG,GTCSA,GTMETSTA,HRHHID2 FROM cps;";
+	static String query3 = "SELECT GESTCEN,GEREG,GTCSA,GTMETSTA, HRHHID2 FROM cps;";
 	
 	static String optimizerOutputDir = "OptimizerOutput";
 	static String normalOutputDir = "NormalOutput";
@@ -57,6 +57,7 @@ public class OptimizerTimeExperiment {
 			long period = System.nanoTime() - startTime;
 			times.add(period);
 		}
+		
 		// finally return the average
 		int count = times.size();
 		long total = 0;
@@ -213,7 +214,7 @@ public class OptimizerTimeExperiment {
 		DecompressByDependency decompressor = new DecompressByDependency();
 		decompressor.setConnection(connection);
 		//measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor);
-		// testWhere(connection, optimizer);
+		//testWhere(connection, optimizer);
 		// measureBasicTwoTypesOfReading("cps", "GEREG");
 
 		// For normal queries.
@@ -222,7 +223,7 @@ public class OptimizerTimeExperiment {
 		
 		long time2 = measureNormalReadTime(connection, query3);
 		System.out.println("Regular Query time: " + time2);
-
+		
 		return;
 	}
 }
