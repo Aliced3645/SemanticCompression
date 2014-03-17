@@ -23,8 +23,10 @@ import weka.core.Instances;
 
 import com.google.common.io.Files;
 
+import Utilities.ColumnReader;
 import Zql.ParseException;
 
+import Online.DecompressByDependency;
 import Online.Optimizer;
 import Online.SQLParser;
 
@@ -38,7 +40,7 @@ public class OptimizerTimeExperiment {
 
 	static SQLParser parser = new SQLParser();
 
-	static String[] modelTypes = { "REPTree", "M5P"};
+	static String[] modelTypes = { "M5P", "REPTree" };
 
 	static long measureOptimizerTime(Optimizer optimizer, String sql,
 			String model) throws Exception {
@@ -176,6 +178,28 @@ public class OptimizerTimeExperiment {
 		System.out.println("Optimizer is " + (time2 / time1) + " times faster");
 	}
 
+	public static void measureBasicTwoTypesOfReading(String tableName,
+			String columnName) throws IOException {
+		long time = System.nanoTime();
+		ColumnReader.copyDirectly(tableName, columnName, "test");
+		time = System.nanoTime() - time;
+		System.out.println("Copy time: " + time);
+
+		time = System.nanoTime();
+		ColumnReader.readAndWrite(tableName, columnName, "test");
+		time = System.nanoTime() - time;
+		System.out.println("Read write time: " + time);
+	}
+
+	public static void measurePredictTimeAndReadWriteTime(String tableName,
+			String columnName, DecompressByDependency decompressor) throws Exception {
+		decompressor.decompress(tableName, columnName, "cps", "test", "M5P");
+		long time = System.nanoTime();
+		ColumnReader.readAndWrite("cps", columnName, "test");
+		time = System.nanoTime() - time;
+		System.out.println("Read write time: " + time);
+	}
+
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
 	public static void main(String[] args) throws Exception {
 		Connection connection = DriverManager
@@ -186,16 +210,21 @@ public class OptimizerTimeExperiment {
 		FileUtils.deleteDirectory(new File(normalOutputDir));
 		(new File(normalOutputDir)).mkdirs();
 		Optimizer optimizer = new Optimizer(connection);
+		DecompressByDependency decompressor = new DecompressByDependency();
+		decompressor.setConnection(connection);
+		measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor );
+		
 		// testWhere(connection, optimizer);
+		// measureBasicTwoTypesOfReading("cps", "GEREG");
 
-		// For normal queries.
-		for (String model : modelTypes) {
-			long time1 = measureOptimizerTime(optimizer, query1, model);
-			System.out.println(model + " : " + time1);
-		}
-
-		long time2 = measureNormalReadTime(connection, query1);
-		System.out.println("Regular Query time: " + time2);
+		/*
+		 * // For normal queries. for (String model : modelTypes) { long time1 =
+		 * measureOptimizerTime(optimizer, query1, model);
+		 * System.out.println(model + " : " + time1); }
+		 * 
+		 * long time2 = measureNormalReadTime(connection, query1);
+		 * System.out.println("Regular Query time: " + time2);
+		 */
 
 		return;
 	}

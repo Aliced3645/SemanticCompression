@@ -28,12 +28,15 @@ import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
 public class DecompressByDependency {
+	
 	private Connection connection;
-
+	
 	InstancesHeader header;
-
+	
 	BufferedReader inputStream;
-
+	
+	static boolean MEASURE_TIME = true;
+	
 	public DecompressByDependency() throws SQLException {
 
 		connection = DriverManager
@@ -296,6 +299,8 @@ public class DecompressByDependency {
 		resultInstances = new Instances(resultAttribute.name(), resultAttrinfo,
 				instances[0].size());
 
+		long time = System.nanoTime();
+		
 		for (int i = 0; i < instances[0].size(); i++) {
 
 			predInstance = new DenseInstance(header.numAttributes());
@@ -360,6 +365,12 @@ public class DecompressByDependency {
 		saver.setDestination(new File(sb.toString()));
 		saver.writeBatch();
 
+		//ends
+		if(MEASURE_TIME){
+			time = System.nanoTime() - time;
+			System.out.println("This prediction takes time: " + time);
+		}
+		
 		System.out
 				.println("Decompression done! The predicted column is saved at '"
 						+ predictFilesFolder + "' folder.");

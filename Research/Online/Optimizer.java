@@ -17,6 +17,7 @@ import java.util.List;
 
 import com.google.common.io.Files;
 
+import Utilities.ColumnReader;
 import Zql.ParseException;
 
 /**
@@ -112,21 +113,6 @@ public class Optimizer {
 		return permutations;
 	}
 
-	/**
-	 * Helper function. Read column from the directory and put to destination.
-	 * 
-	 * @param columnName
-	 * @throws IOException
-	 */
-	private void readColumnDirectly(String tableName, String columnName,
-			String outputDir) throws IOException {
-		String path = tableName + "/" + columnName + ".arff";
-		String outputPath = outputDir + "/" + columnName + ".arff";
-		File from = new File(path);
-		File to = new File(outputPath);
-		Files.copy(from, to);
-	}
-
 	// This interface is set to public for performance testing.
 	public void queryOnePossibleResult(String sql, List<String> possibility,
 			String baseDir, String modelType) throws Exception {
@@ -179,14 +165,14 @@ public class Optimizer {
 				}
 			}
 			if (readDirectly) {
-				this.readColumnDirectly(table, column, outputDir);
+				ColumnReader.copyDirectly(table, column, outputDir);
 			} else {
 				// TODO: TO BE IMPROVED. Still not making sense though.
 				// read other dependent columns first.
 				for (String dependency : dependencies) {
 					if (queryColumnsSet.containsKey(dependency)) {
 						if (queryColumnsSet.get(dependency) == false) {
-							readColumnDirectly(table, dependency, outputDir);
+							ColumnReader.copyDirectly(table, column, outputDir);
 							queryColumnsSet.put(dependency, true);
 						}
 					}
