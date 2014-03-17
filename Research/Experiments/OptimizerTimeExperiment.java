@@ -35,6 +35,8 @@ public class OptimizerTimeExperiment {
 	static String query1 = "SELECT GESTCEN, GEREG FROM cps;";
 	static String query2 = "SELECT GESTCEN FROM cps where "
 			+ "GEREG = 3 AND GTCSA = 0 AND GTMETSTA = 2 AND HRHHID2 = 90001;";
+	static String query3 = "SELECT GESTCEN,GEREG,GTCSA,GTMETSTA,HRHHID2 FROM cps;";
+	
 	static String optimizerOutputDir = "OptimizerOutput";
 	static String normalOutputDir = "NormalOutput";
 
@@ -94,11 +96,8 @@ public class OptimizerTimeExperiment {
 		}
 		// Read all and store into new files..
 		for (String column : columns) {
-			String path = table + "/" + column + ".arff";
 			String outputPath = normalOutputDir + "/" + column + ".arff";
-			File from = new File(path);
-			File to = new File(outputPath);
-			Files.copy(from, to);
+			ColumnReader.readAndWrite(table, column, outputPath);
 		}
 
 		return System.nanoTime() - startTime;
@@ -192,7 +191,8 @@ public class OptimizerTimeExperiment {
 	}
 
 	public static void measurePredictTimeAndReadWriteTime(String tableName,
-			String columnName, DecompressByDependency decompressor) throws Exception {
+			String columnName, DecompressByDependency decompressor)
+			throws Exception {
 		decompressor.decompress(tableName, columnName, "cps", "test", "M5P");
 		long time = System.nanoTime();
 		ColumnReader.readAndWrite("cps", columnName, "test");
@@ -212,19 +212,16 @@ public class OptimizerTimeExperiment {
 		Optimizer optimizer = new Optimizer(connection);
 		DecompressByDependency decompressor = new DecompressByDependency();
 		decompressor.setConnection(connection);
-		measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor );
-		
+		//measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor);
 		// testWhere(connection, optimizer);
 		// measureBasicTwoTypesOfReading("cps", "GEREG");
 
-		/*
-		 * // For normal queries. for (String model : modelTypes) { long time1 =
-		 * measureOptimizerTime(optimizer, query1, model);
-		 * System.out.println(model + " : " + time1); }
-		 * 
-		 * long time2 = measureNormalReadTime(connection, query1);
-		 * System.out.println("Regular Query time: " + time2);
-		 */
+		// For normal queries.
+		long time1 = measureOptimizerTime(optimizer, query3, "REPTree");
+		System.out.println("REPTree" + " : " + time1);
+		
+		long time2 = measureNormalReadTime(connection, query3);
+		System.out.println("Regular Query time: " + time2);
 
 		return;
 	}

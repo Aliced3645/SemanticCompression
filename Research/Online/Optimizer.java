@@ -97,7 +97,7 @@ public class Optimizer {
 		String metadataTable = table + '_' + modelType;
 
 		// the "*" case
-		if (permutations.size() == 1 && permutations.get(0).get(0) == "*") {
+		if (permutations.size() == 1 && permutations.get(0).get(0).equals("*")) {
 			// read all columns of this table;
 			Statement statement = connection.createStatement();
 			String sqlGetCoumns = "select attribute from " + metadataTable
@@ -165,20 +165,23 @@ public class Optimizer {
 				}
 			}
 			if (readDirectly) {
-				ColumnReader.copyDirectly(table, column, outputDir);
+				ColumnReader.readAndWrite(table, column, outputDir);
 			} else {
 				// TODO: TO BE IMPROVED. Still not making sense though.
 				// read other dependent columns first.
 				for (String dependency : dependencies) {
 					if (queryColumnsSet.containsKey(dependency)) {
 						if (queryColumnsSet.get(dependency) == false) {
-							ColumnReader.copyDirectly(table, column, outputDir);
+							// ColumnReader.copyDirectly(table, column,
+							// outputDir);
 							queryColumnsSet.put(dependency, true);
 						}
 					}
 				}
-				decompressor.decompress(metadataTable, column, table,
-						outputDir, modelType);
+				// decompressor.decompress(metadataTable, column, table,
+				// outputDir, modelType);
+				decompressor.decompress(metadataTable, column, dependencies,
+						table, outputDir, modelType);
 			}
 		}
 	}
@@ -192,10 +195,9 @@ public class Optimizer {
 	 */
 	private void produceAllPossibleResults(String sql, String modelType)
 			throws Exception {
+
 		List<List<String>> permutations = getColumnsPermutations(sql, modelType);
-
 		decompressor.setConnection(connection);
-
 		String baseDir = "OptimizerOutput";
 		// for each possible permutations, and each model.
 		for (List<String> possibility : permutations) {
@@ -291,7 +293,7 @@ public class Optimizer {
 						+ "user=shu&password=shu");
 
 		Optimizer optimizer = new Optimizer(connection);
-		String sql = "SELECT GEREG, GESTCEN FROM cps;";
+		String sql = "SELECT GEREG FROM cps;";
 		// String sql = "SELECT GEREG FROM FROM cps WHERE "
 		optimizer.processQuery(sql);
 	}
