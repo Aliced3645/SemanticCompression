@@ -36,13 +36,15 @@ public class OptimizerTimeExperiment {
 	static String query2 = "SELECT GESTCEN FROM cps where "
 			+ "GEREG = 3 AND GTCSA = 0 AND GTMETSTA = 2 AND HRHHID2 = 90001;";
 	static String query3 = "SELECT GESTCEN,GEREG,GTCSA,GTMETSTA, HRHHID2 FROM cps;";
+	static String query4 = "SELECT PRERELG, PTWK, PTERN FROM cps;";
+	static String query5 = "SELECT PRERELG FROM cps where PTWK = 0 AND PTERN = 0.01;";
 	
 	static String optimizerOutputDir = "OptimizerOutput";
 	static String normalOutputDir = "NormalOutput";
 
 	static SQLParser parser = new SQLParser();
 
-	static String[] modelTypes = { "M5P", "REPTree" };
+	static String[] modelTypes = {"REPTree" };
 
 	static long measureOptimizerTime(Optimizer optimizer, String sql,
 			String model) throws Exception {
@@ -180,9 +182,9 @@ public class OptimizerTimeExperiment {
 
 	static void testWhere(Connection connection, Optimizer optimizer)
 			throws Exception {
-		double time1 = measureOptimizerTimeForWhere(optimizer, query2, "M5P");
+		double time1 = measureOptimizerTimeForWhere(optimizer, query5, "REPTree");
 		System.out.println("Optimizer Query time: " + time1);
-		double time2 = measureNormalReadTimeForWhere(connection, query2);
+		double time2 = measureNormalReadTimeForWhere(connection, query5);
 		System.out.println("Regular Query time: " + time2);
 		System.out.println("Optimizer is " + (time2 / time1) + " times faster");
 	}
@@ -223,16 +225,21 @@ public class OptimizerTimeExperiment {
 		DecompressByDependency decompressor = new DecompressByDependency();
 		decompressor.setConnection(connection);
 		//measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor);
-		//testWhere(connection, optimizer);
+		testWhere(connection, optimizer);
 		// measureBasicTwoTypesOfReading("cps", "GEREG");
 
 		// For normal queries.
-		long time1 = measureOptimizerTime(optimizer, query3, "REPTree");
-		LinkedList<String> permutation = new LinkedList<String>();
-		System.out.println("REPTree" + " : " + time1);
 		
-		long time2 = measureNormalReadTime(connection, query3);
-		System.out.println("Regular Query time: " + time2);
+		LinkedList<String> permutation = new LinkedList<String>();
+		permutation.add("PRERELG");
+		permutation.add("PTWK");
+		permutation.add("PTERN");
+		//long time1 = measureOptimizerTimeInSpecificOrder(optimizer, permutation, query4, "REPTree");
+		//long time1 = measureOptimizerTime(optimizer, query4, "REPTree");
+		//System.out.println("REPTree" + " : " + time1);
+		
+		//long time2 = measureNormalReadTime(connection, query4);
+		//System.out.println("Regular Query time: " + time2);
 		
 		return;
 	}
