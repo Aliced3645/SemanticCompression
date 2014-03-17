@@ -30,7 +30,7 @@ import Online.SQLParser;
 
 public class OptimizerTimeExperiment {
 
-	static String query1 = "SELECT GESTCEN FROM cps;";
+	static String query1 = "SELECT GESTCEN, GEREG FROM cps;";
 	static String query2 = "SELECT GESTCEN FROM cps where "
 			+ "GEREG = 3 AND GTCSA = 0 AND GTMETSTA = 2 AND HRHHID2 = 90001;";
 	static String optimizerOutputDir = "OptimizerOutput";
@@ -38,25 +38,25 @@ public class OptimizerTimeExperiment {
 
 	static SQLParser parser = new SQLParser();
 
-	static String[] modelTypes = { "M5P", "REPTree" };
+	static String[] modelTypes = { "REPTree", "M5P"};
 
 	static long measureOptimizerTime(Optimizer optimizer, String sql,
 			String model) throws Exception {
 		List<Long> times = new LinkedList<Long>();
-		for(String modelType : modelTypes){
-			List<List<String>> permutations = optimizer.getColumnsPermutations(sql, modelType);
-			for(List<String> permutation : permutations) {
-				//timing here
-				long startTime = System.nanoTime();
-				optimizer.queryOnePossibleResult(sql, permutation, "OptimizerOutput", modelType);
-				long period = System.nanoTime() - startTime;
-				times.add(period);
-			}
+		List<List<String>> permutations = optimizer.getColumnsPermutations(sql,
+				model);
+		for (List<String> permutation : permutations) {
+			// timing here
+			long startTime = System.nanoTime();
+			optimizer.queryOnePossibleResult(sql, permutation,
+					"OptimizerOutput", model);
+			long period = System.nanoTime() - startTime;
+			times.add(period);
 		}
-		//finally return the average
+		// finally return the average
 		int count = times.size();
 		long total = 0;
-		for(Long time : times) {
+		for (Long time : times) {
 			total += time;
 		}
 		return total / count;
