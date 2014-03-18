@@ -33,11 +33,11 @@ import Online.SQLParser;
 public class OptimizerTimeExperiment {
 
 	static String query1 = "SELECT GESTCEN, GEREG FROM cps;";
-	static String query2 = "SELECT GESTCEN FROM cps where "
-			+ "GEREG = 3 AND GTCSA = 0 AND GTMETSTA = 2 AND HRHHID2 = 90001;";
+	static String query2 = "SELECT PRERELG FROM cps where "
+			+  "PTERN = 3 AND PEERNCOV = 6;";
 	static String query3 = "SELECT GESTCEN,GEREG,GTCSA,GTMETSTA, HRHHID2 FROM cps;";
 	static String query4 = "SELECT PRERELG, PTWK, PTERN FROM cps;";
-	static String query5 = "SELECT PRERELG FROM cps where PTWK = 0 AND PTERN = 0.01;";
+	static String query5 = "SELECT PRERELG FROM cps where PTWK = 0 AND PTERN = -0.01;";
 	
 	static String optimizerOutputDir = "OptimizerOutput";
 	static String normalOutputDir = "NormalOutput";
@@ -182,9 +182,9 @@ public class OptimizerTimeExperiment {
 
 	static void testWhere(Connection connection, Optimizer optimizer)
 			throws Exception {
-		double time1 = measureOptimizerTimeForWhere(optimizer, query5, "REPTree");
+		double time1 = measureOptimizerTimeForWhere(optimizer, query2, "REPTree");
 		System.out.println("Optimizer Query time: " + time1);
-		double time2 = measureNormalReadTimeForWhere(connection, query5);
+		double time2 = measureNormalReadTimeForWhere(connection, query2);
 		System.out.println("Regular Query time: " + time2);
 		System.out.println("Optimizer is " + (time2 / time1) + " times faster");
 	}
@@ -229,7 +229,6 @@ public class OptimizerTimeExperiment {
 		// measureBasicTwoTypesOfReading("cps", "GEREG");
 
 		// For normal queries.
-		
 		LinkedList<String> permutation = new LinkedList<String>();
 		permutation.add("PRERELG");
 		permutation.add("PTWK");

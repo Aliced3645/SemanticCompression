@@ -114,7 +114,13 @@ public class SQLParser {
 				pair.value = Double.parseDouble(where.getOperand(1).toString());
 			} catch (Exception e) {
 				//numeric value
-				pair.value = where.getOperand(1).toString();
+				String valueString = where.getOperand(1).toString();
+				if(valueString.substring(0, 2).equals("(-")){
+					String part = valueString.substring(2, valueString.length() - 1);
+					pair.value = Double.parseDouble(part);
+				} else {
+					pair.value = where.getOperand(1).toString();
+				}
 			}
 			return pair;
 		} else
