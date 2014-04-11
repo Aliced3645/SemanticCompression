@@ -108,6 +108,7 @@ public class DecompressByDependency {
 		return toReturn;
 	}
 
+	//Predict one particular value
 	public void decompress(String tableName, String columnName,
 			String predictFilesFolder, HashMap<String, Object> dependencies, String modelName)
 			throws Exception {
@@ -229,6 +230,7 @@ public class DecompressByDependency {
 						+ predictFilesFolder + "' folder.");
 	}
 	
+	//Predict one column according to dependencies
 	public void decompress(String tableName, String columnName,
 			String columnsFileFolder, String predictFilesFolder, String modelName)
 			throws Exception {
@@ -373,6 +375,8 @@ public class DecompressByDependency {
 						+ predictFilesFolder + "' folder.");
 	}
 
+	
+	//Predict one column and save it with its dependencies
 	public void decompress(String tableName, String columnName, List<String> dependencies,
 			String columnsFileFolder, String predictFilesFolder, String modelName)
 			throws Exception {
@@ -553,8 +557,8 @@ public class DecompressByDependency {
 		String predictFilesFolder = args[3];
 		DecompressByDependency dbd = new DecompressByDependency();
 		
-		dbd.decompress(tableName, columnName, dbd.getDependencies(tableName, columnName), columnFilesFolder, predictFilesFolder, "REPTree");
-		//dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder, "REPTree");
+		//dbd.decompress(tableName, columnName, dbd.getDependencies(tableName, columnName), columnFilesFolder, predictFilesFolder, "REPTree");
+		dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder, "REPTree");
 		//HashMap<String, Object> map = new HashMap<String, Object>();
 		//map.put("PRERELG", 0.0);
 		//map.put("PTHR", -0.01);

@@ -182,9 +182,9 @@ public class OptimizerTimeExperiment {
 
 	static void testWhere(Connection connection, Optimizer optimizer)
 			throws Exception {
-		double time1 = measureOptimizerTimeForWhere(optimizer, query2, "REPTree");
+		double time1 = measureOptimizerTimeForWhere(optimizer, query5, "REPTree");
 		System.out.println("Optimizer Query time: " + time1);
-		double time2 = measureNormalReadTimeForWhere(connection, query2);
+		double time2 = measureNormalReadTimeForWhere(connection, query5);
 		System.out.println("Regular Query time: " + time2);
 		System.out.println("Optimizer is " + (time2 / time1) + " times faster");
 	}
@@ -233,13 +233,13 @@ public class OptimizerTimeExperiment {
 		permutation.add("PRERELG");
 		permutation.add("PTWK");
 		permutation.add("PTERN");
-		//long time1 = measureOptimizerTimeInSpecificOrder(optimizer, permutation, query4, "REPTree");
+		double time1 = measureOptimizerTimeInSpecificOrder(optimizer, permutation, query4, "REPTree");
 		//long time1 = measureOptimizerTime(optimizer, query4, "REPTree");
-		//System.out.println("REPTree" + " : " + time1);
+		System.out.println("REPTree" + " : " + time1);
 		
-		//long time2 = measureNormalReadTime(connection, query4);
-		//System.out.println("Regular Query time: " + time2);
-		
+		double time2 = measureNormalReadTime(connection, query4);
+		System.out.println("Regular Query time: " + time2);
+		System.out.println("Optimizer is " + time1 / time2 + " slower");
 		return;
 	}
 }
