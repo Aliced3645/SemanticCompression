@@ -43,6 +43,7 @@ public class ErrorPercent {
 		int e_10 = 0;
 		int e_25 = 0;
 		int e_50 = 0;
+		int e_75 = 0;
 		int e_100 = 0;
 		int e_inf = 0;
 		
@@ -75,7 +76,11 @@ public class ErrorPercent {
 				e_50++;
 			}
 			
-			else if(result >= 0.5 && result < 1) {
+			else if(result >= 0.5 && result < 0.75) {
+				e_75++;
+			}
+			
+			else if(result >= 0.75 && result < 1) {
 				e_100++;
 			}
 			
@@ -97,6 +102,7 @@ public class ErrorPercent {
 		double e_10_p = (double) e_10 / rowNum;
 		double e_25_p = (double) e_25 / rowNum;
 		double e_50_p = (double) e_50 / rowNum;
+		double e_75_p = (double) e_75 / rowNum;
 		double e_100_p = (double) e_100 / rowNum;
 		double e_inf_p = (double) e_inf / rowNum;
 		
@@ -105,7 +111,8 @@ public class ErrorPercent {
 		fos.write(String.valueOf(e_10_p + " [5% - 10%]" + "\n").getBytes());
 		fos.write(String.valueOf(e_25_p + " [10% - 25%]" + "\n").getBytes());
 		fos.write(String.valueOf(e_50_p + " [25% - 50%]" + "\n").getBytes());
-		fos.write(String.valueOf(e_100_p + " [50% - 100%]" + "\n").getBytes());
+		fos.write(String.valueOf(e_75_p + " [50% - 75%]" + "\n").getBytes());
+		fos.write(String.valueOf(e_100_p + " [75% - 100%]" + "\n").getBytes());
 		fos.write(String.valueOf(e_inf_p + " [100% - infinity]" + "\n").getBytes());
 		
 		fos.close();
@@ -117,7 +124,8 @@ public class ErrorPercent {
 		System.out.println(e_10_p + " [5% - 10%]");
 		System.out.println(e_25_p + " [10% - 25%]");
 		System.out.println(e_50_p + " [25% - 50%]");
-		System.out.println(e_100_p + " [50% - 100%]");
+		System.out.println(e_75_p + " [50% - 75%]");
+		System.out.println(e_100_p + " [75% - 100%]");
 		System.out.println(e_inf_p + " [100% - infinity]");
 
 	}
