@@ -145,11 +145,6 @@ public class DecompressByDependency {
 			return;
 		}
 
-		HashMap<String, Integer> dependIndex = new HashMap<String, Integer>();
-		
-		for (String column : dependencies.keySet()) {
-			dependIndex.put(column, header.attribute(column).index());
-		}
 
 
 
@@ -166,7 +161,7 @@ public class DecompressByDependency {
 		header.setClassIndex(header.numAttributes()-1);
 		predInstance.setDataset(header);
 		for (String column : dependencies.keySet()) {
-			if (header.attribute(dependIndex.get(column)).isNumeric()) {
+			if (header.attribute(column).isNumeric()) {
 				double val;
 				try {
 					val = (Double)dependencies.get(column);
@@ -174,10 +169,10 @@ public class DecompressByDependency {
 					e.printStackTrace();
 					break;
 				}
-				predInstance.setValue(dependIndex.get(column), val);
+				predInstance.setValue(header.attribute(column), val);
 			} else {
 				String val = (String)dependencies.get(column);
-				predInstance.setValue(dependIndex.get(column), val);
+				predInstance.setValue(header.attribute(column), val);
 			}
 		}
 			
@@ -558,11 +553,12 @@ public class DecompressByDependency {
 		DecompressByDependency dbd = new DecompressByDependency();
 		
 		//dbd.decompress(tableName, columnName, dbd.getDependencies(tableName, columnName), columnFilesFolder, predictFilesFolder, "REPTree");
-		dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder, "REPTree");
-		//HashMap<String, Object> map = new HashMap<String, Object>();
-		//map.put("PRERELG", 0.0);
-		//map.put("PTHR", -0.01);
-		//dbd.decompress(tableName, columnName, predictFilesFolder, map, "REPTree");
+		//dbd.decompress(tableName, columnName, columnFilesFolder, predictFilesFolder, "REPTree");
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("P6p2", 0.049252);
+		map.put("H18pA", 0.052246);
+		map.put("P18p2", 0.003251);
+		dbd.decompress(tableName, columnName, predictFilesFolder, map, "REPTree");
 
 	}
 
