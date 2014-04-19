@@ -373,7 +373,7 @@ public class DecompressByDependency {
 	
 	//Predict one column and save it with its dependencies
 	public void decompress(String tableName, String columnName, List<String> dependencies,
-			String columnsFileFolder, String predictFilesFolder, String modelName)
+			String columnFilesFolder, String predictFilesFolder, String modelName)
 			throws Exception {
 		
 		readHeader(tableName);
@@ -421,7 +421,7 @@ public class DecompressByDependency {
 
 		BufferedReader[] reader = new BufferedReader[dependArray.length];
 		for (int i = 0; i < reader.length; i++) {
-			reader[i] = new BufferedReader(new FileReader(columnsFileFolder
+			reader[i] = new BufferedReader(new FileReader(columnFilesFolder
 					+ "/" + dependArray[i] + ".arff"));
 		}
 
