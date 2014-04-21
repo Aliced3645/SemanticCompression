@@ -11,7 +11,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import weka.classifiers.trees.M5P;
@@ -32,10 +32,10 @@ public class HashStore {
 	
 	BufferedReader inputStream;
 	
-	HashSet<ArrayList<Double>> e_1;
-	HashSet<ArrayList<Double>> e_5;
-	HashSet<ArrayList<Double>> e_10;
-	HashSet<ArrayList<Double>> e_25;
+	HashSet<HashMap<String, Double>> e_1;
+	HashSet<HashMap<String, Double>> e_5;
+	HashSet<HashMap<String, Double>> e_10;
+	HashSet<HashMap<String, Double>> e_25;
 
 	
 	public HashStore() throws SQLException {
@@ -44,10 +44,10 @@ public class HashStore {
 				.getConnection("jdbc:mysql://localhost/metadata?"
 						+ "user=shu&password=shu");
 		
-		e_1 = new HashSet<ArrayList<Double>>();
-		e_5 = new HashSet<ArrayList<Double>>();
-		e_10 = new HashSet<ArrayList<Double>>();
-		e_25 = new HashSet<ArrayList<Double>>();
+		e_1 = new HashSet<HashMap<String, Double>>();
+		e_5 = new HashSet<HashMap<String, Double>>();
+		e_10 = new HashSet<HashMap<String, Double>>();
+		e_25 = new HashSet<HashMap<String, Double>>();
 	}
 
 	public void setConnection(Connection connection) {
@@ -154,7 +154,7 @@ public class HashStore {
 			header.setClassIndex(header.numAttributes()-1);
 			predInstance.setDataset(header);
 			
-			ArrayList<Double> hashKey = new ArrayList<Double>();
+			HashMap<String, Double> hashKey = new HashMap<String, Double>();
 			for (int j = 0; j < dependArray.length; j++) {
 				if (header.attribute(dependIndex[j]).isNumeric()) {
 					double val;
@@ -165,7 +165,7 @@ public class HashStore {
 						break;
 					}
 					predInstance.setValue(dependIndex[j], val);
-					hashKey.add(val);
+					hashKey.put(dependArray[j], val);
 				} else {
 					System.out.println("HashStore support numeric value only.");
 					return;
@@ -265,10 +265,10 @@ public class HashStore {
 		System.out.println(hs.e_10.size());
 		System.out.println(hs.e_25.size());
 		
-		ArrayList<Double> test = new ArrayList<Double>();
-		test.add(0.049252);
-		test.add(0.052246);
-		test.add(0.003251);
+		HashMap<String, Double> test = new HashMap<String, Double>();
+		test.put("P6p2", 0.049252);
+		test.put("H18pA", 0.052246);
+		test.put("P18p2", 0.003251);
 		System.out.println(hs.e_1.contains(test));
 		System.out.println(hs.e_5.contains(test));
 		System.out.println(hs.e_10.contains(test));

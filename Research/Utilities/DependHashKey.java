@@ -1,6 +1,6 @@
 package Utilities;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class DependHashKey {
@@ -59,7 +59,7 @@ public class DependHashKey {
 	
 	public static void main(String[] args) {
 		
-		double[] d1 = {0.01, 0.02, 17.5, 100.8};
+		/*double[] d1 = {0.01, 0.02, 17.5, 100.8};
 		double[] d2 = {0.01, 0.02, 17.5, 100.8};
 		DependHashKey dhk1 = new DependHashKey(d1);
 		DependHashKey dhk2 = new DependHashKey(d2);
@@ -84,7 +84,19 @@ public class DependHashKey {
 		HashSet<ArrayList<Double>> hs2 = new HashSet<ArrayList<Double>>();
 		
 		hs2.add(D1);
-		System.out.println(hs2.contains(D2));
+		System.out.println(hs2.contains(D2));*/
+		
+		HashSet<HashMap<String, Double>> test = new HashSet<HashMap<String, Double>>();
+		HashMap<String, Double> hm1 = new HashMap<String, Double>();
+		hm1.put("A", 1.0);
+		hm1.put("B", 2.0);
+		test.add(hm1);
+		
+		HashMap<String, Double> hm2 = new HashMap<String, Double>();
+		hm2.put("B", 2.0);
+		hm2.put("A", 1.0);
+		
+		System.out.println(test.contains(hm2));
 		
 	}
 }
