@@ -127,6 +127,29 @@ public class SQLParser {
 			return null;
 	}
 
+	
+	public HashMap<String, Double> parseWhereOnlyDouble(String sql) throws ParseException {
+		HashMap<String, Double> result = new HashMap<String, Double>();
+		ZQuery query = convertSqlToZQuery(sql);
+		ZExpression where = (ZExpression) query.getWhere();
+		if (where.getOperator().equals("AND")
+				|| where.getOperator().equals("and")) {
+			Vector<ZExpression> operands = where.getOperands();
+			for (ZExpression operand : operands) {
+				WherePair wp = parseWhereTuple(operand);
+				if (wp == null)
+					return null;
+				result.put(wp.attribute, (Double)wp.value);
+			}
+		} else {
+			WherePair wp = parseWhereTuple(where);
+			if (wp == null)
+				return null;
+			result.put(wp.attribute, (Double)wp.value);
+		}
+		return result;
+	}
+	
 	/**
 	 * Only there are AND and "=" in where does this function work. If the
 	 * situation not met, return a null;

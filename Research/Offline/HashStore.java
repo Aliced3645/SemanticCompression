@@ -332,8 +332,6 @@ public class HashStore {
 		test.put("P6p2", 0.049252);
 		test.put("H18pA", 0.052246);
 		test.put("P18p2", 0.003251);
-		
-
 
 		
 		System.out.println(hs.e_1.contains(test));

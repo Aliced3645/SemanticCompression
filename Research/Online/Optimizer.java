@@ -1,6 +1,9 @@
 package Online;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,6 +17,10 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import weka.core.Instance;
+import weka.core.Instances;
 
 import com.google.common.io.Files;
 
@@ -277,6 +284,86 @@ public class Optimizer {
 			processQueryWithWhere(sql, model);
 		} else {
 			produceAllPossibleResults(sql, model);
+		}
+	}
+
+	/**
+	 * A brute force method to read where
+	 * 
+	 * @param query
+	 * @throws ParseException
+	 * @throws IOException
+	 */
+	private void scanReadWhere(String query) throws ParseException, IOException {
+		
+		HashMap<String, Double> wheres = parser.parseWhereOnlyDouble(query);
+		String columnDir = parser.parseTables(query).get(0);
+		List<Set<Integer>> sets = new LinkedList<Set<Integer>>();
+		for (String column : wheres.keySet()) {
+			String columnFile = columnDir + "/" + column + ".arff";
+			Set<Integer> set = new HashSet<Integer>();
+			BufferedReader reader = new BufferedReader(new FileReader(
+					columnFile));
+			Instances instances = new Instances(reader);
+			reader.close();
+			for (int i = 0; i < instances.size(); i++) {
+				Instance instance = instances.get(i);
+				if (instance.value(0) == (Double) wheres.get(column)) {
+					set.add(i);
+				}
+			}
+			sets.add(set);
+		}
+		
+		Set<Integer> firstSet = sets.get(0);
+		for (int i = 1; i < sets.size(); i++) {
+			firstSet.retainAll(sets.get(i));
+		}
+
+		List<Double> answers = new LinkedList<Double>();
+		String selectColumn = parser.parseColumns(query).get(0);
+		String columnFile = columnDir + "/" + selectColumn + ".arff";
+		BufferedReader reader = new BufferedReader(new FileReader(columnFile));
+		Instances instances = new Instances(reader);
+		reader.close();
+		for (int i = 0; i < instances.size(); i++) {
+			if (firstSet.contains(i)) {
+				Instance instance = instances.get(i);
+				answers.add(instance.value(0));
+			}
+		}
+		
+		//Print out the value first
+		System.out.println("results: " + answers);
+		
+	}
+
+	/**
+	 * We can give an accracy now.
+	 * 
+	 * @param sql
+	 * @param accracy
+	 * @param model
+	 * @throws Exception
+	 */
+	public void processWhereWithAccuracy(String sql, double errorBound,
+			String model) throws Exception {
+		if (!validateWhere(sql, model)) {
+			System.out.println("Not meet the WHERE criteria");
+		}
+
+		HashLookUp lookup = new HashLookUp();
+		HashMap<String, Double> wheres = parser.parseWhereOnlyDouble(sql);
+
+		// for now, only support one table in SQL.
+		String table = parser.parseTables(sql).get(0) + '_' + model;
+		String column = parser.parseColumns(sql).get(0);
+		boolean lookUpResult = lookup.LookUp(table, column, wheres, errorBound);
+		if (lookUpResult) {
+			processQueryWithWhere(sql, model);
+		} else {
+			// use traditional lookup..
+			scanReadWhere(sql);
 		}
 	}
 
