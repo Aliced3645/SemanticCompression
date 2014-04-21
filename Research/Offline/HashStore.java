@@ -1,13 +1,17 @@
 package Offline;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -248,7 +252,76 @@ public class HashStore {
 			}
 
 		}
+		storeToDB(tableName, columnName);
 
+	}
+	
+	private void storeToDB(String tableName, String columnName) throws SQLException {
+		String hashName = tableName + "_hash";
+		
+		Statement statement = connection.createStatement();
+		ResultSet resultSet = statement.executeQuery("show tables like '" + hashName + "'");
+		if (!resultSet.first()) {
+			statement = connection.createStatement();
+			statement
+					.executeUpdate("create table " + hashName + " (columnName CHAR(50), e_1 LONGBLOB, e_5 LONGBLOB, e_10 LONGBLOB, e_25 LONGBLOB);");
+			statement = connection.createStatement();
+			statement
+					.executeUpdate("alter table " + hashName + " ADD PRIMARY KEY (columnName);");
+		}
+		
+		ResultSet resultSet2 = statement.executeQuery("select * from " + hashName + " where columnName = '" + columnName + "'");
+		
+		if (!resultSet2.first()) {
+		
+			String sql = "Insert into " + hashName + " (columnName, e_1, e_5, e_10, e_25) values (?, ?, ?, ?, ?)";
+		
+			PreparedStatement ps = connection.prepareStatement(sql);
+			ps.setString(1, columnName);
+			ps.setObject(2, (Object) e_1);
+			ps.setObject(3, (Object) e_5);
+			ps.setObject(4, (Object) e_10);
+			ps.setObject(5, (Object) e_25);
+			ps.execute();
+			ps.close();
+		
+		}
+		
+	}
+	
+	private void makeInsertStatementAndExecute(Connection connection,
+			String sql, String columnName, InputStream e_1, InputStream e_5, InputStream e_10, InputStream e_25)
+			throws SQLException {
+		PreparedStatement ps = connection.prepareStatement(sql);
+		ps.setString(1, columnName);
+		ps.setBlob(2, e_1);
+		ps.setBlob(3, e_5);
+		ps.setBlob(4, e_10);
+		ps.setBlob(5, e_25);
+		ps.execute();
+		ps.close();
+	}
+	
+	public void test() throws SQLException, IOException, ClassNotFoundException {
+		
+		HashMap<String, Double> test = new HashMap<String, Double>();
+		test.put("P6p2", 0.049252);
+		test.put("H18pA", 0.052246);
+		test.put("P18p2", 0.003251);
+		
+		HashSet<HashMap<String, Double>> testSet = null;
+		
+		String query = "select e_10 from house_REPTree_hash where columnName = 'P1'";
+		Statement  statement = connection.prepareStatement(query);
+
+		ResultSet  resultSet = statement.executeQuery(query);
+		if (resultSet.next()) {
+			InputStream is = resultSet.getBlob(1).getBinaryStream();
+			ObjectInputStream ois = new ObjectInputStream(is);
+			Object x = ois.readObject();
+		    testSet = (HashSet<HashMap<String, Double>>) x;
+		}
+		System.out.println(testSet.contains(test));
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -265,14 +338,20 @@ public class HashStore {
 		System.out.println(hs.e_10.size());
 		System.out.println(hs.e_25.size());
 		
-		HashMap<String, Double> test = new HashMap<String, Double>();
+		hs.test();
+		
+		/*HashMap<String, Double> test = new HashMap<String, Double>();
 		test.put("P6p2", 0.049252);
 		test.put("H18pA", 0.052246);
 		test.put("P18p2", 0.003251);
+		
+
+
+		
 		System.out.println(hs.e_1.contains(test));
 		System.out.println(hs.e_5.contains(test));
 		System.out.println(hs.e_10.contains(test));
-		System.out.println(hs.e_25.contains(test));
+		System.out.println(hs.e_25.contains(test));*/
 	}
 
 }
