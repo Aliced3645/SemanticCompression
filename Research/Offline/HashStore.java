@@ -289,18 +289,6 @@ public class HashStore {
 		
 	}
 	
-	private void makeInsertStatementAndExecute(Connection connection,
-			String sql, String columnName, InputStream e_1, InputStream e_5, InputStream e_10, InputStream e_25)
-			throws SQLException {
-		PreparedStatement ps = connection.prepareStatement(sql);
-		ps.setString(1, columnName);
-		ps.setBlob(2, e_1);
-		ps.setBlob(3, e_5);
-		ps.setBlob(4, e_10);
-		ps.setBlob(5, e_25);
-		ps.execute();
-		ps.close();
-	}
 	
 	public void test() throws SQLException, IOException, ClassNotFoundException {
 		
