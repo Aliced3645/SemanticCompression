@@ -380,8 +380,15 @@ public class Optimizer {
 						+ "user=shu&password=shu");
 
 		Optimizer optimizer = new Optimizer(connection);
+		/*
 		String sql = "SELECT GEREG FROM cps;";
 		// String sql = "SELECT GEREG FROM FROM cps WHERE "
 		optimizer.processQuery(sql);
+		*/
+		
+		//Test where with accuracy
+		String sql = "SELECT H8p2 FROM house WHERE P6p2 = 0.001835 AND P18p2 = 0.006289;";
+		optimizer.processWhereWithAccuracy(sql, 0.1, "REPTree");
+		
 	}
 }

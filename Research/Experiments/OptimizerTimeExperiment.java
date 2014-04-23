@@ -179,7 +179,7 @@ public class OptimizerTimeExperiment {
 		optimizer.processQuery(query, model);
 		return System.nanoTime() - startTime;
 	}
-
+	
 	static void testWhere(Connection connection, Optimizer optimizer)
 			throws Exception {
 		double time1 = measureOptimizerTimeForWhere(optimizer, query5, "REPTree");
@@ -212,23 +212,47 @@ public class OptimizerTimeExperiment {
 		System.out.println("Read write time: " + time);
 	}
 
+	static long measureOptimizerTimeForWhereWithAccuracy(Optimizer optimizer, 
+			String query, String model, double errorBound) throws Exception{
+		long startTime = System.nanoTime();
+		optimizer.processWhereWithAccuracy(query, errorBound, model);
+		return System.nanoTime() - startTime;
+	}
+	
+	/**
+	 * Added for testing where with accuracy.
+	 * For now it is simple (like a placeholder), but could be extended.
+	 * 4/23 added.
+	 */
+	//This sql should hit the hash.
+	static String sampleSQLForTestWhereWithAccracy 
+			= "SELECT H8p2 FROM house WHERE P6p2 = 0.001835 AND P18p2 = 0.006289;";
+	public static void testWhereWithAccuracy(Connection connection, Optimizer optimizer) throws Exception{
+		long time1 = measureOptimizerTimeForWhereWithAccuracy(optimizer, 
+				sampleSQLForTestWhereWithAccracy, "REPTree", 0.05);
+		System.out.println("Where with accuracy time (hit): " + time1);
+		double time2 = measureNormalReadTimeForWhere(connection, query5);
+		System.out.println("Regular Query time: " + time2);
+		
+	}
+	
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
 	public static void main(String[] args) throws Exception {
 		Connection connection = DriverManager
 				.getConnection("jdbc:mysql://localhost/metadata?"
 						+ "user=shu&password=shu");
-
 		FileUtils.deleteDirectory(new File(optimizerOutputDir));
 		FileUtils.deleteDirectory(new File(normalOutputDir));
 		(new File(normalOutputDir)).mkdirs();
 		Optimizer optimizer = new Optimizer(connection);
-		DecompressByDependency decompressor = new DecompressByDependency();
-		decompressor.setConnection(connection);
+		//DecompressByDependency decompressor = new DecompressByDependency();
+		//decompressor.setConnection(connection);
 		//measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor);
-		testWhere(connection, optimizer);
+		//testWhere(connection, optimizer);
 		// measureBasicTwoTypesOfReading("cps", "GEREG");
 
 		// For normal queries.
+		/*
 		LinkedList<String> permutation = new LinkedList<String>();
 		permutation.add("PRERELG");
 		permutation.add("PTWK");
@@ -240,6 +264,8 @@ public class OptimizerTimeExperiment {
 		double time2 = measureNormalReadTime(connection, query4);
 		System.out.println("Regular Query time: " + time2);
 		System.out.println("Optimizer is " + time1 / time2 + " slower");
+		*/
+		testWhereWithAccuracy(connection, optimizer);
 		return;
 	}
 }
