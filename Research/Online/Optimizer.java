@@ -333,9 +333,6 @@ public class Optimizer {
 			}
 		}
 		
-		//Print out the value first
-		System.out.println("results: " + answers);
-		
 	}
 
 	/**

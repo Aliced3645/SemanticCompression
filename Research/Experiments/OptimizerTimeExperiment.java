@@ -227,13 +227,18 @@ public class OptimizerTimeExperiment {
 	//This sql should hit the hash.
 	static String sampleSQLForTestWhereWithAccracy 
 			= "SELECT H8p2 FROM house WHERE P6p2 = 0.001835 AND P18p2 = 0.006289;";
+	//not hit sentence
+	static String sampleSQLForTestWhereWithAccracy2 = 
+			"SELECT H8p2 FROM house WHERE P6p2 = 0.011 AND P18p2 = 0.01;";
 	public static void testWhereWithAccuracy(Connection connection, Optimizer optimizer) throws Exception{
-		long time1 = measureOptimizerTimeForWhereWithAccuracy(optimizer, 
+		double time1 = measureOptimizerTimeForWhereWithAccuracy(optimizer, 
 				sampleSQLForTestWhereWithAccracy, "REPTree", 0.05);
 		System.out.println("Where with accuracy time (hit): " + time1);
-		double time2 = measureNormalReadTimeForWhere(connection, query5);
-		System.out.println("Regular Query time: " + time2);
-		
+		double time2 = measureOptimizerTimeForWhereWithAccuracy(optimizer, 
+				sampleSQLForTestWhereWithAccracy2, "REPTree", 0.05);
+		System.out.println("Where with accuracy time (not hit): " + time2);
+		double time3 = measureNormalReadTimeForWhere(connection, query5);
+		System.out.println("Regular Query time: " + time3);
 	}
 	
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
