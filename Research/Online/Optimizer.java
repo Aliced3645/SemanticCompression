@@ -244,7 +244,7 @@ public class Optimizer {
 	 * @param sql
 	 * @throws Exception
 	 */
-	private void processQueryWithWhere(String sql, String modelType)
+	public void processQueryWithWhere(String sql, String modelType)
 			throws Exception {
 		HashMap<String, Object> wheres = parser.parseWhere(sql);
 		// for now, only support one table in SQL.

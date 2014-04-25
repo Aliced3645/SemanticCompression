@@ -12,8 +12,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -35,17 +37,17 @@ public class OptimizerTimeExperiment {
 
 	static String query1 = "SELECT GESTCEN, GEREG FROM cps;";
 	static String query2 = "SELECT PRERELG FROM cps where "
-			+  "PTERN = 3 AND PEERNCOV = 6;";
+			+ "PTERN = 3 AND PEERNCOV = 6;";
 	static String query3 = "SELECT GESTCEN,GEREG,GTCSA,GTMETSTA, HRHHID2 FROM cps;";
 	static String query4 = "SELECT PRERELG, PTWK, PTERN FROM cps;";
 	static String query5 = "SELECT PRERELG FROM cps where PTWK = 0 AND PTERN = -0.01;";
-	
+
 	static String optimizerOutputDir = "OptimizerOutput";
 	static String normalOutputDir = "NormalOutput";
 
 	static SQLParser parser = new SQLParser();
 
-	static String[] modelTypes = {"REPTree" };
+	static String[] modelTypes = { "REPTree" };
 
 	static long measureOptimizerTime(Optimizer optimizer, String sql,
 			String model) throws Exception {
@@ -60,7 +62,7 @@ public class OptimizerTimeExperiment {
 			long period = System.nanoTime() - startTime;
 			times.add(period);
 		}
-		
+
 		// finally return the average
 		int count = times.size();
 		long total = 0;
@@ -69,12 +71,13 @@ public class OptimizerTimeExperiment {
 		}
 		return total / count;
 	}
-	
-	static long measureOptimizerTimeInSpecificOrder(Optimizer optimizer, List<String> permutation, String sql, 
-			String model) throws Exception{
+
+	static long measureOptimizerTimeInSpecificOrder(Optimizer optimizer,
+			List<String> permutation, String sql, String model)
+			throws Exception {
 		long startTime = System.nanoTime();
-		optimizer.queryOnePossibleResult(sql, permutation,
-				"OptimizerOutput", model);
+		optimizer.queryOnePossibleResult(sql, permutation, "OptimizerOutput",
+				model);
 		long period = System.nanoTime() - startTime;
 		return period;
 	}
@@ -180,10 +183,11 @@ public class OptimizerTimeExperiment {
 		optimizer.processQuery(query, model);
 		return System.nanoTime() - startTime;
 	}
-	
+
 	static void testWhere(Connection connection, Optimizer optimizer)
 			throws Exception {
-		double time1 = measureOptimizerTimeForWhere(optimizer, query5, "REPTree");
+		double time1 = measureOptimizerTimeForWhere(optimizer, query5,
+				"REPTree");
 		System.out.println("Optimizer Query time: " + time1);
 		double time2 = measureNormalReadTimeForWhere(connection, query5);
 		System.out.println("Regular Query time: " + time2);
@@ -213,48 +217,118 @@ public class OptimizerTimeExperiment {
 		System.out.println("Read write time: " + time);
 	}
 
-	static long measureOptimizerTimeForWhereWithAccuracy(Optimizer optimizer, 
-			String query, String model, double errorBound) throws Exception{
+	static long measureOptimizerTimeForWhereWithAccuracy(Optimizer optimizer,
+			String query, String model, double errorBound) throws Exception {
 		long startTime = System.nanoTime();
 		optimizer.processWhereWithAccuracy(query, errorBound, model);
 		return System.nanoTime() - startTime;
 	}
-	
+
 	/**
-	 * Added for testing where with accuracy.
-	 * For now it is simple (like a placeholder), but could be extended.
-	 * 4/23 added.
+	 * Added for testing where with accuracy. For now it is simple (like a
+	 * placeholder), but could be extended. 4/23 added.
 	 */
-	//This sql should hit the hash.
-	static String sampleSQLForTestWhereWithAccracy 
-			= "SELECT H8p2 FROM house WHERE P6p2 = 0.001835 AND P18p2 = 0.006289;";
-	//not hit sentence
-	static String sampleSQLForTestWhereWithAccracy2 = 
-			"SELECT H8p2 FROM house WHERE P6p2 = 0.011 AND P18p2 = 0.01;";
-	public static void testWhereWithAccuracy(Connection connection, Optimizer optimizer) throws Exception{
-		double time1 = measureOptimizerTimeForWhereWithAccuracy(optimizer, 
+	// This sql should hit the hash.
+	static String sampleSQLForTestWhereWithAccracy = "SELECT H8p2 FROM house WHERE P6p2 = 0.001835 AND P18p2 = 0.006289;";
+	// not hit sentence
+	static String sampleSQLForTestWhereWithAccracy2 = "SELECT H8p2 FROM house WHERE P6p2 = 0.011 AND P18p2 = 0.01;";
+
+	public static void testWhereWithAccuracy(Connection connection,
+			Optimizer optimizer) throws Exception {
+		double time1 = measureOptimizerTimeForWhereWithAccuracy(optimizer,
 				sampleSQLForTestWhereWithAccracy, "REPTree", 0.05);
 		System.out.println("Where with accuracy time (hit): " + time1);
-		double time2 = measureOptimizerTimeForWhereWithAccuracy(optimizer, 
+		double time2 = measureOptimizerTimeForWhereWithAccuracy(optimizer,
 				sampleSQLForTestWhereWithAccracy2, "REPTree", 0.05);
 		System.out.println("Where with accuracy time (not hit): " + time2);
 		double time3 = measureNormalReadTimeForWhere(connection, query5);
 		System.out.println("Regular Query time: " + time3);
 	}
-	
-	public static void testWhereWithAccuracyLoop(
-			Connection connection, Optimizer optimizer, int loop, double errorBound,
-			String table, String column) throws Exception {
-		DecompressByDependency decompressor = new DecompressByDependency();
-		decompressor.setConnection(connection);
-		List<String> dependencies = decompressor.getDependencies(table, column);
-		HashLookUp lookup = new HashLookUp();
-		//lookup.LookUp(table, column, dependencies, errorBound);
-		for(int i = 0; i < loop; i ++){
-			
+
+	public static void readFromFile(Connection connection, Optimizer optimizer,
+			String table, String columnName, HashMap<String, Double> wheres)
+			throws IOException {
+		List<Set<Integer>> sets = new LinkedList<Set<Integer>>();
+		String columnDir = table;
+		for (String column : wheres.keySet()) {
+			String columnFile = columnDir + "/" + column + ".arff";
+			Set<Integer> set = new HashSet<Integer>();
+			BufferedReader reader = new BufferedReader(new FileReader(
+					columnFile));
+			Instances instances = new Instances(reader);
+			reader.close();
+			for (int i = 0; i < instances.size(); i++) {
+				Instance instance = instances.get(i);
+				if (instance.value(0) == (Double) wheres.get(column)) {
+					set.add(i);
+				}
+			}
+			sets.add(set);
 		}
+		Set<Integer> firstSet = sets.get(0);
+		for (int i = 1; i < sets.size(); i++) {
+			firstSet.retainAll(sets.get(i));
+		}
+
+		List<Double> answers = new LinkedList<Double>();
+		String selectColumn = columnName;
+		String columnFile = columnDir + "/" + selectColumn + ".arff";
+		BufferedReader reader = new BufferedReader(new FileReader(columnFile));
+		Instances instances = new Instances(reader);
+		reader.close();
+		for (int i = 0; i < instances.size(); i++) {
+			if (firstSet.contains(i)) {
+				Instance instance = instances.get(i);
+				answers.add(instance.value(0));
+			}
+		}
+
 	}
-	
+
+	public static void testWhereWithAccuracyLoop(Connection connection,
+			Optimizer optimizer, int loop, double errorBound, String table,
+			String column, String model) throws Exception {
+		DecompressByDependency decompressor = new DecompressByDependency();
+		String tableName = table + "_" + model;
+		decompressor.setConnection(connection);
+		List<String> dependencies = decompressor.getDependencies(tableName,
+				column);
+		HashLookUp lookup = new HashLookUp();
+		HashSet<HashMap<String, Double>> hashSet = lookup.getHash(tableName,
+				column, errorBound);
+		double timestart = System.nanoTime();
+		Iterator<HashMap<String, Double>> iter = hashSet.iterator();
+		int i = 0;
+		String baseDir = "OptimizerOutput/WherePredict/";
+		baseDir += model;
+		while (i < loop && iter.hasNext()) {
+			HashMap<String, Double> map = iter.next();
+			boolean result = lookup.LookUp(tableName, column, map, errorBound);
+			//predict
+			HashMap<String, Object> mapo = new HashMap<String, Object>();
+			for(Entry<String, Double> entry : map.entrySet()){
+				mapo.put(entry.getKey(), entry.getValue());
+			}
+			decompressor.decompress(tableName, column, baseDir, mapo, model);
+			i++;
+		}
+		double timeEnd = System.nanoTime();
+		System.out.println("Where with accuracy time (hit): "
+				+ (timeEnd - timestart) / loop);
+
+		timestart = System.nanoTime();
+		i = 0;
+		iter = hashSet.iterator();
+		while (i < loop && iter.hasNext()){
+			HashMap<String, Double> map = iter.next();
+			readFromFile(connection, optimizer, table, column, map);
+			i ++;
+		}
+		timeEnd = System.nanoTime();
+		System.out.println("Regular Query time: "
+				+ (timeEnd - timestart) / loop);
+	}
+
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
 	public static void main(String[] args) throws Exception {
 		Connection connection = DriverManager
@@ -264,27 +338,30 @@ public class OptimizerTimeExperiment {
 		FileUtils.deleteDirectory(new File(normalOutputDir));
 		(new File(normalOutputDir)).mkdirs();
 		Optimizer optimizer = new Optimizer(connection);
-		//DecompressByDependency decompressor = new DecompressByDependency();
-		//decompressor.setConnection(connection);
-		//measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor);
-		//testWhere(connection, optimizer);
+		// DecompressByDependency decompressor = new DecompressByDependency();
+		// decompressor.setConnection(connection);
+		// measurePredictTimeAndReadWriteTime("cps_M5P", "GEREG", decompressor);
+		// testWhere(connection, optimizer);
 		// measureBasicTwoTypesOfReading("cps", "GEREG");
 
 		// For normal queries.
 		/*
-		LinkedList<String> permutation = new LinkedList<String>();
-		permutation.add("PRERELG");
-		permutation.add("PTWK");
-		permutation.add("PTERN");
-		double time1 = measureOptimizerTimeInSpecificOrder(optimizer, permutation, query4, "REPTree");
-		//long time1 = measureOptimizerTime(optimizer, query4, "REPTree");
-		System.out.println("REPTree" + " : " + time1);
+		 * LinkedList<String> permutation = new LinkedList<String>();
+		 * permutation.add("PRERELG"); permutation.add("PTWK");
+		 * permutation.add("PTERN"); double time1 =
+		 * measureOptimizerTimeInSpecificOrder(optimizer, permutation, query4,
+		 * "REPTree"); //long time1 = measureOptimizerTime(optimizer, query4,
+		 * "REPTree"); System.out.println("REPTree" + " : " + time1);
+		 * 
+		 * double time2 = measureNormalReadTime(connection, query4);
+		 * System.out.println("Regular Query time: " + time2);
+		 * System.out.println("Optimizer is " + time1 / time2 + " slower");
+		 */
+
+		// testWhereWithAccuracy(connection, optimizer);
+		testWhereWithAccuracyLoop(connection, optimizer, 100, 0.01, "house",
+				"H8p2", "REPTree");
 		
-		double time2 = measureNormalReadTime(connection, query4);
-		System.out.println("Regular Query time: " + time2);
-		System.out.println("Optimizer is " + time1 / time2 + " slower");
-		*/
-		testWhereWithAccuracy(connection, optimizer);
 		return;
 	}
 }
