@@ -26,11 +26,78 @@ public class HashLookUp {
 						+ "user=shu&password=shu");
 	}
 	
-	public HashSet<HashMap<String, Double>> getHash(double errorBound) {
-		if(errorBound == 0.01) return e_1;
-		else if(errorBound == 0.05) return e_5;
-		else if(errorBound == 0.1) return e_10;
-		else if(errorBound == 0.25) return e_25;
+	public HashSet<HashMap<String, Double>> getHash(String tableName, String columnName, double errorBound) throws SQLException, IOException, ClassNotFoundException {
+		
+		String hashName = tableName + "_hash";
+		
+		if(errorBound == 0.01) {
+			HashSet<HashMap<String, Double>> e_1 = new HashSet<HashMap<String, Double>>();
+			
+			String query = "select e_1 from " + hashName + " where columnName = '" + columnName + "'";
+			Statement  statement = connection.prepareStatement(query);
+
+			ResultSet  resultSet = statement.executeQuery(query);
+			if (resultSet.next()) {
+				InputStream is = resultSet.getBlob(1).getBinaryStream();
+				ObjectInputStream ois = new ObjectInputStream(is);
+				Object x = ois.readObject();
+			    e_1 = (HashSet<HashMap<String, Double>>) x;
+			}
+			
+			return e_1;
+		}
+		
+		else if(errorBound == 0.05) {
+			HashSet<HashMap<String, Double>> e_5 = new HashSet<HashMap<String, Double>>();
+			
+			String query = "select e_5 from " + hashName + " where columnName = '" + columnName + "'";
+			Statement  statement = connection.prepareStatement(query);
+
+			ResultSet  resultSet = statement.executeQuery(query);
+			if (resultSet.next()) {
+				InputStream is = resultSet.getBlob(1).getBinaryStream();
+				ObjectInputStream ois = new ObjectInputStream(is);
+				Object x = ois.readObject();
+			    e_5 = (HashSet<HashMap<String, Double>>) x;
+			}
+			
+			return e_5;
+		}
+		
+		else if(errorBound == 0.1) {
+			HashSet<HashMap<String, Double>> e_10 = new HashSet<HashMap<String, Double>>();
+			
+			String query = "select e_10 from " + hashName + " where columnName = '" + columnName + "'";
+			Statement  statement = connection.prepareStatement(query);
+
+			ResultSet  resultSet = statement.executeQuery(query);
+			if (resultSet.next()) {
+				InputStream is = resultSet.getBlob(1).getBinaryStream();
+				ObjectInputStream ois = new ObjectInputStream(is);
+				Object x = ois.readObject();
+			    e_10 = (HashSet<HashMap<String, Double>>) x;
+			}
+			
+			return e_10;
+		}
+		
+		else if(errorBound == 0.25) {
+			HashSet<HashMap<String, Double>> e_25 = new HashSet<HashMap<String, Double>>();
+			
+			String query = "select e_25 from " + hashName + " where columnName = '" + columnName + "'";
+			Statement  statement = connection.prepareStatement(query);
+
+			ResultSet  resultSet = statement.executeQuery(query);
+			if (resultSet.next()) {
+				InputStream is = resultSet.getBlob(1).getBinaryStream();
+				ObjectInputStream ois = new ObjectInputStream(is);
+				Object x = ois.readObject();
+			    e_25 = (HashSet<HashMap<String, Double>>) x;
+			}
+			
+			return e_25;
+		}
+		
 		else return null;
 	}
 	
