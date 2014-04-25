@@ -220,10 +220,127 @@ public class DecompressByDependency {
 		saver.setDestination(new File(sb.toString()));
 		saver.writeBatch();
 
-		System.out
+		/*System.out
 				.println("Decompression done! The predicted column is saved at '"
-						+ predictFilesFolder + "' folder.");
+						+ predictFilesFolder + "' folder.");*/
 	}
+	
+	//Predict one particular value, numeric only
+		public void decompressNumeric(String tableName, String columnName,
+				String predictFilesFolder, HashMap<String, Double> dependencies, String modelName)
+				throws Exception {
+			
+			readHeader(tableName);
+			
+			Classifier classifier = null;
+
+			Statement statement = connection.createStatement();
+			ResultSet resultSet = statement.executeQuery("select model from "
+					+ tableName + " where attribute =  '" + columnName + "';");
+			if (resultSet.first()) {
+				InputStream in = resultSet.getBinaryStream(1);
+				File file = new File("Temp");
+				FileOutputStream fos = new FileOutputStream(file);
+				byte[] data = new byte[4096];
+				int count = -1;
+				while ((count = in.read(data, 0, 4096)) != -1) {
+					fos.write(data, 0, count);
+				}
+				fos.close();
+				classifier = (Classifier) SerializeUtils.readFromFile(file);
+			} else {
+				System.out.println("SQL exception: No such table/colunmn.");
+				return;
+			}
+
+			Instance predInstance = null;
+			Instances resultInstances = null;
+
+
+			if (dependencies.isEmpty()) {
+				System.out.println("Cannot predict this column: " + columnName);
+				return;
+			}
+
+
+
+
+			Attribute resultAttribute = header.attribute(columnName);
+			ArrayList<Attribute> resultAttrinfo = new ArrayList<Attribute>();
+			resultAttrinfo.add(resultAttribute);
+			resultInstances = new Instances(resultAttribute.name(), resultAttrinfo,
+					1);
+
+
+
+			predInstance = new DenseInstance(header.numAttributes());
+			
+			header.setClassIndex(header.numAttributes()-1);
+			predInstance.setDataset(header);
+			for (String column : dependencies.keySet()) {
+				if (header.attribute(column).isNumeric()) {
+					double val;
+					try {
+						val = dependencies.get(column);
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
+						break;
+					}
+					predInstance.setValue(header.attribute(column), val);
+				} else {
+					System.out.println("Numeric Only");
+					return;
+				}
+			}
+				
+			CustomWEKAClassifier classifier2 = (CustomWEKAClassifier) classifier;
+
+			Instance instanceToAdd = new DenseInstance(1);
+
+			instanceToAdd.setDataset(resultInstances);
+
+			if (modelName.equals("M5P")) {
+
+				M5P m5p = (M5P) (classifier2.getWEKAClassifier());
+
+				if (header.attribute(columnName).isNumeric()) {
+
+					instanceToAdd.setValue(0,
+							m5p.classifyInstance(predInstance));
+				} else {
+					System.out.println("M5P can only predict numeric value.");
+					return;
+				}
+
+			}
+
+			else if (modelName.equals("REPTree")) {
+				if (header.attribute(columnName).isNumeric()) {
+					instanceToAdd.setValue(0,
+							Utilities.numericValue(classifier, predInstance));
+				} else {
+					System.out.println("Numeric Only");
+					return;
+				}
+			}
+
+			resultInstances.add(instanceToAdd);
+
+
+			StringBuilder sb = new StringBuilder(predictFilesFolder);
+			sb.append('/');
+			sb.append(columnName);
+			sb.append(".arff");
+			ArffSaver saver = new ArffSaver();
+			saver.setInstances(resultInstances);
+			saver.setFile(new File(sb.toString()));
+			saver.setDestination(new File(sb.toString()));
+			saver.writeBatch();
+
+			/*System.out
+					.println("Decompression done! The predicted column is saved at '"
+							+ predictFilesFolder + "' folder.");*/
+		}
 	
 	//Predict one column according to dependencies
 	public void decompress(String tableName, String columnName,
@@ -365,9 +482,9 @@ public class DecompressByDependency {
 		saver.writeBatch();
 
 		
-		System.out
+		/*System.out
 				.println("Decompression done! The predicted column is saved at '"
-						+ predictFilesFolder + "' folder.");
+						+ predictFilesFolder + "' folder.");*/
 	}
 
 	
@@ -540,9 +657,9 @@ public class DecompressByDependency {
 		}
 
 		
-		System.out
+		/*System.out
 				.println("Decompression done! The predicted column is saved at '"
-						+ predictFilesFolder + "' folder.");
+						+ predictFilesFolder + "' folder.");*/
 	}
 	
 	public static void main(String[] args) throws Exception {
