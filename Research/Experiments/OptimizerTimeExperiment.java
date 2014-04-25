@@ -305,16 +305,12 @@ public class OptimizerTimeExperiment {
 			HashMap<String, Double> map = iter.next();
 			boolean result = lookup.LookUp(tableName, column, map, errorBound);
 			//predict
-			HashMap<String, Object> mapo = new HashMap<String, Object>();
-			for(Entry<String, Double> entry : map.entrySet()){
-				mapo.put(entry.getKey(), entry.getValue());
-			}
-			decompressor.decompress(tableName, column, baseDir, mapo, model);
+			decompressor.decompressNumeric(tableName, column, baseDir, map, model);
 			i++;
 		}
 		double timeEnd = System.nanoTime();
-		System.out.println("Where with accuracy time (hit): "
-				+ (timeEnd - timestart) / loop);
+		double time1 = (timeEnd - timestart) / i;
+		System.out.printf("Where with accuracy time (hit): %.0f\n" ,time1);
 
 		timestart = System.nanoTime();
 		i = 0;
@@ -325,8 +321,10 @@ public class OptimizerTimeExperiment {
 			i ++;
 		}
 		timeEnd = System.nanoTime();
-		System.out.println("Regular Query time: "
-				+ (timeEnd - timestart) / loop);
+		double time2 = (timeEnd - timestart) / i;
+		System.out.printf("Regular Query time: %.0f\n", time2);
+		
+		System.out.println(time2 / time1 + " times faster");
 	}
 
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
@@ -359,7 +357,7 @@ public class OptimizerTimeExperiment {
 		 */
 
 		// testWhereWithAccuracy(connection, optimizer);
-		testWhereWithAccuracyLoop(connection, optimizer, 100, 0.01, "house",
+		testWhereWithAccuracyLoop(connection, optimizer, 300, 0.01, "house",
 				"H8p2", "REPTree");
 		
 		return;
