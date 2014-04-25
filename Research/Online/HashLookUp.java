@@ -14,6 +14,11 @@ import java.util.HashSet;
 public class HashLookUp {
 	private Connection connection;
 	
+	private HashSet<HashMap<String, Double>> e_1 = null;
+	private HashSet<HashMap<String, Double>> e_5 = null;
+	private HashSet<HashMap<String, Double>> e_10 = null;
+	private HashSet<HashMap<String, Double>> e_25 = null;
+	
 	public HashLookUp() throws SQLException {
 
 		connection = DriverManager
@@ -21,16 +26,22 @@ public class HashLookUp {
 						+ "user=shu&password=shu");
 	}
 	
+	public HashSet<HashMap<String, Double>> getHash(double errorBound) {
+		if(errorBound == 0.01) return e_1;
+		else if(errorBound == 0.05) return e_5;
+		else if(errorBound == 0.1) return e_10;
+		else if(errorBound == 0.25) return e_25;
+		else return null;
+	}
+	
 	public boolean LookUp(String tableName, String columnName, HashMap<String, Double> dependencies, double errorBound) throws SQLException, IOException, ClassNotFoundException {
-		
-		HashSet<HashMap<String, Double>> e_1 = new HashSet<HashMap<String, Double>>();
-		HashSet<HashMap<String, Double>> e_5 = new HashSet<HashMap<String, Double>>();
-		HashSet<HashMap<String, Double>> e_10 = new HashSet<HashMap<String, Double>>();
-		HashSet<HashMap<String, Double>> e_25 = new HashSet<HashMap<String, Double>>();
+
 		
 		String hashName = tableName + "_hash";
 		
-		if(errorBound >= 0.01) {
+		if(errorBound >= 0.01 && e_1 == null) {
+			e_1 = new HashSet<HashMap<String, Double>>();
+			
 			String query = "select e_1 from " + hashName + " where columnName = '" + columnName + "'";
 			Statement  statement = connection.prepareStatement(query);
 
@@ -43,7 +54,9 @@ public class HashLookUp {
 			}
 		}
 		
-		if(errorBound >= 0.05) {
+		if(errorBound >= 0.05 && e_5 == null) {
+			e_5 = new HashSet<HashMap<String, Double>>();
+			
 			String query = "select e_5 from " + hashName + " where columnName = '" + columnName + "'";
 			Statement  statement = connection.prepareStatement(query);
 
@@ -56,7 +69,9 @@ public class HashLookUp {
 			}
 		}
 		
-		if(errorBound >= 0.1) {
+		if(errorBound >= 0.1 && e_10 == null) {
+			e_10 = new HashSet<HashMap<String, Double>>();
+			
 			String query = "select e_10 from " + hashName + " where columnName = '" + columnName + "'";
 			Statement  statement = connection.prepareStatement(query);
 
@@ -67,9 +82,12 @@ public class HashLookUp {
 				Object x = ois.readObject();
 			    e_10 = (HashSet<HashMap<String, Double>>) x;
 			}
+
 		}
 
-		if(errorBound >= 0.25) {
+		if(errorBound >= 0.25 && e_25 == null) {
+			e_25 = new HashSet<HashMap<String, Double>>();
+			
 			String query = "select e_25 from " + hashName + " where columnName = '" + columnName + "'";
 			Statement  statement = connection.prepareStatement(query);
 
@@ -95,6 +113,8 @@ public class HashLookUp {
 		test.put("H18pA", 0.052246);
 		test.put("P18p2", 0.003251);
 		
+		System.out.println(hl.LookUp("house_REPTree", "P1", test, 0.10));
+		System.out.println(hl.LookUp("house_REPTree", "P1", test, 0.10));
 		System.out.println(hl.LookUp("house_REPTree", "P1", test, 0.10));
 	}
 
