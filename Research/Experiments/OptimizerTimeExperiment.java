@@ -27,6 +27,7 @@ import Utilities.ColumnReader;
 import Zql.ParseException;
 
 import Online.DecompressByDependency;
+import Online.HashLookUp;
 import Online.Optimizer;
 import Online.SQLParser;
 
@@ -239,6 +240,19 @@ public class OptimizerTimeExperiment {
 		System.out.println("Where with accuracy time (not hit): " + time2);
 		double time3 = measureNormalReadTimeForWhere(connection, query5);
 		System.out.println("Regular Query time: " + time3);
+	}
+	
+	public static void testWhereWithAccuracyLoop(
+			Connection connection, Optimizer optimizer, int loop, double errorBound,
+			String table, String column) throws Exception {
+		DecompressByDependency decompressor = new DecompressByDependency();
+		decompressor.setConnection(connection);
+		List<String> dependencies = decompressor.getDependencies(table, column);
+		HashLookUp lookup = new HashLookUp();
+		//lookup.LookUp(table, column, dependencies, errorBound);
+		for(int i = 0; i < loop; i ++){
+			
+		}
 	}
 	
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
