@@ -304,27 +304,151 @@ public class OptimizerTimeExperiment {
 		while (i < loop && iter.hasNext()) {
 			HashMap<String, Double> map = iter.next();
 			boolean result = lookup.LookUp(tableName, column, map, errorBound);
-			//predict
-			decompressor.decompressNumeric(tableName, column, baseDir, map, model);
+			// predict
+			decompressor.decompressNumeric(tableName, column, baseDir, map,
+					model);
 			i++;
 		}
 		double timeEnd = System.nanoTime();
 		double time1 = (timeEnd - timestart) / i;
-		System.out.printf("Where with accuracy time (hit): %.0f\n" ,time1);
+		System.out.printf("Where with accuracy time (hit): %.0f\n", time1);
 
 		timestart = System.nanoTime();
 		i = 0;
 		iter = hashSet.iterator();
-		while (i < loop && iter.hasNext()){
+		while (i < loop && iter.hasNext()) {
 			HashMap<String, Double> map = iter.next();
 			readFromFile(connection, optimizer, table, column, map);
-			i ++;
+			i++;
 		}
 		timeEnd = System.nanoTime();
 		double time2 = (timeEnd - timestart) / i;
 		System.out.printf("Regular Query time: %.0f\n", time2);
-		
+
 		System.out.println(time2 / time1 + " times faster");
+		System.out.println(i + " sentences tested");
+	}
+
+	static double E1Rate = 0.1;
+	static double E5Rate = 0.2;
+	static double E10Rate = 0.4;
+	static double E25Rate = 0.3;
+
+	public static void testWhereWithRate(int sentenceCount,
+			Connection connection, Optimizer optimizer, String table,
+			String column, String model) throws Exception {
+		
+		DecompressByDependency decompressor = new DecompressByDependency();
+		String tableName = table + "_" + model;
+		decompressor.setConnection(connection);
+		List<String> dependencies = decompressor.getDependencies(tableName,
+				column);
+		HashLookUp lookup = new HashLookUp();
+		HashSet<HashMap<String, Double>> hashSet1 = lookup.getHash(tableName,
+				column, 0.01);
+		HashSet<HashMap<String, Double>> hashSet5 = lookup.getHash(tableName,
+				column, 0.05);
+		HashSet<HashMap<String, Double>> hashSet10 = lookup.getHash(tableName,
+				column, 0.1);
+		HashSet<HashMap<String, Double>> hashSet25 = lookup.getHash(tableName,
+				column, 0.25);
+		String baseDir = "OptimizerOutput/WherePredict/";
+		
+		// take portions and combine together
+		HashSet<HashMap<String, Double>> combined = new HashSet<HashMap<String, Double>>();
+		Iterator<HashMap<String, Double>> iter = hashSet1.iterator();
+		int i = 0;
+		while (i < sentenceCount * E1Rate && iter.hasNext()) {
+			HashMap<String, Double> map = iter.next();
+			combined.add(map);
+			i++;
+		}
+		i = 0;
+		iter = hashSet5.iterator();
+		while (i < sentenceCount * E5Rate && iter.hasNext()) {
+			HashMap<String, Double> map = iter.next();
+			combined.add(map);
+			i++;
+		}
+		i = 0;
+		iter = hashSet10.iterator();
+		while (i < sentenceCount * E10Rate && iter.hasNext()) {
+			HashMap<String, Double> map = iter.next();
+			combined.add(map);
+			i++;
+		}
+		i = 0;
+		iter = hashSet25.iterator();
+		while (i < sentenceCount * E25Rate && iter.hasNext()) {
+			HashMap<String, Double> map = iter.next();
+			combined.add(map);
+			i++;
+		}
+		double timeStart = 0;	
+		double timeEnd = 0;
+		
+		// totall not hit
+		timeStart = System.nanoTime();
+		iter = combined.iterator();
+		while(iter.hasNext()){
+			HashMap<String, Double> map = iter.next();
+			readFromFile(connection, optimizer, table, column, map);
+		}
+		timeEnd = System.nanoTime();
+		System.out.printf("Running time (all missing) : %.0f\n", (timeEnd - timeStart) / sentenceCount);
+		
+		// test 1%
+		timeStart = System.nanoTime();
+		iter = combined.iterator();
+		while(iter.hasNext()){
+			HashMap<String, Double> map = iter.next();
+			if(hashSet1.contains(map)){
+				decompressor.decompressNumeric(tableName, column, baseDir, map, model);
+			} else {
+				readFromFile(connection, optimizer, table, column, map);
+			}
+		}
+		timeEnd = System.nanoTime();
+		System.out.printf("Running time (error bound: 1) : %.0f\n", (timeEnd - timeStart) / sentenceCount);
+		
+		// test 5%
+		timeStart = System.nanoTime();
+		iter = combined.iterator();
+		while(iter.hasNext()){
+			HashMap<String, Double> map = iter.next();
+			if(hashSet1.contains(map) || hashSet5.contains(map)){
+				decompressor.decompressNumeric(tableName, column, baseDir, map, model);
+			} else {
+				readFromFile(connection, optimizer, table, column, map);
+			}
+		}
+		timeEnd = System.nanoTime();
+		System.out.printf("Running time (error bound: 5) : %.0f\n", (timeEnd - timeStart) / sentenceCount);
+		
+		// test 10%
+		timeStart = System.nanoTime();
+		iter = combined.iterator();
+		while(iter.hasNext()){
+			HashMap<String, Double> map = iter.next();
+			if(hashSet1.contains(map) || hashSet5.contains(map) || hashSet10.contains(map)){
+				decompressor.decompressNumeric(tableName, column, baseDir, map, model);
+			} else {
+				readFromFile(connection, optimizer, table, column, map);
+			}
+		}
+		timeEnd = System.nanoTime();
+		System.out.printf("Running time (error bound: 10) : %.0f\n", (timeEnd - timeStart) / sentenceCount);
+		
+		timeStart = System.nanoTime();
+		// test 25% (rest)
+		iter = combined.iterator();
+		while(iter.hasNext()){
+			HashMap<String, Double> map = iter.next();
+			//always hit
+			decompressor.decompressNumeric(tableName, column, baseDir, map, model);
+		}
+		timeEnd = System.nanoTime();
+		System.out.printf("Running time (error bound: 25) : %.0f\n", (timeEnd - timeStart) / sentenceCount);
 	}
 
 	// | GESTCEN | GEREG,GTCSA,GTMETSTA,HRHHID2
@@ -357,8 +481,9 @@ public class OptimizerTimeExperiment {
 		 */
 
 		// testWhereWithAccuracy(connection, optimizer);
-		testWhereWithAccuracyLoop(connection, optimizer, 300, 0.01, "house",
-				"H8p2", "REPTree");
+		//testWhereWithAccuracyLoop(connection, optimizer, 1000, 0.25, "house",
+		//		"H8p2", "REPTree");
+		testWhereWithRate(1000, connection, optimizer, "house", "H8p2", "REPTree");
 		
 		return;
 	}
